@@ -2042,8 +2042,24 @@ class EnhancedProjectSummaryGenerator:
 
         # Output to codebase_summary folder where test expects it
         report_path = Path(__file__).parent / "missing_breadcrumbs.json"
-        with open(report_path, 'w', encoding='utf-8') as f:
-            json.dump(breadcrumbs_report, f, indent=2, ensure_ascii=False)
+        try:
+            # Ensure parent directory exists
+            report_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            with open(report_path, 'w', encoding='utf-8') as f:
+                json.dump(breadcrumbs_report, f, indent=2, ensure_ascii=False)
+                
+        except Exception as e:
+            print(f"⚠️  Failed to save breadcrumbs report to {report_path}: {e}")
+            # Try backup location in current directory
+            backup_path = "missing_breadcrumbs_backup.json"
+            try:
+                with open(backup_path, 'w', encoding='utf-8') as f:
+                    json.dump(breadcrumbs_report, f, indent=2, ensure_ascii=False)
+                print(f"✅ Saved breadcrumbs report to backup location: {backup_path}")
+            except Exception as backup_error:
+                print(f"❌ Failed to save breadcrumbs report to backup: {backup_error}")
+                # Continue without failing the entire process
 
     def _generate_markdown_summary(self, summary: Dict[str, Any], breadcrumbs: List):
         """Generate comprehensive markdown summary"""
@@ -2100,8 +2116,24 @@ class EnhancedProjectSummaryGenerator:
 """
 
         markdown_path = self.project_root / "CODEBASE_SUMMARY.md"
-        with open(markdown_path, 'w', encoding='utf-8') as f:
-            f.write(markdown_content)
+        try:
+            # Ensure parent directory exists
+            markdown_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            with open(markdown_path, 'w', encoding='utf-8') as f:
+                f.write(markdown_content)
+                
+        except Exception as e:
+            print(f"⚠️  Failed to save markdown summary to {markdown_path}: {e}")
+            # Try backup location
+            backup_path = self.project_root / "CODEBASE_SUMMARY_backup.md"
+            try:
+                with open(backup_path, 'w', encoding='utf-8') as f:
+                    f.write(markdown_content)
+                print(f"✅ Saved markdown summary to backup location: {backup_path}")
+            except Exception as backup_error:
+                print(f"❌ Failed to save markdown summary to backup: {backup_error}")
+                # Continue without failing
 
     def _format_tech_stack(self, summary: Dict[str, Any]) -> str:
         """Format technology stack section"""
@@ -2366,8 +2398,24 @@ pie title Documentation Coverage Distribution
 """
 
         diagram_path = self.project_root / "ARCHITECTURE_DIAGRAM.md"
-        with open(diagram_path, 'w', encoding='utf-8') as f:
-            f.write(diagram_content)
+        try:
+            # Ensure parent directory exists
+            diagram_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            with open(diagram_path, 'w', encoding='utf-8') as f:
+                f.write(diagram_content)
+                
+        except Exception as e:
+            print(f"⚠️  Failed to save architecture diagram to {diagram_path}: {e}")
+            # Try backup location
+            backup_path = self.project_root / "ARCHITECTURE_DIAGRAM_backup.md"
+            try:
+                with open(backup_path, 'w', encoding='utf-8') as f:
+                    f.write(diagram_content)
+                print(f"✅ Saved architecture diagram to backup location: {backup_path}")
+            except Exception as backup_error:
+                print(f"❌ Failed to save architecture diagram to backup: {backup_error}")
+                # Continue without failing
 
     def _get_changelog_version(self) -> str:
         """Get version from changelog for correlation"""

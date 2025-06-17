@@ -187,8 +187,23 @@ class AgentWorkflowOrchestrator:
             }
         }
 
-        with open(self.session_state_path, 'w', encoding='utf-8') as f:
-            json.dump(session_state, f, indent=2)
+        try:
+            # Ensure parent directory exists
+            os.makedirs(os.path.dirname(self.session_state_path), exist_ok=True)
+            
+            with open(self.session_state_path, 'w', encoding='utf-8') as f:
+                json.dump(session_state, f, indent=2)
+                
+        except Exception as e:
+            print(f"⚠️  Failed to save session state to {self.session_state_path}: {e}")
+            # Try backup location
+            backup_path = self.project_root / "session_state_backup.json"
+            try:
+                with open(backup_path, 'w', encoding='utf-8') as f:
+                    json.dump(session_state, f, indent=2)
+                print(f"✅ Saved session state to backup location: {backup_path}")
+            except Exception as backup_error:
+                print(f"❌ Failed to save session state to backup: {backup_error}")
 
     def _create_changelog_entry(self, session_summary: str, issue_type: str) -> bool:
         """
@@ -294,8 +309,25 @@ class AgentWorkflowOrchestrator:
             }
 
             handoff_path = self.project_root / "codebase_summary" / "agent_handoff.json"
-            with open(handoff_path, 'w', encoding='utf-8') as f:
-                json.dump(handoff_doc, f, indent=2)
+            
+            try:
+                # Ensure parent directory exists
+                handoff_path.parent.mkdir(parents=True, exist_ok=True)
+                
+                with open(handoff_path, 'w', encoding='utf-8') as f:
+                    json.dump(handoff_doc, f, indent=2)
+                    
+            except Exception as e:
+                print(f"⚠️  Failed to save handoff documentation to {handoff_path}: {e}")
+                # Try backup location
+                backup_path = self.project_root / "agent_handoff_backup.json"
+                try:
+                    with open(backup_path, 'w', encoding='utf-8') as f:
+                        json.dump(handoff_doc, f, indent=2)
+                    print(f"✅ Saved handoff documentation to backup location: {backup_path}")
+                except Exception as backup_error:
+                    print(f"❌ Failed to save handoff documentation to backup: {backup_error}")
+                    raise
 
             # Replicate into export package system
             self._replicate_handoff_documentation(handoff_doc)
