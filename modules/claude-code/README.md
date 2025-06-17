@@ -27,7 +27,23 @@ python3 modules/claude-code/claude_bridge.py test
 
 # Send a message
 python3 modules/claude-code/claude_bridge.py "Hello Claude!"
+
+# Add message to log
+python3 modules/claude-code/msg.py add replit_agent "Your message here"
+
+# Read recent messages
+python3 modules/claude-code/msg.py read 5
 ```
+
+## 📨 Inter-Agent Messaging
+
+**Message File Location**: `modules/claude-code/msgs.md`
+
+All Claude-related messaging is centralized in the claude-code module. When agents need to communicate:
+
+1. **Replit Agent → Claude**: Use `python3 modules/claude-code/msg.py add replit_agent "message"`
+2. **Claude → Other Agents**: Messages automatically logged to `modules/claude-code/msgs.md`
+3. **Message History**: All inter-agent communication stored in `modules/claude-code/msgs.md`
 
 ## Usage Options
 
