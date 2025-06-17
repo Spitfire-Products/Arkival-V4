@@ -441,6 +441,31 @@ Arkival's unique strength is maintaining **complete session continuity** across 
 
 The workflow system maintains context consistency regardless of which IDE or AI assistant triggers the workflows, ensuring seamless knowledge transfer between different environments, AI agents, and human developers.
 
+### 📨 Inter-Agent Messaging System
+
+**Universal Message Path**: `modules/claude-code/msgs.md`
+
+All AI assistants and agents can communicate using the standardized messaging system:
+
+```bash
+# Any agent can send messages
+python3 modules/claude-code/msg.py add <agent_type> "message content"
+
+# Read message history  
+python3 modules/claude-code/msg.py read 10
+```
+
+**Supported Agent Types:**
+- **cline_agent** (VS Code/Cline)
+- **cursor_agent** (Cursor AI) 
+- **replit_agent** (Replit AI)
+- **copilot_agent** (GitHub Copilot)
+- **windsurf_agent** (Windsurf)
+- **ide_agent** (Generic IDE assistant)
+- **developer** (Human developer)
+
+This ensures consistent communication logging regardless of which IDE or AI assistant is being used.
+
 ## 🌟 Benefits of Cross-Platform Design
 
 ### For GitHub-Based Development

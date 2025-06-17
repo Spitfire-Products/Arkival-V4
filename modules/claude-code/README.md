@@ -28,8 +28,8 @@ python3 modules/claude-code/claude_bridge.py test
 # Send a message
 python3 modules/claude-code/claude_bridge.py "Hello Claude!"
 
-# Add message to log
-python3 modules/claude-code/msg.py add replit_agent "Your message here"
+# Add message to log (replace agent_name with your agent type)
+python3 modules/claude-code/msg.py add <agent_name> "Your message here"
 
 # Read recent messages
 python3 modules/claude-code/msg.py read 5
@@ -41,9 +41,18 @@ python3 modules/claude-code/msg.py read 5
 
 All Claude-related messaging is centralized in the claude-code module. When agents need to communicate:
 
-1. **Replit Agent → Claude**: Use `python3 modules/claude-code/msg.py add replit_agent "message"`
+1. **Any Agent → Claude**: Use `python3 modules/claude-code/msg.py add <agent_name> "message"`
 2. **Claude → Other Agents**: Messages automatically logged to `modules/claude-code/msgs.md`
 3. **Message History**: All inter-agent communication stored in `modules/claude-code/msgs.md`
+
+### Supported Agent Types:
+- **Replit Agent**: `python3 modules/claude-code/msg.py add replit_agent "message"`
+- **VS Code/Cline**: `python3 modules/claude-code/msg.py add cline_agent "message"`
+- **Cursor AI**: `python3 modules/claude-code/msg.py add cursor_agent "message"`
+- **GitHub Copilot**: `python3 modules/claude-code/msg.py add copilot_agent "message"`
+- **Windsurf Agent**: `python3 modules/claude-code/msg.py add windsurf_agent "message"`
+- **Generic IDE Agent**: `python3 modules/claude-code/msg.py add ide_agent "message"`
+- **Human Developer**: `python3 modules/claude-code/msg.py add developer "message"`
 
 ## Usage Options
 
