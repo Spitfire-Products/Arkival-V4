@@ -1,20 +1,563 @@
 {
-  "generated_at": "2025-06-17T18:59:17.481026Z",
+  "generated_at": "2025-06-17T20:32:46.459333Z",
   "summary": {
-    "total_functions": 59,
-    "documented_functions": 59,
-    "missing_count": 0,
-    "coverage_percentage": 100.0
+    "total_functions": 620,
+    "documented_functions": 60,
+    "missing_count": 330,
+    "coverage_percentage": 9.67741935483871
   },
   "language_breakdown": {
     ".py": {
-      "files": 7,
-      "functions": 57
+      "files": 8,
+      "functions": 75
     },
     ".tsx": {
       "files": 1,
       "functions": 2
+    },
+    ".php": {
+      "files": 1,
+      "functions": 19
+    },
+    ".rb": {
+      "files": 1,
+      "functions": 20
+    },
+    ".cpp": {
+      "files": 1,
+      "functions": 16
+    },
+    ".kt": {
+      "files": 1,
+      "functions": 19
+    },
+    ".swift": {
+      "files": 1,
+      "functions": 22
+    },
+    ".c": {
+      "files": 1,
+      "functions": 26
+    },
+    ".go": {
+      "files": 1,
+      "functions": 11
+    },
+    ".dart": {
+      "files": 1,
+      "functions": 19
+    },
+    ".java": {
+      "files": 1,
+      "functions": 17
+    },
+    ".vue": {
+      "files": 1,
+      "functions": 8
+    },
+    ".ts": {
+      "files": 1,
+      "functions": 32
+    },
+    ".js": {
+      "files": 1,
+      "functions": 10
+    },
+    ".css": {
+      "files": 1,
+      "functions": 11
+    },
+    ".sql": {
+      "files": 1,
+      "functions": 12
+    },
+    ".rs": {
+      "files": 1,
+      "functions": 23
+    },
+    ".lua": {
+      "files": 1,
+      "functions": 11
+    },
+    ".scala": {
+      "files": 1,
+      "functions": 19
+    },
+    ".clj": {
+      "files": 1,
+      "functions": 12
+    },
+    ".r": {
+      "files": 1,
+      "functions": 44
+    },
+    ".m": {
+      "files": 1,
+      "functions": 30
+    },
+    ".cs": {
+      "files": 1,
+      "functions": 105
+    },
+    ".sh": {
+      "files": 1,
+      "functions": 38
+    },
+    ".ps1": {
+      "files": 1,
+      "functions": 19
     }
   },
-  "missing_breadcrumbs": []
+  "missing_breadcrumbs": [
+    {
+      "file": "codebase_summary/language_scan_tests/test_php_functions.php",
+      "missing": [
+        "basicFunction",
+        "functionWithParams",
+        "undocumentedFunction",
+        "nullableFunction",
+        "variadicFunction",
+        "TestClass",
+        "getValue",
+        "undocumentedMethod",
+        "createDefault",
+        "AbstractClass",
+        "abstractMethod",
+        "interfaceMethod",
+        "TestTrait",
+        "traitMethod",
+        "namespaceFunction"
+      ]
+    },
+    {
+      "file": "codebase_summary/language_scan_tests/test_ruby_functions.rb",
+      "missing": [
+        "basic_method",
+        "method_with_params",
+        "undocumented_method",
+        "block_method",
+        "splat_method",
+        "keyword_method",
+        "TestClass",
+        "initialize",
+        "instance_method",
+        "undocumented_instance_method",
+        "self",
+        "private_method",
+        "protected_method",
+        "TestModule",
+        "module_method"
+      ]
+    },
+    {
+      "file": "codebase_summary/language_scan_tests/test_cpp_functions.cpp",
+      "missing": [
+        "unction",
+        "arams",
+        "unction",
+        "unction",
+        "unction",
+        "unction",
+        "TestClass",
+        "value_",
+        "ethod",
+        "efault",
+        "ethod",
+        "FriendTestClass",
+        "unction",
+        "unction",
+        "OperatorTestClass"
+      ]
+    },
+    {
+      "file": "codebase_summary/language_scan_tests/test_kotlin_functions.kt",
+      "missing": [
+        "basicFunction",
+        "functionWithParams",
+        "undocumentedFunction",
+        "suspendFunction",
+        "inlineFunction",
+        "TestClass",
+        "getValue",
+        "undocumentedMethod",
+        "createDefault",
+        "DataClass",
+        "SealedClass",
+        "Success",
+        "Error",
+        "TestInterface",
+        "interfaceMethod"
+      ]
+    },
+    {
+      "file": "codebase_summary/language_scan_tests/test_swift_functions.swift",
+      "missing": [
+        "basicFunction",
+        "functionWithParams",
+        "undocumentedFunction",
+        "throwingFunction",
+        "asyncFunction",
+        "asyncThrowingFunction",
+        "closureFunction",
+        "inoutFunction",
+        "variadicFunction",
+        "TestStruct",
+        "getValue",
+        "undocumentedMethod",
+        "updateValue",
+        "createDefault",
+        "TestClass"
+      ]
+    },
+    {
+      "file": "codebase_summary/language_scan_tests/test_c_functions.c",
+      "missing": [
+        "basic_function",
+        "function_with_params",
+        "printf",
+        "undocumented_function",
+        "static_function",
+        "printf",
+        "inline_function",
+        "callback",
+        "variadic_function",
+        "printf",
+        "struct_function",
+        "strcpy",
+        "pointer_function",
+        "for",
+        "array_function"
+      ]
+    },
+    {
+      "file": "codebase_summary/language_scan_tests/test_go_functions.go",
+      "missing": [
+        "basicFunction",
+        "functionWithParams",
+        "undocumentedFunction",
+        "variadicFunction",
+        "contextFunction",
+        "TestStruct",
+        "TestInterface",
+        "goroutineFunction",
+        "closureFunction",
+        "init",
+        "main"
+      ]
+    },
+    {
+      "file": "codebase_summary/language_scan_tests/test_dart_functions.dart",
+      "missing": [
+        "basicFunction",
+        "functionWithParams",
+        "undocumentedFunction",
+        "asyncFunction",
+        "namedParameterFunction",
+        "optionalParameterFunction",
+        "TestClass",
+        "getValue",
+        "undocumentedMethod",
+        "createDefault",
+        "AbstractClass",
+        "concreteMethod",
+        "TestMixin",
+        "mixinMethod",
+        "reverse"
+      ]
+    },
+    {
+      "file": "codebase_summary/language_scan_tests/test_python_functions.py",
+      "missing": [
+        "simple_function",
+        "function_with_params",
+        "undocumented_function",
+        "async_function",
+        "async_function",
+        "TestClass",
+        "documented_method",
+        "undocumented_method",
+        "static_method",
+        "class_method",
+        "complex_signature_function",
+        "generator_function",
+        "outer_function",
+        "inner_function",
+        "closure_function"
+      ]
+    },
+    {
+      "file": "codebase_summary/language_scan_tests/test_java_functions.java",
+      "missing": [
+        "TestJavaFunctions",
+        "basicMethod",
+        "methodWithParams",
+        "undocumentedMethod",
+        "genericMethod",
+        "staticMethod",
+        "synchronizedMethod",
+        "AbstractClass",
+        "TestInterface",
+        "defaultMethod",
+        "lambdaMethod",
+        "streamMethod",
+        "asyncMethod",
+        "estJavaFunctions",
+        "getValue"
+      ]
+    },
+    {
+      "file": "codebase_summary/language_scan_tests/test_vue_functions.vue",
+      "missing": [
+        "increment",
+        "undocumentedMethod",
+        "data",
+        "computed: {",
+        "upperMessage",
+        "methods: {",
+        "updateMessage",
+        "mounted"
+      ]
+    },
+    {
+      "file": "codebase_summary/language_scan_tests/test_typescript_functions.ts",
+      "missing": [
+        "basicTypedFunction",
+        "complexTypedArrowFunction",
+        "undocumentedTypedFunction",
+        "genericFunction",
+        "asyncGenericFunction",
+        "unionTypeFunction",
+        "TestClass",
+        "overloadedFunction",
+        "overloadedFunction",
+        "overloadedFunction",
+        "isString",
+        "exportedTypedFunction",
+        "LogMethod",
+        "namespaceFunction",
+        "namespaceArrowFunction"
+      ]
+    },
+    {
+      "file": "codebase_summary/language_scan_tests/test_javascript_functions.js",
+      "missing": [
+        "basicFunction",
+        "arrowFunction",
+        "undocumentedFunction",
+        "asyncFunction",
+        "functionExpression",
+        "multiLineCommentFunction",
+        "TestClass",
+        "higherOrderFunction",
+        "restParametersFunction",
+        "exportedFunction"
+      ]
+    },
+    {
+      "file": "codebase_summary/language_scan_tests/test_css_functions.css",
+      "missing": [
+        "calc-function",
+        "undocumented-function",
+        "gradient-function",
+        "transform-function",
+        "responsive-function",
+        "custom-function",
+        "filter-function",
+        "clip-function",
+        "grid-function",
+        "flex-function",
+        "container-function"
+      ]
+    },
+    {
+      "file": "codebase_summary/language_scan_tests/test_sql_functions.sql",
+      "missing": [
+        "basic_function",
+        "function_with_params",
+        "undocumented_function",
+        "aggregate_function",
+        "trigger_function",
+        "window_function_example",
+        "recursive_function",
+        "json_function",
+        "array_function",
+        "security_function",
+        "exception_function",
+        "table_function"
+      ]
+    },
+    {
+      "file": "codebase_summary/language_scan_tests/test_rust_functions.rs",
+      "missing": [
+        "basic_function",
+        "function_with_params",
+        "undocumented_function",
+        "public_function",
+        "public_function",
+        "async_function",
+        "async_function",
+        "generic_function",
+        "TestStruct",
+        "new",
+        "new",
+        "get_value",
+        "get_value",
+        "undocumented_method",
+        "update_value"
+      ]
+    },
+    {
+      "file": "codebase_summary/language_scan_tests/test_lua_functions.lua",
+      "missing": [
+        "basicFunction",
+        "functionWithParams",
+        "undocumentedFunction",
+        "localFunction",
+        "localFunction",
+        "myFunction",
+        "anotherFunction",
+        "makeCounter",
+        "variadicFunction",
+        "factorial",
+        "coroutineFunction"
+      ]
+    },
+    {
+      "file": "codebase_summary/language_scan_tests/test_scala_functions.scala",
+      "missing": [
+        "basicFunction",
+        "functionWithParams",
+        "undocumentedFunction",
+        "genericFunction",
+        "curriedFunction",
+        "TestClass",
+        "undocumentedMethod",
+        "updateValue",
+        "TestObject",
+        "objectMethod",
+        "undocumentedObjectMethod",
+        "TestTrait",
+        "traitMethod",
+        "concreteTraitMethod",
+        "DataClass"
+      ]
+    },
+    {
+      "file": "codebase_summary/language_scan_tests/test_clojure_functions.clj",
+      "missing": [
+        "basic-function",
+        "function-with-params",
+        "undocumented-function",
+        "multi-arity-function",
+        "destructuring-function",
+        "private-function",
+        "higher-order-function",
+        "factorial",
+        "validated-function",
+        "when-valid",
+        "increment-counter",
+        "utility-function"
+      ]
+    },
+    {
+      "file": "codebase_summary/language_scan_tests/test_r_functions.r",
+      "missing": [
+        "basic_function",
+        "function(",
+        "function_with_params",
+        "function(",
+        "undocumented_function",
+        "function(",
+        "default_params_function",
+        "function(",
+        "variadic_function",
+        "function(",
+        "square_function",
+        "function(",
+        "model_function",
+        "function(",
+        "calculate_mean"
+      ]
+    },
+    {
+      "file": "codebase_summary/language_scan_tests/test_objc_functions.m",
+      "missing": [
+        "TestClass",
+        "initWithValue",
+        "getValue",
+        "undocumentedMethod",
+        "updateValue",
+        "createDefault",
+        "TestClass",
+        "initWithValue",
+        "getValue",
+        "undocumentedMethod",
+        "updateValue",
+        "createDefault",
+        "TestClass",
+        "description",
+        "isValid"
+      ]
+    },
+    {
+      "file": "codebase_summary/language_scan_tests/test_csharp_functions.cs",
+      "missing": [
+        "TestClass",
+        "BasicMethod",
+        "MethodWithParams",
+        "UndocumentedMethod",
+        "Name",
+        "CreateDefault",
+        "AsyncMethod",
+        "GenericMethod",
+        "enericMethod",
+        "OptionalParamsMethod",
+        "TryParse",
+        "ModifyValue",
+        "SumNumbers",
+        "VirtualMethod",
+        "ProtectedMethod"
+      ]
+    },
+    {
+      "file": "codebase_summary/language_scan_tests/test_shell_functions.sh",
+      "missing": [
+        "basic_function",
+        "basic_function",
+        "function_with_params",
+        "function_with_params",
+        "undocumented_function",
+        "undocumented_function",
+        "another_function",
+        "another_function",
+        "local_vars_function",
+        "local_vars_function",
+        "calculate_sum",
+        "calculate_sum",
+        "modify_global",
+        "modify_global",
+        "check_file"
+      ]
+    },
+    {
+      "file": "codebase_summary/language_scan_tests/test_powershell_functions.ps1",
+      "missing": [
+        "Basic-Function",
+        "Function-WithParams",
+        "Undocumented-Function",
+        "Mandatory-Params",
+        "Process-Pipeline",
+        "with",
+        "Advanced-Function",
+        "Multi-ParameterSet",
+        "function",
+        "Where-LargeFile",
+        "Process-Items",
+        "Get-CustomObject",
+        "Validate-Input",
+        "Get-Factorial",
+        "Safe-Divide"
+      ]
+    }
+  ]
 }

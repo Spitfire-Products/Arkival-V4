@@ -7,15 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.4.0] - 2025-06-17
+## [1.6.0] - 2025-06-17
 
 ### Enhanced
-- Restructured documentation for true cross-platform compatibility
-  Fixed GitHub deployment issue where documentation was Replit-specific despite cross-platform capabilities: 1) Renamed replit.md to PROJECT_CONFIG.md for environment-agnostic project preferences, 2) Updated SETUP_GUIDE.md to provide IDE-specific instructions for all supported environments (Replit, VS Code, Cursor, Codespaces, Gitpod), 3) Enhanced workflow_config.json to reflect cross-platform nature with current_ide instead of detected_ide, 4) Added alternative_methods for different IDE workflow execution, 5) Updated references throughout documentation to emphasize multi-IDE support rather than Replit-first approach
+- Integrated EXPORT_PACKAGE_MANIFEST.json with modern validation system
+  Updated and integrated the EXPORT_PACKAGE_MANIFEST.json to reflect current v1.1.377 system state: 1) Updated manifest from legacy v1.1.223 to current v1.1.377 with accurate file listings and capabilities, 2) Added comprehensive environment-specific file documentation and deployment architecture details, 3) Integrated manifest validation into validate_deployment.py with detailed file checking across all categories, 4) Enhanced validation system to verify 30 required files across setup_scripts, core_modules, configuration, templates, documentation, ai_integration, and documentation_assets, 5) Added quality metrics tracking including 100% documentation coverage and cross-platform support verification, 6) Documented supported environments (6 IDEs, 5 AI assistants, 4 platforms) and deployment architecture benefits
 
-## [1.3.0] - 2025-06-17
+## [1.5.0] - 2025-06-17
 
-## [1.2.0] - 2025-06-17
+### Enhanced
+- Implemented proper environment-specific file management for GitHub deployment
+  Fixed critical GitHub deployment architecture issue where environment-specific files were included in repository: 1) Enhanced .gitignore to exclude .replit, .vscode/, .gitpod.yml, and .workflow_system/ directories, 2) Modified setup_workflow_system.py to properly generate .replit file with integrated workflows (not just backup toml), 3) Updated SETUP_GUIDE.md to clearly explain the environment-specific file generation design, 4) Documented clean repository approach where IDE-specific files are generated locally during setup but excluded from GitHub, 5) Ensured cross-platform compatibility where each user gets appropriate environment configuration without repository clutter or merge conflicts
 
 ## [1.0.0] - 2025-06-17
 

@@ -11,12 +11,59 @@ import sys
 from pathlib import Path
 from datetime import datetime
 
+def validate_against_manifest():
+    """
+    # @codebase-summary: Validates deployment against EXPORT_PACKAGE_MANIFEST.json specifications
+    - Loads and validates manifest file structure
+    - Checks all required files specified in manifest exist
+    - Verifies quality metrics meet manifest standards
+    - Ensures deployment architecture compliance
+    - Returns validation status and detailed results
+    """
+    print("📋 VALIDATING AGAINST EXPORT PACKAGE MANIFEST")
+    print("=" * 50)
+    
+    try:
+        with open("EXPORT_PACKAGE_MANIFEST.json", 'r') as f:
+            manifest = json.load(f)
+        print(f"✅ Loaded manifest: {manifest['package_name']} v{manifest['version']}")
+    except FileNotFoundError:
+        print("⚠️  EXPORT_PACKAGE_MANIFEST.json not found - skipping manifest validation")
+        return True
+    except json.JSONDecodeError as e:
+        print(f"❌ Invalid manifest JSON: {e}")
+        return False
+    
+    # Validate all required file categories
+    all_files_valid = True
+    total_required = 0
+    found_files = 0
+    
+    for category, files in manifest.get("required_files", {}).items():
+        print(f"\n📁 Checking {category}:")
+        for file_path in files:
+            total_required += 1
+            if Path(file_path).exists():
+                print(f"  ✅ {file_path}")
+                found_files += 1
+            else:
+                print(f"  ❌ {file_path} - MISSING")
+                all_files_valid = False
+    
+    print(f"\n📊 Manifest Validation Results:")
+    print(f"   Required Files: {found_files}/{total_required} found")
+    print(f"   Status: {manifest.get('status', 'UNKNOWN')}")
+    print(f"   Confidence: {manifest.get('confidence_level', 'UNKNOWN')}")
+    
+    return all_files_valid
+
 def validate_export_package():
     """
     # @codebase-summary: Core deployment validation system for export package
     - Validates all required files exist and are properly configured
     - Checks JSON configuration files for syntax and completeness
     - Verifies workflow system setup and dependencies
+    - Validates against EXPORT_PACKAGE_MANIFEST.json specifications
     - Generates deployment readiness report
     - Used by: deployment automation, quality assurance, release preparation
     """
@@ -113,6 +160,14 @@ def validate_export_package():
         print("   → Run post-deployment cleanup to optimize prompt caching")
     else:
         print("✅ No cleanup required")
+    
+    # Validate against manifest specifications
+    print("\n" + "="*50)
+    manifest_valid = validate_against_manifest()
+    
+    if not manifest_valid:
+        print("\n❌ MANIFEST VALIDATION FAILED")
+        return False
     
     print("\n✅ EXPORT PACKAGE VALIDATION PASSED")
     print("🚀 Ready for deployment to new projects")

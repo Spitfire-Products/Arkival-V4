@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3:*)",
+      "Bash(rm:*)",
+      "Bash(ls:*)",
+      "Bash(mv:*)",
+      "Bash(claude --print \"test message - checking API authentication\")",
+      "Bash(grep:*)",
+      "Bash(rg:*)",
+      "WebFetch(domain:docs.anthropic.com)",
+      "Bash(python:*)",
+      "Bash(find:*)",
+      "Bash(true)",
+      "Bash(mkdir:*)",
+      "Bash(cat:*)",
+      "Bash(git init:*)",
+      "Bash(git commit:*)",
+      "Bash(git add:*)",
+      "Bash(git push:*)",
+      "Bash(git remote set-url:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:api.github.com)",
+      "Bash(git rm:*)",
+      "Bash(git reset:*)",
+      "Bash(git ls-tree:*)"
+    ],
+    "deny": []
+  }
+}

@@ -776,13 +776,14 @@ class EnhancedProjectSummaryGenerator:
         # Enhanced code file extensions - broad spectrum for different codebase types
         code_extensions = ['.py', '.js', '.ts', '.tsx', '.jsx', '.go', '.rs', 
                           '.java', '.cpp', '.c', '.h', '.php', '.rb', '.swift',
-                          '.kt', '.scala', '.clj', '.dart', '.lua', '.r', '.m']
+                          '.kt', '.scala', '.clj', '.dart', '.lua', '.r', '.m',
+                          '.css', '.scss', '.sass', '.sql', '.vue', '.cs', '.sh', '.ps1']
 
         # Exclude build artifacts and cache directories but include actual code
         ignore_dirs = [
             'node_modules', '__pycache__', 'dist', 'build', 
             'workflow_export_package', 'attached_assets', 'reference_assets', 
-            'documentation_assets', 'history', 'language_scan_tests',
+            'documentation_assets', 'history',
             'migration_utilities_assets', 'function_tests_assets', 'analysis_scripts_assets', 
             'checkpoints', 'workflow_export_package_backup', '.config', '.git', '.vscode', 
             '.idea', '.cache', '.local', '.pythonlibs'
@@ -793,7 +794,7 @@ class EnhancedProjectSummaryGenerator:
             
             # Skip specific paths completely
             rel_root = os.path.relpath(root, self.project_root)
-            if any(skip_path in rel_root for skip_path in ['history', 'language_scan_tests', 'documentation_assets', 'attached_assets', 'reference_assets', '.pythonlibs']):
+            if any(skip_path in rel_root for skip_path in ['history', 'documentation_assets', 'attached_assets', 'reference_assets', '.pythonlibs']):
                 continue
 
             for file in files:
@@ -859,6 +860,139 @@ class EnhancedProjectSummaryGenerator:
                     r'struct\s+([A-Z]\w*)',
                     r'enum\s+([A-Z]\w*)',
                     r'trait\s+([A-Z]\w*)'
+                ],
+                'c': [
+                    r'(?:static\s+)?(?:inline\s+)?(?:\w+\s+)*([a-z_][a-z0-9_]*)\s*\([^)]*\)\s*\{',
+                    r'(?:extern\s+)?(?:\w+\s+)*([a-z_][a-z0-9_]*)\s*\([^)]*\);'
+                ],
+                'cpp': [
+                    r'(?:virtual\s+)?(?:static\s+)?(?:inline\s+)?(?:\w+\s+)*([a-z_][a-z0-9_]*)\s*\([^)]*\)\s*\{',
+                    r'(?:\w+\s+)*([A-Z]\w*)\s*::\s*([a-z_][a-z0-9_]*)\s*\(',
+                    r'class\s+([A-Z]\w*)',
+                    r'template.*class\s+([A-Z]\w*)'
+                ],
+                'java': [
+                    r'(?:public\s+)?(?:private\s+)?(?:protected\s+)?(?:static\s+)?(?:\w+\s+)*([a-z][a-zA-Z0-9_]*)\s*\([^)]*\)\s*\{',
+                    r'(?:public\s+)?(?:private\s+)?(?:protected\s+)?class\s+([A-Z]\w*)',
+                    r'(?:public\s+)?(?:private\s+)?(?:protected\s+)?interface\s+([A-Z]\w*)'
+                ],
+                'go': [
+                    r'func\s+([a-z][a-zA-Z0-9_]*)\s*\(',
+                    r'func\s+\(\w+\s+\*?\w+\)\s+([a-z][a-zA-Z0-9_]*)\s*\(',
+                    r'type\s+([A-Z]\w*)\s+(?:struct|interface)'
+                ],
+                'swift': [
+                    r'(?:public\s+)?(?:private\s+)?(?:internal\s+)?func\s+([a-z][a-zA-Z0-9_]*)\s*\(',
+                    r'(?:public\s+)?(?:private\s+)?(?:internal\s+)?class\s+([A-Z]\w*)',
+                    r'(?:public\s+)?(?:private\s+)?(?:internal\s+)?struct\s+([A-Z]\w*)'
+                ],
+                'kotlin': [
+                    r'(?:suspend\s+)?(?:inline\s+)?fun\s+([a-z][a-zA-Z0-9_]*)\s*\(',
+                    r'(?:data\s+)?class\s+([A-Z]\w*)',
+                    r'(?:sealed\s+)?interface\s+([A-Z]\w*)'
+                ],
+                'php': [
+                    r'(?:public\s+)?(?:private\s+)?(?:protected\s+)?function\s+([a-z_][a-zA-Z0-9_]*)\s*\(',
+                    r'class\s+([A-Z]\w*)',
+                    r'trait\s+([A-Z]\w*)'
+                ],
+                'ruby': [
+                    r'def\s+([a-z_][a-zA-Z0-9_]*[?!]?)',
+                    r'class\s+([A-Z]\w*)',
+                    r'module\s+([A-Z]\w*)'
+                ],
+                'dart': [
+                    r'(?:static\s+)?(?:async\s+)?(?:\w+\s+)*([a-z][a-zA-Z0-9_]*)\s*\([^)]*\)\s*(?:async\s*)?\{',
+                    r'class\s+([A-Z]\w*)',
+                    r'mixin\s+([A-Z]\w*)'
+                ],
+                'sql': [
+                    r'(?:CREATE\s+)?(?:OR\s+REPLACE\s+)?(?:FUNCTION|PROCEDURE)\s+([a-z_][a-zA-Z0-9_]*)',
+                    r'CREATE\s+TRIGGER\s+([a-z_][a-zA-Z0-9_]*)'
+                ],
+                'css': [
+                    r'@function\s+([a-z-][a-z0-9-]*)',
+                    r'@mixin\s+([a-z-][a-z0-9-]*)',
+                    r'\.([a-z-][a-z0-9-]*)\s*\{'
+                ],
+                'vue': [
+                    r'(?:async\s+)?([a-z][a-zA-Z0-9_]*)\s*\([^)]*\)\s*\{',
+                    r'computed:\s*\{',
+                    r'methods:\s*\{'
+                ],
+                'lua': [
+                    r'function\s+([a-z_][a-zA-Z0-9_]*)\s*\(',
+                    r'local\s+function\s+([a-z_][a-zA-Z0-9_]*)\s*\(',
+                    r'([a-z_][a-zA-Z0-9_]*)\s*=\s*function\s*\('
+                ],
+                'scala': [
+                    r'def\s+([a-z_][a-zA-Z0-9_]*)\s*[\(\[]',
+                    r'class\s+([A-Z]\w*)',
+                    r'object\s+([A-Z]\w*)',
+                    r'trait\s+([A-Z]\w*)'
+                ],
+                'clojure': [
+                    r'\(defn\s+([a-z-][a-z0-9-]*)',
+                    r'\(defn-\s+([a-z-][a-z0-9-]*)',
+                    r'\(defmacro\s+([a-z-][a-z0-9-]*)'
+                ],
+                'r': [
+                    r'([a-z_][a-zA-Z0-9_\.]*)\s*<-\s*function\s*\(',
+                    r'([a-z_][a-zA-Z0-9_\.]*)\s*=\s*function\s*\(',
+                    r'function\s*\('
+                ],
+                'objc': [
+                    r'-\s*\([^)]+\)\s*([a-z_][a-zA-Z0-9_]*)',
+                    r'\+\s*\([^)]+\)\s*([a-z_][a-zA-Z0-9_]*)',
+                    r'@interface\s+([A-Z]\w*)',
+                    r'@implementation\s+([A-Z]\w*)'
+                ],
+                'csharp': [
+                    # Methods - must have return type followed by method name and parentheses
+                    r'(?:public\s+|private\s+|protected\s+|internal\s+)?(?:static\s+)?(?:virtual\s+)?(?:override\s+)?(?:async\s+)?(?:abstract\s+)?(?:void|Task(?:<[^>]+>)?|string|int|bool|double|float|decimal|char|byte|short|long|object|var|I?[A-Z]\w*(?:<[^>]+>)?)\s+([A-Z][a-zA-Z0-9_]*)\s*\([^)]*\)',
+                    r'(?:public\s+|private\s+|protected\s+|internal\s+)?(?:static\s+)?(?:virtual\s+)?(?:override\s+)?(?:async\s+)?(?:abstract\s+)?(?:void|Task(?:<[^>]+>)?|string|int|bool|double|float|decimal|char|byte|short|long|object|var|I?[A-Z]\w*(?:<[^>]+>)?)\s+([a-z][a-zA-Z0-9_]*)\s*\([^)]*\)',
+                    # Constructors (same name as class)
+                    r'^\s*(?:public\s+|private\s+|protected\s+|internal\s+)?([A-Z]\w*)\s*\([^)]*\)\s*(?::\s*(?:base|this)\s*\([^)]*\))?\s*\{',
+                    # Destructors
+                    r'~([A-Z]\w*)\s*\(\s*\)',
+                    # Generic methods with angle brackets before parentheses
+                    r'(?:public\s+|private\s+|protected\s+|internal\s+)?(?:static\s+)?(?:\w+\s+)?([A-Z][a-zA-Z0-9_]*)<[^>]+>\s*\([^)]*\)',
+                    r'(?:public\s+|private\s+|protected\s+|internal\s+)?(?:static\s+)?(?:\w+\s+)?([a-z][a-zA-Z0-9_]*)<[^>]+>\s*\([^)]*\)',
+                    # Extension methods (this keyword as first parameter)
+                    r'(?:public\s+)?(?:static\s+)(?:\w+\s+)([A-Z][a-zA-Z0-9_]*)\s*\(\s*this\s+',
+                    r'(?:public\s+)?(?:static\s+)(?:\w+\s+)([a-z][a-zA-Z0-9_]*)\s*\(\s*this\s+',
+                    # Properties (get/set pattern)
+                    r'(?:public\s+|private\s+|protected\s+|internal\s+)?(?:static\s+)?(?:virtual\s+)?(?:override\s+)?(?:\w+\s+)([A-Z][a-zA-Z0-9_]*)\s*\{\s*(?:get|set)',
+                    # Expression-bodied members with =>
+                    r'(?:public\s+|private\s+|protected\s+|internal\s+)?(?:\w+\s+)([A-Z][a-zA-Z0-9_]*)\s*=>\s*',
+                    r'(?:public\s+|private\s+|protected\s+|internal\s+)?(?:\w+\s+)([a-z][a-zA-Z0-9_]*)\s*=>\s*',
+                    # Local functions (simpler pattern)
+                    r'^\s{4,}(?:async\s+)?(?:\w+\s+)([A-Z][a-zA-Z0-9_]*)\s*\([^)]*\)\s*(?:\{|=>)',
+                    r'^\s{4,}(?:async\s+)?(?:\w+\s+)([a-z][a-zA-Z0-9_]*)\s*\([^)]*\)\s*(?:\{|=>)',
+                    # Classes, interfaces, structs, enums, records
+                    r'(?:public\s+|private\s+|protected\s+|internal\s+)?(?:abstract\s+|sealed\s+|static\s+)?(?:partial\s+)?class\s+([A-Z]\w*)',
+                    r'(?:public\s+|private\s+|protected\s+|internal\s+)?(?:partial\s+)?interface\s+([A-Z]\w*)',
+                    r'(?:public\s+|private\s+|protected\s+|internal\s+)?(?:readonly\s+)?struct\s+([A-Z]\w*)',
+                    r'(?:public\s+|private\s+|protected\s+|internal\s+)?enum\s+([A-Z]\w*)',
+                    r'(?:public\s+|private\s+|protected\s+|internal\s+)?record\s+([A-Z]\w*)',
+                    # Delegates
+                    r'(?:public\s+|private\s+|protected\s+|internal\s+)?delegate\s+(?:\w+\s+)([A-Z][a-zA-Z0-9_]*)\s*\(',
+                    # Events
+                    r'(?:public\s+|private\s+|protected\s+|internal\s+)?(?:static\s+)?event\s+(?:\w+\s+)([A-Z][a-zA-Z0-9_]*)',
+                    # Indexers special handling
+                    r'this\s*\[\s*(?:int|string)',
+                    # Operators
+                    r'operator\s+([+\-*/=!<>]+|==|!=|true|false)\s*\('
+                ],
+                'shell': [
+                    r'function\s+([a-z_][a-zA-Z0-9_]*)\s*\(',
+                    r'([a-z_][a-zA-Z0-9_]*)\s*\(\s*\)\s*\{',
+                    r'^\s*([a-z_][a-zA-Z0-9_]*)\s*\(\)\s*\{'
+                ],
+                'powershell': [
+                    r'function\s+([A-Za-z][a-zA-Z0-9_-]*)',
+                    r'Filter\s+([A-Za-z][a-zA-Z0-9_-]*)',
+                    r'([A-Za-z][a-zA-Z0-9_-]*)\s*=\s*\{'
                 ]
             }
 
@@ -870,6 +1004,46 @@ class EnhancedProjectSummaryGenerator:
                 patterns = function_patterns['javascript']
             elif ext in ['.rs']:
                 patterns = function_patterns['rust']
+            elif ext in ['.c', '.h']:
+                patterns = function_patterns['c']
+            elif ext in ['.cpp', '.cc', '.cxx', '.hpp']:
+                patterns = function_patterns['cpp']
+            elif ext in ['.java']:
+                patterns = function_patterns['java']
+            elif ext in ['.go']:
+                patterns = function_patterns['go']
+            elif ext in ['.swift']:
+                patterns = function_patterns['swift']
+            elif ext in ['.kt', '.kts']:
+                patterns = function_patterns['kotlin']
+            elif ext in ['.php']:
+                patterns = function_patterns['php']
+            elif ext in ['.rb']:
+                patterns = function_patterns['ruby']
+            elif ext in ['.dart']:
+                patterns = function_patterns['dart']
+            elif ext in ['.sql']:
+                patterns = function_patterns['sql']
+            elif ext in ['.css', '.scss', '.sass']:
+                patterns = function_patterns['css']
+            elif ext in ['.vue']:
+                patterns = function_patterns['vue']
+            elif ext in ['.lua']:
+                patterns = function_patterns['lua']
+            elif ext in ['.scala']:
+                patterns = function_patterns['scala']
+            elif ext in ['.clj', '.cljs']:
+                patterns = function_patterns['clojure']
+            elif ext in ['.r']:
+                patterns = function_patterns['r']
+            elif ext in ['.m', '.mm']:
+                patterns = function_patterns['objc']
+            elif ext in ['.cs']:
+                patterns = function_patterns['csharp']
+            elif ext in ['.sh', '.bash']:
+                patterns = function_patterns['shell']
+            elif ext in ['.ps1']:
+                patterns = function_patterns['powershell']
             else:
                 patterns = function_patterns['javascript']  # Default fallback
 
@@ -1028,7 +1202,7 @@ class EnhancedProjectSummaryGenerator:
         skip_directories = {
             'node_modules', '__pycache__', '.git', 'dist', 'build', 
             'coverage', '.next', '.vscode', '.idea', 'workflow_export_package',
-            '.cache', '.local', 'history', 'language_scan_tests'
+            '.cache', '.local', 'history'
         }
 
         # Important root files
@@ -1181,7 +1355,7 @@ class EnhancedProjectSummaryGenerator:
 
         # Find AI-related files
         for root, dirs, files in os.walk(self.project_root):
-            dirs[:] = [d for d in dirs if d not in ['node_modules', '__pycache__', '.git', 'dist', 'build', '.cache', '.local', 'history', 'language_scan_tests', '.pythonlibs']]
+            dirs[:] = [d for d in dirs if d not in ['node_modules', '__pycache__', '.git', 'dist', 'build', '.cache', '.local', 'history', '.pythonlibs']]
 
             for file in files:
                 if file.endswith(('.ts', '.tsx', '.js', '.jsx', '.py')):

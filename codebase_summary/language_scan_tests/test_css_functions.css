@@ -1,0 +1,83 @@
+/* CSS test functions for breadcrumb detection validation */
+
+:root {
+  --primary-color: #007bff;
+  --secondary-color: #6c757d;
+  --font-size-base: 1rem;
+}
+
+.calc-function {
+  width: calc(100% - 20px);
+  height: calc(100vh - 60px);
+  margin: calc(var(--font-size-base) * 2);
+}
+
+/* Function without breadcrumb documentation */
+.undocumented-function {
+  transform: translateX(50px);
+}
+
+.gradient-function {
+  background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+  background: radial-gradient(circle, rgba(255,0,0,1) 0%, rgba(0,0,255,1) 100%);
+}
+
+.transform-function {
+  transform: translateX(10px) translateY(20px) rotate(45deg) scale(1.5);
+  transform-origin: center center;
+}
+
+@keyframes slideIn {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .responsive-function {
+    font-size: calc(var(--font-size-base) * 0.875);
+    padding: calc(var(--font-size-base) / 2);
+  }
+}
+
+.custom-function {
+  color: var(--primary-color, #000);
+  background-color: var(--secondary-color, #fff);
+  font-size: var(--font-size-base, 16px);
+}
+
+.filter-function {
+  filter: blur(5px) brightness(0.8) contrast(1.2) saturate(1.5);
+  backdrop-filter: blur(10px) opacity(0.8);
+}
+
+.clip-function {
+  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+  clip-path: circle(50% at 50% 50%);
+}
+
+.grid-function {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-rows: repeat(3, minmax(100px, auto));
+  gap: clamp(1rem, 2vw, 2rem);
+}
+
+.flex-function {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex: 1 1 auto;
+}
+
+@container (min-width: 300px) {
+  .container-function {
+    font-size: clamp(1rem, 2.5vw, 1.5rem);
+    padding: max(1rem, 2vw);
+  }
+}

@@ -1,7 +1,7 @@
 # New Project - Architecture Diagrams
 
-*Last updated: 2025-06-17 18:59:17 UTC*
-*Generated from codebase analysis - Version: 1.1.377*
+*Last updated: 2025-06-17 20:32:46 UTC*
+*Generated from codebase analysis - Version: 1.1.390*
 
 ## System Overview
 ```mermaid
@@ -46,9 +46,9 @@ graph LR
     end
 
     subgraph "📊 Project Statistics"
-        STATS1[Files: 47]
-        STATS2[Functions: 59]
-        STATS3[Coverage: 100.0%]
+        STATS1[Files: 48]
+        STATS2[Functions: 620]
+        STATS3[Coverage: 9.7%]
         STATS4[AI Providers: 0]
     end
 ```
@@ -100,10 +100,10 @@ flowchart TD
 ## Enhanced Documentation Coverage
 ```mermaid
 pie title Documentation Coverage Distribution
-    "Documented Functions" : 59
-    "Missing Documentation" : 0
+    "Documented Functions" : 60
+    "Missing Documentation" : 560
 ```
 
 ---
 *Architecture diagrams are auto-generated from codebase analysis*
-*Coverage: 100.0% | Functions: 59 | Files: 47*
+*Coverage: 9.7% | Functions: 620 | Files: 48*

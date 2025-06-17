@@ -1,7 +1,7 @@
 # New Project - Enhanced Codebase Summary
 
-**Version:** 1.1.377  
-**Generated:** 2025-06-17 18:59:17  
+**Version:** 1.1.390  
+**Generated:** 2025-06-17 20:32:46  
 **Description:** AI-powered application with workflow orchestration
 
 ## 📊 Project Overview
@@ -11,14 +11,14 @@
 - **Backend:** 10 files
 - **Ai_Integration:** 11 files
 - **Deployment:** 1 files
-- **Documentation:** 25 files
+- **Documentation:** 26 files
 
 ### Architecture Overview
 Architecture analysis not available
 
 ## 🏗 Project Structure
 
-- **Total Files:** 47
+- **Total Files:** 48
 - **Directories:** 17
 - **File Types:** 8 different extensions
 
@@ -46,13 +46,13 @@ Architecture analysis not available
 - `SECURITY.md`
 - `CHANGELOG.md`
 - `README.md`
-- ... and 22 more files
+- ... and 23 more files
 
 ## 🔍 Code Analysis
 
-- **Total Functions:** 59
-- **Documentation Coverage:** 100.0%
-- **Complexity:** medium
+- **Total Functions:** 620
+- **Documentation Coverage:** 9.7%
+- **Complexity:** high
 
 ## 🤖 AI Integration
 
@@ -78,10 +78,10 @@ Architecture analysis not available
 
 ## 📈 Performance Metrics
 
-- **File Count:** 47
+- **File Count:** 48
 - **Directory Count:** 17
-- **Function Density:** 1.26 functions/file
-- **Complexity Score:** medium
+- **Function Density:** 12.92 functions/file
+- **Complexity Score:** high
 
 ---
 
