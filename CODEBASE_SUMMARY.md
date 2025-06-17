@@ -1,38 +1,37 @@
-# Arkival - Enhanced Codebase Summary
+# New Project - Enhanced Codebase Summary
 
-**Version:** 1.1.371  
-**Generated:** 2025-06-17 07:16:42  
-**Description:** AI Agent Workflow Orchestration System with Claude Code multi-agent collaboration
+**Version:** 1.1.377  
+**Generated:** 2025-06-17 18:59:17  
+**Description:** AI-powered application with workflow orchestration
 
 ## 📊 Project Overview
 
 ### Technology Stack
-- **Frontend:** 2 files
-- **Backend:** 8 files
+- **Frontend:** 1 files
+- **Backend:** 10 files
 - **Ai_Integration:** 11 files
 - **Deployment:** 1 files
-- **Documentation:** 23 files
+- **Documentation:** 25 files
 
 ### Architecture Overview
 Architecture analysis not available
 
 ## 🏗 Project Structure
 
-- **Total Files:** 46
-- **Directories:** 14
-- **File Types:** 9 different extensions
+- **Total Files:** 47
+- **Directories:** 17
+- **File Types:** 8 different extensions
 
 ### Technology Indicators
 
 #### Frontend
 - `package.json`
-- `package.json.backup`
 
 #### Backend
 - `setup_workflow_system.py`
 - `validate_deployment.py`
 - `codebase_summary/agent_workflow_orchestrator.py`
-- ... and 5 more files
+- ... and 7 more files
 
 #### Ai_Integration
 - `.claude/settings.local.json`
@@ -47,7 +46,7 @@ Architecture analysis not available
 - `SECURITY.md`
 - `CHANGELOG.md`
 - `README.md`
-- ... and 20 more files
+- ... and 22 more files
 
 ## 🔍 Code Analysis
 
@@ -79,9 +78,9 @@ Architecture analysis not available
 
 ## 📈 Performance Metrics
 
-- **File Count:** 46
-- **Directory Count:** 14
-- **Function Density:** 1.28 functions/file
+- **File Count:** 47
+- **Directory Count:** 17
+- **Function Density:** 1.26 functions/file
 - **Complexity Score:** medium
 
 ---

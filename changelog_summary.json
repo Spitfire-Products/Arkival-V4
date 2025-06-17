@@ -1,7 +1,7 @@
 {
   "project_name": "New Project",
-  "changelog_version": "1.0.0",
-  "last_updated": "2025-06-17T17:01:42.238781Z",
+  "changelog_version": "1.5.0",
+  "last_updated": "2025-06-17T18:59:17.329828Z",
   "description": "Comprehensive changelog tracking all significant changes",
   "environment": {
     "ide": "replit",
@@ -15,8 +15,35 @@
   },
   "entries": [
     {
+      "id": "change_002",
+      "timestamp": "2025-06-17T18:59:17.329808Z",
+      "author": "AI Assistant",
+      "version": "1.5.0",
+      "type": "enhancement",
+      "scope": "deployment",
+      "summary": "Implemented proper environment-specific file management for GitHub deployment",
+      "description": "Fixed critical GitHub deployment architecture issue where environment-specific files were included in repository: 1) Enhanced .gitignore to exclude .replit, .vscode/, .gitpod.yml, and .workflow_system/ directories, 2) Modified setup_workflow_system.py to properly generate .replit file with integrated workflows (not just backup toml), 3) Updated SETUP_GUIDE.md to clearly explain the environment-specific file generation design, 4) Documented clean repository approach where IDE-specific files are generated locally during setup but excluded from GitHub, 5) Ensured cross-platform compatibility where each user gets appropriate environment configuration without repository clutter or merge conflicts",
+      "files_changed": [
+        {
+          "file": "multiple",
+          "action": "modified",
+          "changes": [
+            "See description for details"
+          ]
+        }
+      ],
+      "breaking_changes": false,
+      "migration_notes": "No migration required",
+      "related_issues": [],
+      "tags": [],
+      "workflow_context": {
+        "triggered_by_workflow": false,
+        "session_type": "agent_collaboration"
+      }
+    },
+    {
       "id": "change_001",
-      "timestamp": "2025-06-17T17:01:42.238793Z",
+      "timestamp": "2025-06-17T18:55:02.391313Z",
       "author": "Workflow System",
       "version": "1.0.0",
       "type": "feature",
@@ -44,12 +71,18 @@
     }
   ],
   "statistics": {
-    "total_entries": 1,
+    "total_entries": 2,
     "entries_by_type": {
+      "enhancement": 1,
       "feature": 1
     },
     "entries_by_scope": {
+      "deployment": 1,
       "infrastructure": 1
     }
+  },
+  "workflow_integration": {
+    "auto_triggered": false,
+    "last_workflow_trigger": "2025-06-17T18:59:17.329822Z"
   }
 }

@@ -135,7 +135,7 @@ python3 codebase_summary/update_changelog.py add --summary "Description of major
 **What it Updates**:
 - `CHANGELOG.md` - User-facing change history
 - `changelog_summary.json` - Structured change data
-- `replit.md` changelog section - Project preferences record
+- `PROJECT_CONFIG.md` changelog section - Project preferences record
 
 **Version Controlled**: These track your project's evolution over time
 

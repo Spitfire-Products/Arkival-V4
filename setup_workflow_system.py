@@ -268,8 +268,14 @@ class WorkflowSystemSetup:
             self._setup_shell_scripts()
 
     def _setup_replit_workflows(self):
-        """Set up Replit workflows (existing functionality)"""
-        replit_config = '''
+        """Set up Replit workflows with proper .replit file integration"""
+        # Create .replit file with workflow integration
+        replit_file_config = '''modules = ["python-3.11", "nodejs-20", "python3"]
+
+[nix]
+channel = "stable-24_05"
+packages = ["libyaml"]
+
 [[workflows.workflow]]
 name = "Agent Incoming Workflow"
 author = "workflow-system"
@@ -297,11 +303,44 @@ task = "shell.exec"
 args = "python3 codebase_summary/agent_workflow_orchestrator.py outgoing --summary \\"Session summary\\" --type completed"
 '''
 
-        workflow_path = self.project_root / ".workflow_system" / "replit_workflows.toml"
-        with open(workflow_path, 'w', encoding='utf-8') as f:
-            f.write(replit_config)
+        # Write the main .replit file
+        replit_file_path = self.project_root / ".replit"
+        with open(replit_file_path, 'w', encoding='utf-8') as f:
+            f.write(replit_file_config)
 
-        print("🔧 Created Replit workflow configuration")
+        # Also create backup in .workflow_system for reference
+        workflow_path = self.project_root / ".workflow_system" / "replit_workflows.toml"
+        workflow_only_config = '''[[workflows.workflow]]
+name = "Agent Incoming Workflow"
+author = "workflow-system"
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo '🎯 NEW AGENT ONBOARDING WORKFLOW'"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python3 codebase_summary/agent_workflow_orchestrator.py incoming"
+
+[[workflows.workflow]]
+name = "Agent Outgoing Workflow"
+author = "workflow-system"
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo '🚀 OUTGOING AGENT HANDOFF WORKFLOW'"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python3 codebase_summary/agent_workflow_orchestrator.py outgoing --summary \\"Session summary\\" --type completed"
+'''
+        with open(workflow_path, 'w', encoding='utf-8') as f:
+            f.write(workflow_only_config)
+
+        print("🔧 Created Replit .replit file with integrated workflows")
+        print("🔧 Created Replit workflow configuration backup")
 
     def _setup_vscode_tasks(self):
         """Set up VS Code tasks.json"""

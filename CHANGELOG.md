@@ -7,19 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.0] - 2025-06-17
+
+### Enhanced
+- Restructured documentation for true cross-platform compatibility
+  Fixed GitHub deployment issue where documentation was Replit-specific despite cross-platform capabilities: 1) Renamed replit.md to PROJECT_CONFIG.md for environment-agnostic project preferences, 2) Updated SETUP_GUIDE.md to provide IDE-specific instructions for all supported environments (Replit, VS Code, Cursor, Codespaces, Gitpod), 3) Enhanced workflow_config.json to reflect cross-platform nature with current_ide instead of detected_ide, 4) Added alternative_methods for different IDE workflow execution, 5) Updated references throughout documentation to emphasize multi-IDE support rather than Replit-first approach
+
+## [1.3.0] - 2025-06-17
+
 ## [1.2.0] - 2025-06-17
 
-### Enhanced
-- System Enhancement: Fixed changelog architecture by adding markdown generation functionality to update_changelog.py script. Implemented generate_markdown_changelog() function to convert JSON entries to proper CHANGELOG.md format. Completed comprehensive breadcrumb documentation project with 98.5% coverage (131 of 133 functions documented). Enhanced system reliability and maintainability through systematic documentation implementation.
-
-## [1.1.328] - 2025-06-16
-
-## [1.1.0] - 2025-06-17
-
-### Enhanced
-- Major Documentation Enhancement: Increased breadcrumb coverage from 40.2% to 98.5% (77 functions documented). Completed systematic documentation of all critical Claude integration functions, authentication systems, communication utilities, and environment optimization components. Implemented proper @codebase-summary schema across 4 tiers of priority files. Enhanced system maintainability and AI assistance capabilities through comprehensive function documentation.
-
-## [1.0.0] - 2025-06-16
+## [1.0.0] - 2025-06-17
 
 ---
 

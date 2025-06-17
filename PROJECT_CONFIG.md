@@ -1,10 +1,16 @@
-# Replit.md
+# Arkival - Project Configuration & Development Preferences
 
 ## Overview
 
 This is Arkival, an AI Agent Workflow Orchestration System that enables seamless knowledge transfer between AI agents and human developers across different development environments. The system provides comprehensive workflow automation, documentation management, and deployment coordination.
 
-## System Architecture
+**Note**: This file contains project-specific configuration preferences and development environment notes. For general setup instructions, see README.md and SETUP_GUIDE.md.
+
+## Current Development Environment
+
+**Primary IDE**: Replit (can be changed as needed)
+**Platform**: Linux
+**Workflow Method**: replit_workflows
 
 ### Core Components
 - **Agent Workflow Orchestrator** - Manages handoffs between development sessions
@@ -17,6 +23,11 @@ This is Arkival, an AI Agent Workflow Orchestration System that enables seamless
 - **Configuration**: JSON-based workflow configuration
 - **Documentation**: Markdown with Mermaid diagrams
 - **Package Management**: NPM/Poetry templates for different environments
+
+### Cross-Platform Compatibility
+- Works in VS Code, Cursor, Codespaces, Gitpod, and any IDE with terminal access
+- Automatic environment detection and configuration
+- Universal shell script fallback for unsupported environments
 
 ## Key Components
 

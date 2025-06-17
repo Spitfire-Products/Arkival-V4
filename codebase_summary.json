@@ -1,8 +1,8 @@
 {
-  "project_name": "Arkival",
-  "version": "1.1.371",
-  "updated_at": "2025-06-17T07:16:42.215934Z",
-  "description": "AI Agent Workflow Orchestration System with Claude Code multi-agent collaboration",
+  "project_name": "New Project",
+  "version": "1.1.377",
+  "updated_at": "2025-06-17T18:59:17.479818Z",
+  "description": "AI-powered application with workflow orchestration",
   "main_dependencies": {
     "runtime": [
       "@anthropic-ai/claude-code"
@@ -11,12 +11,14 @@
     "system": []
   },
   "project_structure": {
-    "total_files": 46,
+    "total_files": 47,
     "directories": [
       "client_templates",
       "codebase_summary",
       "codebase_summary/checkpoints",
       ".workflow_system",
+      ".workflow_system/scripts",
+      ".workflow_system/ide_configs",
       ".upm",
       ".claude",
       ".claude/commands",
@@ -26,13 +28,13 @@
       ".config/npm/node_global/lib",
       ".config/npm/node_global/bin",
       "modules",
-      "modules/claude-code"
+      "modules/claude-code",
+      "checkpoints"
     ],
     "file_types": {
-      ".json": 10,
+      ".json": 13,
       "": 4,
-      ".md": 19,
-      ".backup": 1,
+      ".md": 18,
       ".toml": 2,
       ".lock": 1,
       ".py": 7,
@@ -50,8 +52,7 @@
     ],
     "technology_indicators": {
       "frontend": [
-        "package.json",
-        "package.json.backup"
+        "package.json"
       ],
       "backend": [
         "setup_workflow_system.py",
@@ -60,7 +61,9 @@
         "codebase_summary/update_changelog.py",
         "codebase_summary/update_project_summary.py",
         "codebase_summary/missing_breadcrumbs.json",
-        "codebase_summary/msgs.md",
+        "codebase_summary/codebase_summary.json",
+        "codebase_summary/session_state.json",
+        "codebase_summary/agent_handoff.json",
         "codebase_summary/checkpoints/checkpoint_log.md"
       ],
       "ai_integration": [
@@ -91,13 +94,14 @@
         "SETUP_GUIDE.md",
         "ARCHITECTURE_DIAGRAM.md",
         "CODEBASE_SUMMARY.md",
-        "replit.md",
-        "msgs.md",
+        "PROJECT_CONFIG.md",
         "codebase_summary/agent_workflow_orchestrator.py",
         "codebase_summary/update_changelog.py",
         "codebase_summary/update_project_summary.py",
         "codebase_summary/missing_breadcrumbs.json",
-        "codebase_summary/msgs.md",
+        "codebase_summary/codebase_summary.json",
+        "codebase_summary/session_state.json",
+        "codebase_summary/agent_handoff.json",
         "codebase_summary/checkpoints/checkpoint_log.md",
         ".claude/commands/analyze.md",
         ".claude/commands/refactor.md",
@@ -105,7 +109,8 @@
         ".claude/commands/document.md",
         "modules/claude-code/CLAUDE_BRIDGE_GUIDE.md",
         "modules/claude-code/msgs.md",
-        "modules/claude-code/README.md"
+        "modules/claude-code/README.md",
+        "checkpoints/checkpoint_log.md"
       ]
     }
   },
@@ -126,7 +131,7 @@
           "main"
         ],
         "missing_breadcrumbs": [],
-        "lines_of_code": 1083
+        "lines_of_code": 1122
       },
       {
         "file": "validate_deployment.py",
@@ -218,7 +223,7 @@
           "main"
         ],
         "missing_breadcrumbs": [],
-        "lines_of_code": 2262
+        "lines_of_code": 2278
       },
       {
         "file": "modules/claude-code/claude_bridge.py",
@@ -351,7 +356,14 @@
     "components": [],
     "hooks": [],
     "total_components": 0,
-    "total_hooks": 0
+    "total_hooks": 0,
+    "components_config": {
+      "config_exists": false,
+      "paths_valid": {},
+      "missing_directories": [],
+      "ui_components_count": 0,
+      "alignment_status": "unknown"
+    }
   },
   "ai_integration": {
     "providers": [
@@ -403,16 +415,13 @@
   "recent_features": {
     "git_changes": [],
     "new_files": [
-      "package.json",
       ".gitignore",
       "SECURITY.md",
       "LICENSE",
       "CHANGELOG.md",
       "README.md",
-      "AGENT_GUIDE.md",
       "CONTRIBUTING.md",
       "SETUP_GUIDE.md",
-      "package-lock.json",
       "pyproject.toml",
       "uv.lock",
       "workflow_config.json",
@@ -422,51 +431,37 @@
       "codebase_summary.json",
       "setup_workflow_system.py",
       "validate_deployment.py",
-      "replit.md",
       ".replit",
-      ".promptignore",
-      "msgs.md",
-      "client_templates/vite-client.js",
+      "PROJECT_CONFIG.md",
       "codebase_summary/update_changelog.py",
       "codebase_summary/update_project_summary.py",
       "codebase_summary/missing_breadcrumbs.json",
-      "codebase_summary/msgs.md",
-      "codebase_summary/history/codebase_summary_v1.1.365_20250617_064052.json",
-      "codebase_summary/history/codebase_summary_v1.1.366_20250617_070842.json",
-      "codebase_summary/history/codebase_summary_v1.1.367_20250617_071022.json",
-      "codebase_summary/history/codebase_summary_v1.1.368_20250617_071428.json",
-      "codebase_summary/history/codebase_summary_v1.1.369_20250617_071623.json",
-      "codebase_summary/history/codebase_summary_v1.1.370_20250617_071642.json",
+      "codebase_summary/codebase_summary.json",
+      "codebase_summary/session_state.json",
+      "codebase_summary/agent_handoff.json",
+      "codebase_summary/history/codebase_summary_v1.1.371_20250617_181700.json",
+      "codebase_summary/history/codebase_summary_v1.1.372_20250617_183808.json",
+      "codebase_summary/history/codebase_summary_v1.1.373_20250617_183934.json",
+      "codebase_summary/history/codebase_summary_v1.1.374_20250617_184123.json",
+      "codebase_summary/history/codebase_summary_v1.1.375_20250617_184950.json",
+      "codebase_summary/history/codebase_summary_v1.1.376_20250617_185917.json",
       "codebase_summary/checkpoints/checkpoint_log.md",
-      "documentation_assets/COMPREHENSIVE_BREADCRUMB_GUIDE.md",
-      "documentation_assets/WEBSOCKET_MITIGATION.md",
-      "documentation_assets/COMPONENTS_AUTO_UPDATE.md",
-      "documentation_assets/IDE_INTEGRATION.md",
       "documentation_assets/REFERENCE_README.md",
-      "documentation_assets/mvp_launch_checklist_prd_v1.md",
-      "documentation_assets/workflow_assets/workflow_docs/engineering_best_practices.md",
-      "documentation_assets/workflow_assets/ai_integrations/dependency_management.md",
-      "documentation_assets/workflow_assets/ai_integrations/troubleshooting_guide.md",
-      "documentation_assets/workflow_assets/ai_integrations/ai_api_integration_guide.md",
-      "documentation_assets/workflow_assets/ai_integrations/model_provider_reference.md",
-      "documentation_assets/workflow_assets/ai_integrations/implementation_examples.md",
-      "documentation_assets/project_templates/rust_cargo_template.toml",
-      "documentation_assets/project_templates/python_pyproject_template.toml",
       "documentation_assets/project_templates/nodejs_package_template.json",
-      "documentation_assets/project_templates/TEMPLATE_USAGE_GUIDE.md",
       "modules/claude-code/claude_bridge.py",
       "modules/claude-code/CLAUDE_BRIDGE_GUIDE.md",
       "modules/claude-code/msg.py",
       "modules/claude-code/msgs.md",
-      "modules/claude-code/README.md"
+      "modules/claude-code/README.md",
+      "checkpoints/checkpoint_log.md"
     ],
     "modified_files": [],
     "feature_flags": []
   },
   "performance_metrics": {
-    "file_count": 46,
-    "directory_count": 14,
-    "function_density": 1.2826086956521738,
+    "file_count": 47,
+    "directory_count": 17,
+    "function_density": 1.2553191489361701,
     "documentation_coverage": 100.0,
     "complexity_score": "medium"
   },
@@ -479,9 +474,9 @@
     ]
   },
   "version_correlation": {
-    "changelog_version": "1.2.0",
+    "changelog_version": "1.5.0",
     "last_checkpoint": null,
-    "archived_at": "2025-06-17T07:16:42.216278Z",
+    "archived_at": "2025-06-17T18:59:17.480117Z",
     "note": "Enhanced summary version is independent of changelog milestones"
   },
   "future_enhancements": [

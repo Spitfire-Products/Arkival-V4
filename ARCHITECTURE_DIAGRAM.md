@@ -1,7 +1,7 @@
-# Arkival - Architecture Diagrams
+# New Project - Architecture Diagrams
 
-*Last updated: 2025-06-17 07:16:42 UTC*
-*Generated from codebase analysis - Version: 1.1.371*
+*Last updated: 2025-06-17 18:59:17 UTC*
+*Generated from codebase analysis - Version: 1.1.377*
 
 ## System Overview
 ```mermaid
@@ -46,7 +46,7 @@ graph LR
     end
 
     subgraph "📊 Project Statistics"
-        STATS1[Files: 46]
+        STATS1[Files: 47]
         STATS2[Functions: 59]
         STATS3[Coverage: 100.0%]
         STATS4[AI Providers: 0]
@@ -106,4 +106,4 @@ pie title Documentation Coverage Distribution
 
 ---
 *Architecture diagrams are auto-generated from codebase analysis*
-*Coverage: 100.0% | Functions: 59 | Files: 46*
+*Coverage: 100.0% | Functions: 59 | Files: 47*
