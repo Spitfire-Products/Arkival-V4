@@ -78,7 +78,6 @@ codebase_summary/history/
 
 # Claude Code specific files
 .claude/
-modules/claude-code/
 __pycache__/
 
 # Configuration and cache directories
