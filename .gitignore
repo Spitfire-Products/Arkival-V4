@@ -75,3 +75,18 @@ pids/
 .workflow_system/logs/
 .workflow_system/backups/
 codebase_summary/history/
+
+# Claude Code specific files
+.claude/
+modules/claude-code/
+__pycache__/
+
+# Configuration and cache directories
+.config/
+.local/
+.cache/
+.pythonlibs/
+.upm/
+
+# Node modules and dependencies
+node_modules/
