@@ -1,0 +1,46 @@
+# pyproject.toml Template for Python Projects with Workflow System
+[tool.poetry]
+name = "arkival-python"
+version = "0.1.0"
+description = "Arkival Python Project with Workflow System"
+authors = ["Your Name <your.email@example.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+# AI integrations
+openai = "^1.58.1"
+anthropic = "^0.40.0"
+google-generativeai = "^0.8.3"
+# Core dependencies
+requests = "^2.32.3"
+python-dotenv = "^1.0.1"
+pydantic = "^2.0.0"
+# Web framework (choose one)
+# fastapi = "^0.104.0"
+# flask = "^2.3.0"
+# django = "^4.2.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.4"
+pytest-asyncio = "^0.23.0"
+black = "^23.0.0"
+flake8 = "^6.0.0"
+mypy = "^1.7.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-v --tb=short"
+
+[tool.black]
+line-length = 88
+target-version = ['py39']
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true

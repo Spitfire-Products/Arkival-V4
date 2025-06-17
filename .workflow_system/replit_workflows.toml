@@ -1,0 +1,26 @@
+
+[[workflows.workflow]]
+name = "Agent Incoming Workflow"
+author = "workflow-system"
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo '🎯 NEW AGENT ONBOARDING WORKFLOW'"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python3 codebase_summary/agent_workflow_orchestrator.py incoming"
+
+[[workflows.workflow]]
+name = "Agent Outgoing Workflow"
+author = "workflow-system"
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo '🚀 OUTGOING AGENT HANDOFF WORKFLOW'"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python3 codebase_summary/agent_workflow_orchestrator.py outgoing --summary \"Session summary\" --type completed"

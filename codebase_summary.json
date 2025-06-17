@@ -1,0 +1,491 @@
+{
+  "project_name": "Arkival",
+  "version": "1.1.371",
+  "updated_at": "2025-06-17T07:16:42.215934Z",
+  "description": "AI Agent Workflow Orchestration System with Claude Code multi-agent collaboration",
+  "main_dependencies": {
+    "runtime": [
+      "@anthropic-ai/claude-code"
+    ],
+    "development": [],
+    "system": []
+  },
+  "project_structure": {
+    "total_files": 46,
+    "directories": [
+      "client_templates",
+      "codebase_summary",
+      "codebase_summary/checkpoints",
+      ".workflow_system",
+      ".upm",
+      ".claude",
+      ".claude/commands",
+      ".config",
+      ".config/npm",
+      ".config/npm/node_global",
+      ".config/npm/node_global/lib",
+      ".config/npm/node_global/bin",
+      "modules",
+      "modules/claude-code"
+    ],
+    "file_types": {
+      ".json": 10,
+      "": 4,
+      ".md": 19,
+      ".backup": 1,
+      ".toml": 2,
+      ".lock": 1,
+      ".py": 7,
+      ".tsx": 1,
+      ".js": 1
+    },
+    "key_files": [
+      "package.json",
+      ".gitignore",
+      "LICENSE",
+      "README.md",
+      "package-lock.json",
+      ".replit",
+      "modules/claude-code/README.md"
+    ],
+    "technology_indicators": {
+      "frontend": [
+        "package.json",
+        "package.json.backup"
+      ],
+      "backend": [
+        "setup_workflow_system.py",
+        "validate_deployment.py",
+        "codebase_summary/agent_workflow_orchestrator.py",
+        "codebase_summary/update_changelog.py",
+        "codebase_summary/update_project_summary.py",
+        "codebase_summary/missing_breadcrumbs.json",
+        "codebase_summary/msgs.md",
+        "codebase_summary/checkpoints/checkpoint_log.md"
+      ],
+      "ai_integration": [
+        ".claude/settings.local.json",
+        ".claude/commands/analyze.md",
+        ".claude/commands/refactor.md",
+        ".claude/commands/test.md",
+        ".claude/commands/document.md",
+        ".config/npm/node_global/bin/claude",
+        "modules/claude-code/claude_bridge.py",
+        "modules/claude-code/CLAUDE_BRIDGE_GUIDE.md",
+        "modules/claude-code/msg.py",
+        "modules/claude-code/msgs.md",
+        "modules/claude-code/README.md"
+      ],
+      "database": [],
+      "rust_integration": [],
+      "deployment": [
+        ".replit"
+      ],
+      "testing": [],
+      "documentation": [
+        "SECURITY.md",
+        "CHANGELOG.md",
+        "README.md",
+        "AGENT_GUIDE.md",
+        "CONTRIBUTING.md",
+        "SETUP_GUIDE.md",
+        "ARCHITECTURE_DIAGRAM.md",
+        "CODEBASE_SUMMARY.md",
+        "replit.md",
+        "msgs.md",
+        "codebase_summary/agent_workflow_orchestrator.py",
+        "codebase_summary/update_changelog.py",
+        "codebase_summary/update_project_summary.py",
+        "codebase_summary/missing_breadcrumbs.json",
+        "codebase_summary/msgs.md",
+        "codebase_summary/checkpoints/checkpoint_log.md",
+        ".claude/commands/analyze.md",
+        ".claude/commands/refactor.md",
+        ".claude/commands/test.md",
+        ".claude/commands/document.md",
+        "modules/claude-code/CLAUDE_BRIDGE_GUIDE.md",
+        "modules/claude-code/msgs.md",
+        "modules/claude-code/README.md"
+      ]
+    }
+  },
+  "code_analysis": {
+    "total_functions": 59,
+    "documented_functions": 59,
+    "missing_breadcrumbs": [],
+    "file_analysis": [
+      {
+        "file": "setup_workflow_system.py",
+        "language": ".py",
+        "function_count": 4,
+        "documented_count": 4,
+        "functions": [
+          "validate_dependencies",
+          "WorkflowSystemSetup",
+          "setup_complete_system",
+          "main"
+        ],
+        "missing_breadcrumbs": [],
+        "lines_of_code": 1083
+      },
+      {
+        "file": "validate_deployment.py",
+        "language": ".py",
+        "function_count": 3,
+        "documented_count": 3,
+        "functions": [
+          "validate_export_package",
+          "cleanup_post_deployment",
+          "main"
+        ],
+        "missing_breadcrumbs": [],
+        "lines_of_code": 201
+      },
+      {
+        "file": "client_templates/main-template.tsx",
+        "language": ".tsx",
+        "function_count": 2,
+        "documented_count": 2,
+        "functions": [
+          "errorMessage",
+          "isViteWebSocketError"
+        ],
+        "missing_breadcrumbs": [],
+        "lines_of_code": 96
+      },
+      {
+        "file": "client_templates/vite-client.js",
+        "language": ".js",
+        "function_count": 0,
+        "documented_count": 0,
+        "functions": [],
+        "missing_breadcrumbs": [],
+        "lines_of_code": 64
+      },
+      {
+        "file": "codebase_summary/agent_workflow_orchestrator.py",
+        "language": ".py",
+        "function_count": 4,
+        "documented_count": 4,
+        "functions": [
+          "AgentWorkflowOrchestrator",
+          "trigger_outgoing_agent_workflow",
+          "trigger_incoming_agent_workflow",
+          "main"
+        ],
+        "missing_breadcrumbs": [],
+        "lines_of_code": 639
+      },
+      {
+        "file": "codebase_summary/update_changelog.py",
+        "language": ".py",
+        "function_count": 16,
+        "documented_count": 16,
+        "functions": [
+          "get_project_root",
+          "load_changelog",
+          "get_codebase_version",
+          "get_checkpoint_version",
+          "increment_version_by_type",
+          "update_statistics",
+          "create_automated_checkpoint",
+          "save_changelog",
+          "cleanup_changelog",
+          "remove_duplicate_entries",
+          "archive_old_entries",
+          "create_archive_index",
+          "mark_handoff_ready",
+          "add_changelog_entry",
+          "generate_markdown_changelog"
+        ],
+        "missing_breadcrumbs": [],
+        "lines_of_code": 818
+      },
+      {
+        "file": "codebase_summary/update_project_summary.py",
+        "language": ".py",
+        "function_count": 9,
+        "documented_count": 9,
+        "functions": [
+          "get_current_version",
+          "increment_version",
+          "correlate_with_changelog",
+          "archive_previous_version",
+          "analyze_components_config",
+          "update_components_config_if_needed",
+          "EnhancedProjectSummaryGenerator",
+          "generate_summary",
+          "main"
+        ],
+        "missing_breadcrumbs": [],
+        "lines_of_code": 2262
+      },
+      {
+        "file": "modules/claude-code/claude_bridge.py",
+        "language": ".py",
+        "function_count": 19,
+        "documented_count": 19,
+        "functions": [
+          "ClaudeBridge",
+          "setup_environment",
+          "send_message",
+          "test_connection",
+          "collaborate",
+          "send_message_async",
+          "send_message_async",
+          "test_connection_async",
+          "test_connection_async",
+          "collaborate_async",
+          "collaborate_async",
+          "batch_send_async",
+          "batch_send_async",
+          "close",
+          "main"
+        ],
+        "missing_breadcrumbs": [],
+        "lines_of_code": 422
+      },
+      {
+        "file": "modules/claude-code/msg.py",
+        "language": ".py",
+        "function_count": 2,
+        "documented_count": 2,
+        "functions": [
+          "add_message",
+          "read_messages"
+        ],
+        "missing_breadcrumbs": [],
+        "lines_of_code": 58
+      }
+    ],
+    "language_breakdown": {
+      ".py": {
+        "files": 7,
+        "functions": 57
+      },
+      ".tsx": {
+        "files": 1,
+        "functions": 2
+      },
+      ".js": {
+        "files": 1,
+        "functions": 0
+      }
+    },
+    "complexity_metrics": {},
+    "missing_count": 0,
+    "coverage_percentage": 100.0
+  },
+  "core_modules": [
+    {
+      "file": "setup_workflow_system.py",
+      "language": ".py",
+      "function_count": 4,
+      "documented_count": 4,
+      "purpose": "Core functionality"
+    },
+    {
+      "file": "validate_deployment.py",
+      "language": ".py",
+      "function_count": 3,
+      "documented_count": 3,
+      "purpose": "Core functionality"
+    },
+    {
+      "file": "client_templates/main-template.tsx",
+      "language": ".tsx",
+      "function_count": 2,
+      "documented_count": 2,
+      "purpose": "Core functionality"
+    },
+    {
+      "file": "client_templates/vite-client.js",
+      "language": ".js",
+      "function_count": 0,
+      "documented_count": 0,
+      "purpose": "Core functionality"
+    },
+    {
+      "file": "codebase_summary/agent_workflow_orchestrator.py",
+      "language": ".py",
+      "function_count": 4,
+      "documented_count": 4,
+      "purpose": "Core functionality"
+    },
+    {
+      "file": "codebase_summary/update_changelog.py",
+      "language": ".py",
+      "function_count": 16,
+      "documented_count": 16,
+      "purpose": "Core functionality"
+    },
+    {
+      "file": "codebase_summary/update_project_summary.py",
+      "language": ".py",
+      "function_count": 9,
+      "documented_count": 9,
+      "purpose": "Core functionality"
+    },
+    {
+      "file": "modules/claude-code/claude_bridge.py",
+      "language": ".py",
+      "function_count": 19,
+      "documented_count": 19,
+      "purpose": "Core functionality"
+    },
+    {
+      "file": "modules/claude-code/msg.py",
+      "language": ".py",
+      "function_count": 2,
+      "documented_count": 2,
+      "purpose": "Core functionality"
+    }
+  ],
+  "routes": {
+    "total_routes": 0,
+    "by_method": {},
+    "by_category": {},
+    "routes": []
+  },
+  "frontend_structure": {
+    "components": [],
+    "hooks": [],
+    "total_components": 0,
+    "total_hooks": 0
+  },
+  "ai_integration": {
+    "providers": [
+      "Claude"
+    ],
+    "capabilities": [
+      "Text Generation"
+    ],
+    "integration_files": [
+      "/home/runner/workspace/client_templates/main-template.tsx",
+      "/home/runner/workspace/modules/claude-code/claude_bridge.py"
+    ]
+  },
+  "capabilities": [
+    "Claude Integration",
+    "Text Generation"
+  ],
+  "application_flow": [],
+  "documentation_status": {
+    "readme_exists": true,
+    "changelog_exists": true,
+    "architecture_docs": [
+      "ARCHITECTURE_DIAGRAM.md"
+    ],
+    "workflow_files": [
+      "codebase_summary/agent_workflow_orchestrator.py",
+      "codebase_summary/update_changelog.py",
+      "codebase_summary/update_project_summary.py",
+      ".replit"
+    ],
+    "api_documentation": [],
+    "deployment_guides": [
+      "SETUP_GUIDE.md"
+    ]
+  },
+  "database_readiness": {
+    "database_type": "unknown",
+    "orm_detected": false,
+    "schema_files": [],
+    "migration_files": [],
+    "readiness_score": 0
+  },
+  "architecture": {
+    "layers": [],
+    "patterns": [],
+    "dependencies": {},
+    "complexity_score": 0
+  },
+  "recent_features": {
+    "git_changes": [],
+    "new_files": [
+      "package.json",
+      ".gitignore",
+      "SECURITY.md",
+      "LICENSE",
+      "CHANGELOG.md",
+      "README.md",
+      "AGENT_GUIDE.md",
+      "CONTRIBUTING.md",
+      "SETUP_GUIDE.md",
+      "package-lock.json",
+      "pyproject.toml",
+      "uv.lock",
+      "workflow_config.json",
+      "changelog_summary.json",
+      "ARCHITECTURE_DIAGRAM.md",
+      "CODEBASE_SUMMARY.md",
+      "codebase_summary.json",
+      "setup_workflow_system.py",
+      "validate_deployment.py",
+      "replit.md",
+      ".replit",
+      ".promptignore",
+      "msgs.md",
+      "client_templates/vite-client.js",
+      "codebase_summary/update_changelog.py",
+      "codebase_summary/update_project_summary.py",
+      "codebase_summary/missing_breadcrumbs.json",
+      "codebase_summary/msgs.md",
+      "codebase_summary/history/codebase_summary_v1.1.365_20250617_064052.json",
+      "codebase_summary/history/codebase_summary_v1.1.366_20250617_070842.json",
+      "codebase_summary/history/codebase_summary_v1.1.367_20250617_071022.json",
+      "codebase_summary/history/codebase_summary_v1.1.368_20250617_071428.json",
+      "codebase_summary/history/codebase_summary_v1.1.369_20250617_071623.json",
+      "codebase_summary/history/codebase_summary_v1.1.370_20250617_071642.json",
+      "codebase_summary/checkpoints/checkpoint_log.md",
+      "documentation_assets/COMPREHENSIVE_BREADCRUMB_GUIDE.md",
+      "documentation_assets/WEBSOCKET_MITIGATION.md",
+      "documentation_assets/COMPONENTS_AUTO_UPDATE.md",
+      "documentation_assets/IDE_INTEGRATION.md",
+      "documentation_assets/REFERENCE_README.md",
+      "documentation_assets/mvp_launch_checklist_prd_v1.md",
+      "documentation_assets/workflow_assets/workflow_docs/engineering_best_practices.md",
+      "documentation_assets/workflow_assets/ai_integrations/dependency_management.md",
+      "documentation_assets/workflow_assets/ai_integrations/troubleshooting_guide.md",
+      "documentation_assets/workflow_assets/ai_integrations/ai_api_integration_guide.md",
+      "documentation_assets/workflow_assets/ai_integrations/model_provider_reference.md",
+      "documentation_assets/workflow_assets/ai_integrations/implementation_examples.md",
+      "documentation_assets/project_templates/rust_cargo_template.toml",
+      "documentation_assets/project_templates/python_pyproject_template.toml",
+      "documentation_assets/project_templates/nodejs_package_template.json",
+      "documentation_assets/project_templates/TEMPLATE_USAGE_GUIDE.md",
+      "modules/claude-code/claude_bridge.py",
+      "modules/claude-code/CLAUDE_BRIDGE_GUIDE.md",
+      "modules/claude-code/msg.py",
+      "modules/claude-code/msgs.md",
+      "modules/claude-code/README.md"
+    ],
+    "modified_files": [],
+    "feature_flags": []
+  },
+  "performance_metrics": {
+    "file_count": 46,
+    "directory_count": 14,
+    "function_density": 1.2826086956521738,
+    "documentation_coverage": 100.0,
+    "complexity_score": "medium"
+  },
+  "deployment": {
+    "platform": "Replit",
+    "start_command": "unknown",
+    "config_files": [
+      ".replit",
+      "package.json"
+    ]
+  },
+  "version_correlation": {
+    "changelog_version": "1.2.0",
+    "last_checkpoint": null,
+    "archived_at": "2025-06-17T07:16:42.216278Z",
+    "note": "Enhanced summary version is independent of changelog milestones"
+  },
+  "future_enhancements": [
+    "Complete database integration setup",
+    "Add comprehensive testing suite"
+  ]
+}

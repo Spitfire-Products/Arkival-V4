@@ -1,0 +1,39 @@
+# Cargo.toml Template for Rust Projects with Workflow System
+[package]
+name = "arkival-rust"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Core dependencies for Rust web applications
+tokio = { version = "1.0", features = ["full"] }
+reqwest = { version = "0.12", features = ["json", "rustls-tls"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+anyhow = "1.0"
+dotenv = "0.15"
+
+# Web framework dependencies (choose one)
+# actix-web = "4.0"
+# warp = "0.3"
+# axum = "0.7"
+
+# AI integration dependencies
+openai-api-rs = "5.0"
+# anthropic-sdk = { git = "https://github.com/anthropics/anthropic-sdk-rust" }
+
+# Database dependencies (optional)
+# sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres", "chrono", "uuid"] }
+# diesel = { version = "2.0", features = ["postgres", "chrono"] }
+
+[dev-dependencies]
+tokio-test = "0.4"
+
+[[bin]]
+name = "main"
+path = "src/main.rs"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1

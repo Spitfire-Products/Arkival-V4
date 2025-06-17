@@ -1,0 +1,45 @@
+{
+  "name": "arkival-nodejs",
+  "version": "1.0.0",
+  "description": "Arkival Node.js Project with Workflow System",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "test": "jest",
+    "build": "webpack --mode production",
+    "workflow:incoming": "python3 codebase_summary/agent_workflow_orchestrator.py incoming",
+    "workflow:outgoing": "python3 codebase_summary/agent_workflow_orchestrator.py outgoing",
+    "update:summary": "python3 codebase_summary/update_project_summary.py",
+    "validate:features": "python3 validate_deployment.py"
+  },
+  "dependencies": {
+    "express": "^4.18.0",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "dotenv": "^16.3.0",
+    "axios": "^1.6.0",
+    "openai": "^4.28.0",
+    "@anthropic-ai/sdk": "^0.17.0",
+    "@google/generative-ai": "^0.2.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0",
+    "jest": "^29.7.0",
+    "supertest": "^6.3.0",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "keywords": [
+    "arkival",
+    "workflow-system",
+    "ai-integration",
+    "documentation"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}

@@ -1,0 +1,41 @@
+{
+  "project_name": "New Project",
+  "project_description": "AI-powered application with workflow orchestration",
+  "version": "1.0.0",
+  "technology_stack": [
+    "Generic"
+  ],
+  "environment": {
+    "detected_ide": "replit",
+    "platform": "Linux",
+    "supports_integrated_terminal": true,
+    "supports_tasks": false
+  },
+  "workflow_settings": {
+    "auto_changelog": true,
+    "auto_documentation": true,
+    "cost_optimization": true,
+    "agent_handoff_enabled": true,
+    "ide_integration": true
+  },
+  "customization": {
+    "greeting_triggers": [
+      "hi",
+      "hello",
+      "hey"
+    ],
+    "changelog_triggers": [
+      "update the changelog",
+      "update changelog"
+    ],
+    "documentation_required": true,
+    "terminal_commands": true
+  },
+  "ide_specific": {
+    "workflow_method": "replit_workflows",
+    "terminal_integration": true,
+    "task_runner": "replit_workflows",
+    "extensions_recommended": []
+  },
+  "setup_timestamp": "2025-06-17T17:01:42.238448Z"
+}
