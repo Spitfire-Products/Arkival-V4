@@ -48,22 +48,44 @@ def find_arkival_paths():
     if not project_root:
         project_root = current_dir
     
-    # Return all paths
-    return {
-        'project_root': project_root,
-        'config_file': project_root / "arkival.config.json",
-        'arkival_dir': project_root / "Arkival",
-        'data_dir': project_root / "Arkival" / "data",
-        'scripts_dir': project_root / "Arkival" / "codebase_summary", 
-        'export_dir': project_root / "Arkival" / "export_package",
-        'checkpoints_dir': project_root / "Arkival" / "checkpoints",
-        
-        # Data files
-        'codebase_summary': project_root / "Arkival" / "data" / "codebase_summary.json",
-        'changelog_summary': project_root / "Arkival" / "data" / "changelog_summary.json",
-        'session_state': project_root / "Arkival" / "data" / "session_state.json",
-        'missing_breadcrumbs': project_root / "Arkival" / "data" / "missing_breadcrumbs.json"
-    }
+    # Determine if we're in dev mode or subdirectory mode
+    # Dev mode: scripts are in codebase_summary/, data files in root
+    # Subdirectory mode: everything under Arkival/
+    
+    if current_dir.name.lower() == 'arkival' or (project_root / "arkival_config.json").exists():
+        # Subdirectory deployment mode
+        return {
+            'project_root': project_root,
+            'config_file': project_root / "arkival_config.json",
+            'arkival_dir': project_root / "Arkival",
+            'data_dir': project_root / "Arkival" / "data",
+            'scripts_dir': project_root / "Arkival" / "codebase_summary", 
+            'export_dir': project_root / "Arkival" / "export_package",
+            'checkpoints_dir': project_root / "Arkival" / "checkpoints",
+            
+            # Data files
+            'codebase_summary': project_root / "Arkival" / "data" / "codebase_summary.json",
+            'changelog_summary': project_root / "Arkival" / "data" / "changelog_summary.json",
+            'session_state': project_root / "Arkival" / "data" / "session_state.json",
+            'missing_breadcrumbs': project_root / "Arkival" / "data" / "missing_breadcrumbs.json"
+        }
+    else:
+        # Development mode - use root directory structure
+        return {
+            'project_root': project_root,
+            'config_file': project_root / "arkival_config.json",
+            'arkival_dir': project_root,
+            'data_dir': project_root,
+            'scripts_dir': project_root / "codebase_summary", 
+            'export_dir': project_root / "export_package",
+            'checkpoints_dir': project_root / "checkpoints",
+            
+            # Data files in root/standard locations
+            'codebase_summary': project_root / "codebase_summary.json",
+            'changelog_summary': project_root / "changelog_summary.json",
+            'session_state': project_root / "codebase_summary" / "session_state.json",
+            'missing_breadcrumbs': project_root / "codebase_summary" / "missing_breadcrumbs.json"
+        }
 
 # Enhanced Features Enabled - Version 2.0
 ENHANCED_FEATURES_ENABLED = True
@@ -120,19 +142,17 @@ def load_changelog() -> Dict[str, Any]:
         }
     }
 
-def get_codebase_version() -> str:
+def get_changelog_version() -> str:
     """
-    # @codebase-summary: Codebase version extraction for correlation tracking
-    - Retrieves current version from codebase_summary.json for synchronization
+    # @codebase-summary: Independent changelog version tracking
+    - Retrieves current version from changelog_summary.json itself
+    - Completely decoupled from codebase_summary.json versioning
     - Provides fallback version handling for missing or corrupted files
-    - Used by: version correlation, changelog synchronization, deployment tracking
+    - Used by: changelog version tracking only
     """
     try:
-        project_root = get_project_root()
-        codebase_path = project_root / "codebase_summary.json"
-        with open(codebase_path, 'r', encoding='utf-8') as f:
-            codebase_data = json.load(f)
-            return codebase_data.get("version", "1.0.0")
+        changelog = load_changelog()
+        return changelog.get("changelog_version", "1.0.0")
     except:
         return "1.0.0"
 
@@ -341,8 +361,8 @@ def save_changelog(changelog: Dict[str, Any]) -> bool:
             **changelog
         }
         
-        project_root = get_project_root()
-        changelog_path = project_root / "changelog_summary.json"
+        paths = find_arkival_paths()
+        changelog_path = paths['changelog_summary']
         
         try:
             # Ensure parent directory exists
@@ -401,8 +421,10 @@ def cleanup_changelog() -> bool:
         print(f"Removed {removed_count} duplicate entries")
 
     # Correlate versions
-    codebase_version = get_codebase_version()
-    changelog["changelog_version"] = codebase_version
+    # Use existing changelog version or start at 1.0.0
+    # Do NOT tie to codebase_summary version
+    current_version = changelog.get("changelog_version", "1.0.0")
+    changelog["changelog_version"] = current_version
 
     # Update workflow integration status
     changelog["workflow_integration"]["last_workflow_trigger"] = datetime.now().isoformat() + "Z"
@@ -463,7 +485,7 @@ def archive_old_entries(changelog: Dict[str, Any], max_entries: int = 25) -> Dic
     
     # Archive old entries with timestamp and project version correlation
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    project_version = get_codebase_version()
+    project_version = get_changelog_version()
     archive_filename = f"changelog_archive_{timestamp}_v{project_version}.json"
     archive_path = os.path.join(archive_dir, archive_filename)
     
@@ -579,8 +601,9 @@ def add_changelog_entry(
     changelog = remove_duplicate_entries(changelog)
 
     # Generate next version based on change type if not provided
+    # Use the changelog's own version, not checkpoint or codebase summary
     if not version:
-        current_version = get_checkpoint_version()
+        current_version = get_changelog_version()
         try:
             parts = current_version.split('.')
             major, minor, patch = int(parts[0]), int(parts[1]), int(parts[2])
@@ -659,16 +682,9 @@ def add_changelog_entry(
         # Create automated checkpoint for significant changes using changelog version
         create_automated_checkpoint(change_type, summary, version)
 
-        # Update project summary if this is a significant change
-        if change_type in ["feature", "enhancement", "refactor"]:
-            try:
-                import subprocess
-                subprocess.run([
-                    sys.executable,
-                    "codebase_summary/update_project_summary.py"
-                ], check=False)
-            except Exception:
-                pass  # Continue if project summary update fails
+        # DO NOT automatically update project summary
+        # Codebase summaries should be run independently and frequently
+        # Changelog entries are infrequent major events
 
         # Trigger workflow if this is a handoff signal
         if "update the changelog from the last entry" in summary.lower():

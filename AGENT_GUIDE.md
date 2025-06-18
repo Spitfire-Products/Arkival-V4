@@ -4,6 +4,21 @@
 
 Arkival is a complete AI Agent Workflow Orchestration System with comprehensive multi-language function detection capabilities. The system enables seamless knowledge transfer between AI agents and human developers across different development environments.
 
+### 🚀 Deployment Modes (Auto-Detected)
+
+The system automatically detects its deployment context and adjusts behavior:
+
+**Subdirectory Mode**: When Arkival is cloned into an existing project
+- Files generated in `/Arkival/data/` subdirectory
+- Only `arkival_config.json` added to project root
+- Non-destructive integration
+
+**Development Mode**: When Arkival is the main project
+- Files generated in root and `codebase_summary/` directories
+- Full project integration
+
+**Smart Path Resolution**: All scripts use `find_arkival_paths()` to automatically determine correct file locations based on deployment context.
+
 ## Quick Start for New Agents
 
 ### 1. Validate System
@@ -19,19 +34,21 @@ python3 codebase_summary/update_project_summary.py --force
 ```
 
 ### 3. Understand Documentation Systems
-**Two independent systems serve different purposes:**
+**Two COMPLETELY INDEPENDENT systems with separate versioning:**
 
 **Codebase Summary (Run Often):**
 - Updates function documentation and breadcrumb coverage
-- Independent of project versions
-- Run frequently during development
+- **Independent versioning** (can run frequently without affecting project version)
+- Run frequently during development 
 - Tracks technical implementation details
+- Auto-increments version for analysis tracking
 
 **Changelog (Run Infrequently):**
 - Documents major changes and milestones  
-- Version controlled project evolution
-- Run for significant features or agent handoffs
-- Tracks user-facing changes
+- **Independent versioning** (decoupled from codebase summary)
+- Run for significant features or agent handoffs only
+- Tracks user-facing changes and agent session milestones
+- Manual version control for deliberate releases
 
 ### 4. Load Previous Context
 **Start with incoming workflow:**

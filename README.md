@@ -23,8 +23,27 @@ Arkival is a complete AI agent workflow orchestration system for seamless knowle
 
 ## 🚀 Quick Start
 
-### GitHub Deployment & Multi-IDE Setup
-Arkival is designed for seamless deployment to GitHub and use across multiple development environments.
+Arkival supports **two deployment modes** to fit your workflow:
+
+### 🆕 Option A: Subdirectory Integration (Non-Destructive)
+**Perfect for existing projects** - Add Arkival to any existing project without modifying your files.
+
+```bash
+# In your existing project directory
+git clone https://github.com/spitfire-products/arkival.git Arkival
+cd Arkival
+python3 setup_workflow_system.py
+```
+
+✅ **Benefits:**
+- Zero modification to your existing project files
+- Only adds `arkival_config.json` to your project root
+- All Arkival files contained in `/Arkival` subdirectory
+- Works with any existing project structure
+- Easy to remove if needed
+
+### Option B: GitHub Deployment & Multi-IDE Setup
+**For new projects or dedicated Arkival environments** - Full development environment setup.
 
 #### 1. Deploy to GitHub
 ```bash
@@ -36,7 +55,10 @@ cd arkival
 ```bash
 python3 setup_workflow_system.py
 ```
-**The setup script automatically detects your current IDE** and creates appropriate configuration files.
+**The setup script automatically detects:**
+- Your current IDE (VS Code, Replit, etc.)
+- Deployment mode (subdirectory vs standalone)
+- Project structure and creates appropriate configuration files
 
 #### 3. Switch Between IDEs Seamlessly
 **Working in VS Code:**
@@ -87,7 +109,22 @@ The system maintains complete session continuity when switching environments:
 - **Components.json** (shadcn/ui): Auto-detection and validation included
 - **Custom Configuration**: Update `workflow_config.json` with your tech stack
 
-#### 7. Validation & Testing
+#### 7. How Deployment Modes Work
+
+**Subdirectory Mode** (Option A):
+- Creates `arkival_config.json` in your project root
+- All generated files go to `/Arkival/data/` subdirectory
+- Scripts automatically detect subdirectory deployment
+- Your project files remain completely untouched
+
+**Development Mode** (Option B):
+- Generated files go to project root and `codebase_summary/`
+- Full integration with project structure
+- Ideal for dedicated Arkival development
+
+**Smart Path Resolution**: All scripts automatically detect which mode they're running in and adjust file paths accordingly.
+
+#### 8. Validation & Testing
 ```bash
 python3 validate_deployment.py  # Verify system integrity
 ```

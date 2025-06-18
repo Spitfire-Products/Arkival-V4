@@ -1,11 +1,48 @@
 # Workflow System Setup Guide - Cross-Platform
 
+## 🚀 Deployment Modes
+
+Arkival supports **two deployment modes** that are automatically detected:
+
+### 🆕 Subdirectory Mode (Non-Destructive Integration)
+**When it activates**: You clone Arkival into an existing project as a subdirectory
+```bash
+# In your existing project root
+git clone https://github.com/spitfire-products/arkival.git Arkival
+cd Arkival
+python3 setup_workflow_system.py
+```
+
+**What happens**:
+- ✅ Only `arkival_config.json` is added to your project root
+- ✅ All Arkival files remain in `/Arkival` subdirectory  
+- ✅ Generated files go to `/Arkival/data/` (not your project root)
+- ✅ Your existing project files are **never modified**
+- ✅ Easy to remove if needed
+
+### Development Mode (Full Integration)
+**When it activates**: You clone Arkival as the main project
+```bash
+git clone https://github.com/spitfire-products/arkival.git
+cd arkival
+python3 setup_workflow_system.py
+```
+
+**What happens**:
+- Generated files go to project root and `codebase_summary/`
+- Full integration with project structure
+- Ideal for dedicated Arkival development
+
 ## Quick Start
-1. Run the setup script to auto-detect your IDE: `python3 setup_workflow_system.py`
-2. The workflow system will be automatically configured for your environment
-3. **Environment-specific files are generated locally** (not included in GitHub repo)
-4. Test the system by running the incoming workflow
-5. Begin development with full agent handoff support
+1. Choose your deployment mode (see above) and clone Arkival
+2. Run the setup script: `python3 setup_workflow_system.py`
+   - **Automatically detects** your IDE and deployment mode
+   - **Creates appropriate configuration** for your environment
+   - **Generates IDE-specific files** (gitignored, won't clutter repos)
+3. Test the system by running the incoming workflow
+4. Begin development with full agent handoff support
+
+**Path Intelligence**: All scripts automatically detect which mode they're running in and adjust file paths accordingly.
 
 ## Environment-Specific File Generation
 

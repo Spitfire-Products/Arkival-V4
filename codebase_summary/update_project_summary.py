@@ -60,22 +60,44 @@ def find_arkival_paths():
     if not project_root:
         project_root = current_dir
     
-    # Return all paths
-    return {
-        'project_root': project_root,
-        'config_file': project_root / "arkival.config.json",
-        'arkival_dir': project_root / "Arkival",
-        'data_dir': project_root / "Arkival" / "data",
-        'scripts_dir': project_root / "Arkival" / "codebase_summary", 
-        'export_dir': project_root / "Arkival" / "export_package",
-        'checkpoints_dir': project_root / "Arkival" / "checkpoints",
-        
-        # Data files
-        'codebase_summary': project_root / "Arkival" / "data" / "codebase_summary.json",
-        'changelog_summary': project_root / "Arkival" / "data" / "changelog_summary.json",
-        'session_state': project_root / "Arkival" / "data" / "session_state.json",
-        'missing_breadcrumbs': project_root / "Arkival" / "data" / "missing_breadcrumbs.json"
-    }
+    # Determine if we're in dev mode or subdirectory mode
+    # Dev mode: scripts are in codebase_summary/, data files in root
+    # Subdirectory mode: everything under Arkival/
+    
+    if current_dir.name.lower() == 'arkival' or (project_root / "arkival_config.json").exists():
+        # Subdirectory deployment mode
+        return {
+            'project_root': project_root,
+            'config_file': project_root / "arkival_config.json",
+            'arkival_dir': project_root / "Arkival",
+            'data_dir': project_root / "Arkival" / "data",
+            'scripts_dir': project_root / "Arkival" / "codebase_summary", 
+            'export_dir': project_root / "Arkival" / "export_package",
+            'checkpoints_dir': project_root / "Arkival" / "checkpoints",
+            
+            # Data files
+            'codebase_summary': project_root / "Arkival" / "data" / "codebase_summary.json",
+            'changelog_summary': project_root / "Arkival" / "data" / "changelog_summary.json",
+            'session_state': project_root / "Arkival" / "data" / "session_state.json",
+            'missing_breadcrumbs': project_root / "Arkival" / "data" / "missing_breadcrumbs.json"
+        }
+    else:
+        # Development mode - use root directory structure
+        return {
+            'project_root': project_root,
+            'config_file': project_root / "arkival_config.json",
+            'arkival_dir': project_root,
+            'data_dir': project_root,
+            'scripts_dir': project_root / "codebase_summary", 
+            'export_dir': project_root / "export_package",
+            'checkpoints_dir': project_root / "checkpoints",
+            
+            # Data files in root/standard locations
+            'codebase_summary': project_root / "codebase_summary.json",
+            'changelog_summary': project_root / "changelog_summary.json",
+            'session_state': project_root / "codebase_summary" / "session_state.json",
+            'missing_breadcrumbs': project_root / "codebase_summary" / "missing_breadcrumbs.json"
+        }
 
 def get_current_version():
     """
@@ -314,7 +336,8 @@ class EnhancedProjectSummaryGenerator:
         self.project_root = self.paths['project_root']
         self.summary_path = self.paths['codebase_summary']  # Output to Arkival/data/
         self.config_path = self.paths['config_file']  # arkival.config.json
-        self.history_dir = self.paths['data_dir'] / "history"
+        # History files always go to codebase_summary/history regardless of mode
+        self.history_dir = self.paths['scripts_dir'] / "history"
 
     def generate_summary(self, enable_fix_components=False):
         """
@@ -2124,6 +2147,13 @@ class EnhancedProjectSummaryGenerator:
 
 *Core project documentation system*
 
+## 🚀 Deployment Architecture
+
+This system supports **dual deployment modes** with universal path resolution:
+- **Development Mode**: Full integration with project root file structure
+- **Subdirectory Mode**: Non-destructive integration as `/Arkival` subdirectory
+- **Universal Path Resolution**: Automatic detection and path adjustment via `find_arkival_paths()`
+
 ## 📊 Project Overview
 
 ### Technology Stack
@@ -2361,6 +2391,15 @@ graph TB
         A --> E
     end
 
+    subgraph "🚀 Deployment Modes"
+        MODE1[Development Mode]
+        MODE2[Subdirectory Mode]
+        PATH[Universal Path Resolution]
+        
+        MODE1 --> PATH
+        MODE2 --> PATH
+    end
+
     subgraph "🔧 Enhanced Features"
         F[Multi-language Analysis]
         G[AI Integration Detection] 
@@ -2374,6 +2413,7 @@ graph TB
     E --> H
     E --> I
     E --> J
+    PATH --> E
 ```
 
 ## Technology Stack Analysis
@@ -2437,6 +2477,54 @@ flowchart TD
     class A1,A2,A3,A4 workflow
     class B1,B2,B3,B4 analysis
     class C1,C2,C3,C4 output
+```
+
+## Deployment Architecture
+```mermaid
+flowchart LR
+    subgraph "🔧 Development Mode"
+        DEV1[Project Root]
+        DEV2[codebase_summary.json]
+        DEV3[changelog_summary.json]
+        DEV4[codebase_summary/ directory]
+        
+        DEV1 --> DEV2
+        DEV1 --> DEV3
+        DEV1 --> DEV4
+    end
+    
+    subgraph "🆕 Subdirectory Mode"
+        SUB1[Project Root]
+        SUB2[arkival_config.json]
+        SUB3[Arkival/ directory]
+        SUB4[Arkival/data/ files]
+        
+        SUB1 --> SUB2
+        SUB1 --> SUB3
+        SUB3 --> SUB4
+    end
+    
+    subgraph "🧠 Universal Path Resolution"
+        DETECT[Auto-Detection Logic]
+        CONFIG[find_arkival_paths()]
+        PATHS[Dynamic Path Assignment]
+        
+        DETECT --> CONFIG
+        CONFIG --> PATHS
+    end
+    
+    DEV1 --> DETECT
+    SUB1 --> DETECT
+    PATHS --> DEV2
+    PATHS --> SUB4
+    
+    classDef dev fill:#e3f2fd,stroke:#1976d2
+    classDef sub fill:#f3e5f5,stroke:#7b1fa2
+    classDef path fill:#e8f5e8,stroke:#388e3c
+    
+    class DEV1,DEV2,DEV3,DEV4 dev
+    class SUB1,SUB2,SUB3,SUB4 sub
+    class DETECT,CONFIG,PATHS path
 ```
 
 ## Enhanced Documentation Coverage
