@@ -56,7 +56,7 @@ class WorkflowSystemSetup:
         arkival_dir = self.package_root
         
         # Check if we're running from within a cloned Arkival directory
-        if current_dir.name.lower() == 'arkival' and current_dir.parent != current_dir:
+        if current_dir.name.lower() in ['arkival', 'arkival-v4'] and current_dir.parent != current_dir:
             # We're in /Arkival folder - this is existing project integration
             print("🔍 Detected: Running from cloned Arkival directory")
             return 'existing_project_integration'
@@ -91,7 +91,7 @@ class WorkflowSystemSetup:
         current_dir = Path.cwd()
         
         # If we're in /Arkival folder, the project root is the parent directory
-        if current_dir.name.lower() == 'arkival' and self.deployment_context == 'existing_project_integration':
+        if current_dir.name.lower() in ['arkival', 'arkival-v4'] and self.deployment_context == 'existing_project_integration':
             return current_dir.parent  # Parent directory is the actual project root
         else:
             return current_dir  # For new projects or source development
@@ -243,13 +243,16 @@ class WorkflowSystemSetup:
             # Step 3: Create integration-friendly configuration
             self._create_integration_config()
             
-            # Step 4: Set up arkival-specific changelog
+            # Step 4: Create arkival_config.json trigger file
+            self._create_arkival_config()
+            
+            # Step 5: Set up arkival-specific changelog
             self._initialize_arkival_changelog()
             
-            # Step 5: Create integration documentation
+            # Step 6: Create integration documentation
             self._create_integration_documentation()
             
-            # Step 6: Validate integration
+            # Step 7: Validate integration
             self._validate_integration()
 
             print("\n✅ ARKIVAL INTEGRATION COMPLETED!")
@@ -379,6 +382,33 @@ class WorkflowSystemSetup:
             print(f"⚙️  Created arkival/workflow_config.json")
         except Exception as e:
             print(f"❌ Failed to create integration config: {e}")
+    
+    def _create_arkival_config(self):
+        """Create arkival_config.json trigger file in project root"""
+        try:
+            # Simple trigger file for subdirectory mode detection
+            config = {
+                "arkival_integration": True,
+                "version": "4.0",
+                "deployment_mode": "subdirectory",
+                "arkival_directory": "arkival",
+                "created_at": datetime.datetime.now().isoformat(),
+                "note": "This file enables Arkival subdirectory mode detection"
+            }
+            
+            config_path = self.project_root / "arkival_config.json"
+            
+            # SAFETY CHECK: Don't overwrite existing config
+            if config_path.exists():
+                print("⏭️  Skipping arkival_config.json - already exists")
+                return
+            
+            with open(config_path, 'w', encoding='utf-8') as f:
+                json.dump(config, f, indent=2)
+            print("⚙️  Created arkival_config.json (enables subdirectory mode)")
+            
+        except Exception as e:
+            print(f"❌ Failed to create arkival_config.json: {e}")
 
     def _initialize_arkival_changelog(self):
         """
@@ -689,14 +719,16 @@ Existing directories preserved:
 
     def _setup_ide_workflows(self):
         """Set up IDE-specific workflow configurations"""
+        # Always create shell scripts as fallback
+        self._setup_shell_scripts()
+        
+        # Then create IDE-specific configurations
         if self.detected_ide == 'replit':
             self._setup_replit_workflows()
         elif self.detected_ide in ['vscode', 'cursor', 'codespaces']:
             self._setup_vscode_tasks()
         elif self.detected_ide == 'gitpod':
             self._setup_gitpod_tasks()
-        else:
-            self._setup_shell_scripts()
 
     def _setup_replit_workflows(self):
         """Set up Replit workflows with proper .replit file integration"""
@@ -1056,10 +1088,60 @@ python3 codebase_summary/update_changelog.py add --summary "$1"
                 json.dump(codebase_summary, f, indent=2)
             print("📊 Created codebase_summary.json")
 
-    def _create_community_standards_files(self):
-        """Create GitHub community standards files"""
-        # Create .gitignore
-        gitignore_content = """# Dependencies
+    def _handle_gitignore(self):
+        """Handle .gitignore file - merge with existing or create new"""
+        arkival_gitignore_entries = """
+# Arkival-specific entries
+# =======================
+
+# Generated JSON files (should not be committed)
+codebase_summary.json
+changelog_summary.json
+codebase_summary/session_state.json
+codebase_summary/agent_handoff.json
+codebase_summary/missing_breadcrumbs.json
+export_package/agent_handoff.json
+
+# Arkival data directory (subdirectory mode)
+Arkival/data/
+
+# Arkival documentation (kept separate from project docs)
+arkival_docs/
+
+# IDE-specific files (generated during setup)
+.replit
+.gitpod.yml
+
+# Environment-specific workflow files
+.workflow_system/
+
+# System files
+codebase_summary/history/
+
+# Node.js files (not needed for Python project)
+package.json
+package-lock.json
+"""
+        
+        gitignore_path = self.project_root / ".gitignore"
+        
+        if gitignore_path.exists():
+            # Read existing .gitignore
+            with open(gitignore_path, 'r', encoding='utf-8') as f:
+                existing_content = f.read()
+            
+            # Check if Arkival entries already exist
+            if "Arkival-specific entries" in existing_content:
+                print("✅ .gitignore already contains Arkival entries")
+                return
+            
+            # Append Arkival entries to existing .gitignore
+            with open(gitignore_path, 'a', encoding='utf-8') as f:
+                f.write("\n" + arkival_gitignore_entries)
+            print("📝 Appended Arkival entries to existing .gitignore")
+        else:
+            # Create new .gitignore with standard entries plus Arkival entries
+            standard_gitignore = """# Dependencies
 node_modules/
 __pycache__/
 *.pyc
@@ -1069,20 +1151,6 @@ __pycache__/
 env/
 venv/
 .venv/
-pip-log.txt
-pip-delete-this-directory.txt
-.tox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.log
-.git
-.mypy_cache
-.pytest_cache
-.hypothesis
 
 # IDE
 .vscode/
@@ -1104,51 +1172,36 @@ Thumbs.db
 dist/
 build/
 *.egg-info/
-.parcel-cache/
 
 # Environment variables
 .env
 .env.local
-.env.development.local
-.env.test.local
-.env.production.local
+
+# Logs
+logs/
+*.log
 
 # Temporary files
 *.tmp
 *.temp
 .tmp/
 temp/
-
-# Logs
-logs/
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Runtime data
-pids/
-*.pid
-*.seed
-*.pid.lock
-
-# System files
-.workflow_system/logs/
-.workflow_system/backups/
-codebase_summary/history/
 """
-
-        gitignore_path = self.project_root / ".gitignore"
-        
-        # SAFETY CHECK: Never overwrite existing .gitignore
-        if gitignore_path.exists():
-            print("⏭️  Skipping .gitignore - already exists (preserving existing file)")
-        else:
+            
             with open(gitignore_path, 'w', encoding='utf-8') as f:
-                f.write(gitignore_content)
-            print("📄 Created .gitignore")
+                f.write(standard_gitignore + arkival_gitignore_entries)
+            print("📄 Created .gitignore with Arkival entries")
 
-        # Create LICENSE (Attribution to Spitfire Products)
+    def _create_community_standards_files(self):
+        """Create GitHub community standards files"""
+        # Handle .gitignore - merge with existing or create new
+        self._handle_gitignore()
+
+        # Create arkival_docs directory if not exists
+        arkival_docs_dir = self.project_root / "arkival_docs"
+        arkival_docs_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Create LICENSE (Attribution to Spitfire Products) in arkival_docs
         license_content = """Attribution License
 
 Copyright (c) 2025 Spitfire Products
@@ -1183,17 +1236,17 @@ Original work by Spitfire Products
 Arkival - AI Agent Workflow Orchestration System
 """
 
-        license_path = self.project_root / "LICENSE"
+        # Place Arkival LICENSE in arkival_docs folder
+        arkival_license_path = arkival_docs_dir / "ARKIVAL_LICENSE"
         
-        # SAFETY CHECK: Never overwrite existing LICENSE
-        if license_path.exists():
-            print("⏭️  Skipping LICENSE - already exists (preserving existing file)")
+        if arkival_license_path.exists():
+            print("⏭️  Skipping arkival_docs/ARKIVAL_LICENSE - already exists")
         else:
-            with open(license_path, 'w', encoding='utf-8') as f:
+            with open(arkival_license_path, 'w', encoding='utf-8') as f:
                 f.write(license_content)
-            print("📄 Created LICENSE")
+            print("📄 Created arkival_docs/ARKIVAL_LICENSE")
 
-        # Create CONTRIBUTING.md
+        # Create CONTRIBUTING.md in arkival_docs
         contributing_content = """# Contributing to Arkival
 
 Thank you for your interest in contributing! Arkival enables seamless knowledge transfer between AI agents and human developers across different development environments.
@@ -1272,15 +1325,15 @@ python3 validate_deployment.py
 Thank you for contributing to making AI agent workflows more efficient!
 """
 
-        contributing_path = self.project_root / "CONTRIBUTING.md"
+        # Place CONTRIBUTING.md in arkival_docs folder
+        arkival_contributing_path = arkival_docs_dir / "ARKIVAL_CONTRIBUTING.md"
         
-        # SAFETY CHECK: Never overwrite existing CONTRIBUTING.md
-        if contributing_path.exists():
-            print("⏭️  Skipping CONTRIBUTING.md - already exists (preserving existing file)")
+        if arkival_contributing_path.exists():
+            print("⏭️  Skipping arkival_docs/ARKIVAL_CONTRIBUTING.md - already exists")
         else:
-            with open(contributing_path, 'w', encoding='utf-8') as f:
+            with open(arkival_contributing_path, 'w', encoding='utf-8') as f:
                 f.write(contributing_content)
-            print("📄 Created CONTRIBUTING.md")
+            print("📄 Created arkival_docs/ARKIVAL_CONTRIBUTING.md")
 
         # Create SECURITY.md
         security_content = """# Security Policy
@@ -1339,15 +1392,15 @@ When using this system:
 Thank you for helping keep Arkival secure!
 """
 
-        security_path = self.project_root / "SECURITY.md"
+        # Place SECURITY.md in arkival_docs folder
+        arkival_security_path = arkival_docs_dir / "ARKIVAL_SECURITY.md"
         
-        # SAFETY CHECK: Never overwrite existing SECURITY.md
-        if security_path.exists():
-            print("⏭️  Skipping SECURITY.md - already exists (preserving existing file)")
+        if arkival_security_path.exists():
+            print("⏭️  Skipping arkival_docs/ARKIVAL_SECURITY.md - already exists")
         else:
-            with open(security_path, 'w', encoding='utf-8') as f:
+            with open(arkival_security_path, 'w', encoding='utf-8') as f:
                 f.write(security_content)
-            print("📄 Created SECURITY.md")
+            print("📄 Created arkival_docs/ARKIVAL_SECURITY.md")
 
         # Summary message handled by individual file creation
 

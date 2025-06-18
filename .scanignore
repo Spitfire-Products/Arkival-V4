@@ -1,0 +1,97 @@
+# Arkival Codebase Scanner - Ignore Configuration
+# Lines starting with # are comments
+# Supports glob patterns and directory exclusions
+# Case-sensitive matching
+
+# ====== PERFORMANCE EXCLUSIONS ======
+# Large directories that slow down scanning
+node_modules/
+.git/
+__pycache__/
+.cache/
+.vscode/
+.idea/
+.DS_Store
+
+# ====== DEPENDENCY DIRECTORIES ======
+# Package managers and build artifacts
+vendor/
+build/
+dist/
+target/
+bin/
+obj/
+out/
+.next/
+.nuxt/
+
+# ====== TEMPORARY & LOG FILES ======
+# Temporary files and logs
+*.tmp
+*.temp
+*.log
+*.lock
+.env
+.env.local
+.env.production
+
+# ====== ARCHIVED & BACKUP FILES ======
+# Archives and backups
+*.zip
+*.tar.gz
+*.rar
+*.7z
+*.backup
+*.bak
+
+# ====== LARGE ASSET DIRECTORIES ======
+# Media and asset folders that don't contain code
+assets/images/
+public/uploads/
+media/
+uploads/
+static/images/
+images/
+videos/
+audio/
+
+# ====== DATABASE & DATA FILES ======
+# Database files and large datasets
+*.db
+*.sqlite
+*.sqlite3
+*.mdb
+data/dumps/
+*.csv
+*.json
+*.xml
+
+# ====== COMPILED & GENERATED CODE ======
+# Auto-generated and compiled files
+*.min.js
+*.min.css
+coverage/
+test-results/
+.pytest_cache/
+.coverage
+
+# ====== DOCUMENTATION BUILD OUTPUTS ======
+# Generated documentation
+docs/_build/
+docs/build/
+site/
+_site/
+
+# ====== CUSTOM PROJECT EXCLUSIONS ======
+# Add your project-specific exclusions below:
+
+# Example:
+# legacy_code/
+# deprecated/
+# third_party/
+
+# ====== ARKIVAL INTERNAL FILES ======
+# Don't scan Arkival's own internals in subdirectory mode
+Arkival/.git/
+Arkival/__pycache__/
+Arkival/.cache/

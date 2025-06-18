@@ -39,7 +39,6 @@
     ],
     "configuration": [
       "workflow_config.json",
-      "package.json",
       "changelog_summary.json",
       "codebase_summary.json"
     ],
@@ -50,7 +49,6 @@
     "documentation": [
       "README.md",
       "SETUP_GUIDE.md",
-      "PROJECT_CONFIG.md",
       "AGENT_GUIDE.md",
       "CONTRIBUTING.md",
       "SECURITY.md",

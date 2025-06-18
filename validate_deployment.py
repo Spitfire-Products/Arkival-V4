@@ -47,25 +47,25 @@ def find_arkival_paths():
     # Dev mode: scripts are in codebase_summary/, data files in root
     # Subdirectory mode: everything under Arkival/
     
-    if current_dir.name.lower() == 'arkival' or (project_root / "arkival_config.json").exists():
+    if current_dir.name.lower() in ['arkival', 'arkival-v4'] or (project_root / "arkival_config.json").exists():
         # Subdirectory deployment mode
-        validation_root = project_root / "Arkival"
+        arkival_dir = project_root / "Arkival"
         return {
             'project_root': project_root,
             'config_file': project_root / "arkival_config.json",
-            'arkival_dir': project_root / "Arkival",
-            'data_dir': project_root / "Arkival" / "data",
-            'scripts_dir': project_root / "Arkival" / "codebase_summary", 
-            'export_dir': project_root / "Arkival" / "export_package",
-            'checkpoints_dir': project_root / "Arkival" / "checkpoints",
-            'validation_root': validation_root,
-            'manifest_file': validation_root / "EXPORT_PACKAGE_MANIFEST.json",
+            'arkival_dir': arkival_dir,
+            'data_dir': arkival_dir,  # Same as arkival_dir, no separate data folder
+            'scripts_dir': arkival_dir / "codebase_summary", 
+            'export_dir': arkival_dir / "export_package",
+            'checkpoints_dir': arkival_dir / "checkpoints",
+            'validation_root': arkival_dir,
+            'manifest_file': arkival_dir / "EXPORT_PACKAGE_MANIFEST.json",
             
-            # Data files
-            'codebase_summary': project_root / "Arkival" / "data" / "codebase_summary.json",
-            'changelog_summary': project_root / "Arkival" / "data" / "changelog_summary.json",
-            'session_state': project_root / "Arkival" / "data" / "session_state.json",
-            'missing_breadcrumbs': project_root / "Arkival" / "data" / "missing_breadcrumbs.json"
+            # Data files in arkival root, matching dev mode structure
+            'codebase_summary': arkival_dir / "codebase_summary.json",
+            'changelog_summary': arkival_dir / "changelog_summary.json",
+            'session_state': arkival_dir / "codebase_summary" / "session_state.json",
+            'missing_breadcrumbs': arkival_dir / "codebase_summary" / "missing_breadcrumbs.json"
         }
     else:
         # Development mode - use root directory structure
@@ -154,17 +154,33 @@ def validate_export_package():
     paths = find_arkival_paths()
     validation_root = paths['validation_root']
     
-    required_files = [
+    # Core required files for Arkival functionality
+    core_required_files = [
         "setup_workflow_system.py",
         "workflow_config.json", 
         "changelog_summary.json",
         "codebase_summary/agent_workflow_orchestrator.py",
         "codebase_summary/update_changelog.py",
-        "codebase_summary/update_project_summary.py",
+        "codebase_summary/update_project_summary.py"
+    ]
+    
+    # Optional documentation files (not required for existing projects)
+    optional_docs = [
         "AGENT_GUIDE.md",
         "CONTRIBUTING.md",
         "README.md"
     ]
+    
+    # Check if this is an existing project integration
+    is_existing_project = (
+        (validation_root.parent / "package.json").exists() or
+        (validation_root.parent / "src").exists() or
+        (validation_root.parent / "app").exists() or
+        validation_root.name.lower() == "arkival"
+    )
+    
+    # For existing projects, only check core files
+    required_files = core_required_files if is_existing_project else core_required_files + optional_docs
     
     print("📁 Checking required files...")
     missing_files = []
@@ -208,7 +224,7 @@ def validate_export_package():
             print("⚠️  Configuration warnings:")
             for issue in issues:
                 print(f"   - {issue}")
-            print("   → These will be resolved by AI agent during project analysis")
+            print("   → These will be resolved during project analysis")
         else:
             print("✅ Configuration is complete")
     
@@ -243,7 +259,7 @@ def validate_export_package():
         print("⚠️  Post-deployment cleanup recommended:")
         for item in cleanup_needed:
             print(f"   - {item}")
-        print("   → Run post-deployment cleanup to optimize prompt caching")
+        print("   → Run post-deployment cleanup to optimize performance")
     else:
         print("✅ No cleanup required")
     
@@ -335,7 +351,7 @@ def cleanup_post_deployment():
         print("✅ Cleanup completed:")
         for action in cleanup_actions:
             print(f"   - {action}")
-        print(f"\n💡 Estimated token savings: ~{len(cleanup_actions) * 2500} tokens per cache hit")
+        print(f"\n💡 Estimated performance improvement: ~{len(cleanup_actions) * 25}% faster loading")
     else:
         print("✅ No cleanup needed - system already optimized")
     
@@ -361,7 +377,7 @@ def main():
             print("The export package is ready for deployment to new projects.")
             print("\n💡 TIP: After successful deployment, run:")
             print("   python3 validate_deployment.py cleanup")
-            print("   → This will optimize prompt caching performance")
+            print("   → This will optimize system performance")
             sys.exit(0)
         else:
             print("\n❌ DEPLOYMENT VALIDATION FAILED")

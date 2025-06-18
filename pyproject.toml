@@ -1,7 +1,7 @@
 [project]
-name = "repl-nix-workspace"
-version = "0.1.0"
-description = "Add your description here"
+name = "Arkival"
+version = "1.1.20"
+description = "AI Agent Workflow Orchestration System for seamless knowledge transfer between AI agents and human developers"
 requires-python = ">=3.11"
 dependencies = [
     "pyyaml>=6.0.2",

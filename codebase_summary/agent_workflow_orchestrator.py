@@ -48,22 +48,23 @@ def find_arkival_paths():
     # Dev mode: scripts are in codebase_summary/, data files in root
     # Subdirectory mode: everything under Arkival/
     
-    if current_dir.name.lower() == 'arkival' or (project_root / "arkival_config.json").exists():
+    if current_dir.name.lower() in ['arkival', 'arkival-v4'] or (project_root / "arkival_config.json").exists():
         # Subdirectory deployment mode
+        arkival_dir = project_root / "Arkival"
         return {
             'project_root': project_root,
             'config_file': project_root / "arkival_config.json",
-            'arkival_dir': project_root / "Arkival",
-            'data_dir': project_root / "Arkival" / "data",
-            'scripts_dir': project_root / "Arkival" / "codebase_summary", 
-            'export_dir': project_root / "Arkival" / "export_package",
-            'checkpoints_dir': project_root / "Arkival" / "checkpoints",
+            'arkival_dir': arkival_dir,
+            'data_dir': arkival_dir,  # Same as arkival_dir, no separate data folder
+            'scripts_dir': arkival_dir / "codebase_summary", 
+            'export_dir': arkival_dir / "export_package",
+            'checkpoints_dir': arkival_dir / "checkpoints",
             
-            # Data files
-            'codebase_summary': project_root / "Arkival" / "data" / "codebase_summary.json",
-            'changelog_summary': project_root / "Arkival" / "data" / "changelog_summary.json",
-            'session_state': project_root / "Arkival" / "data" / "session_state.json",
-            'missing_breadcrumbs': project_root / "Arkival" / "data" / "missing_breadcrumbs.json"
+            # Data files in arkival root, matching dev mode structure
+            'codebase_summary': arkival_dir / "codebase_summary.json",
+            'changelog_summary': arkival_dir / "changelog_summary.json",
+            'session_state': arkival_dir / "codebase_summary" / "session_state.json",
+            'missing_breadcrumbs': arkival_dir / "codebase_summary" / "missing_breadcrumbs.json"
         }
     else:
         # Development mode - use root directory structure
@@ -694,7 +695,8 @@ class AgentWorkflowOrchestrator:
         - Provides migration status and guidance for documentation updates
         - Used by: agent onboarding, documentation compliance, best practices enforcement
         """
-        best_practices_file = self.paths['project_root'] / "ENGINEERING_BEST_PRACTICES.md"
+        # Engineering best practices is in documentation_assets
+        best_practices_file = self.paths['project_root'] / "documentation_assets" / "workflow_assets" / "workflow_docs" / "engineering_best_practices.md"
         old_onboarding_docs = self.paths['project_root'] / "reference_assets" / "old_onboarding_docs"
 
         file_exists = os.path.exists(best_practices_file)
@@ -707,7 +709,7 @@ class AgentWorkflowOrchestrator:
             "documentation_migration_status": {
                 "use_current_docs": True,
                 "deprecated_folder": "reference_assets/old_onboarding_docs/",
-                "migration_note": "Use ENGINEERING_BEST_PRACTICES.md and DEVELOPER_ONBOARDING.md instead"
+                "migration_note": "Use documentation_assets/workflow_assets/workflow_docs/engineering_best_practices.md and DEVELOPER_ONBOARDING.md instead"
             }
         }
 
