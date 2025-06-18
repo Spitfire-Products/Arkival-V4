@@ -184,6 +184,19 @@ def cleanup_post_deployment():
     print("🧹 POST-DEPLOYMENT CLEANUP")
     print("=" * 40)
     
+    # Check if this is the source repository (has development marker files)
+    is_source_repo = (
+        Path("EXPORT_PACKAGE_MANIFEST.json").exists() or
+        Path(".github").exists() or
+        Path("reference_assets").exists()
+    )
+    
+    if is_source_repo:
+        print("🔍 DETECTED SOURCE REPOSITORY - SIMULATION MODE")
+        print("   → Cleanup actions will be simulated, not executed")
+        print("   → This preserves development files in the main repo")
+        print("")
+    
     cleanup_actions = []
     
     # Remove language scan test files
@@ -193,23 +206,44 @@ def cleanup_post_deployment():
         if test_files:
             try:
                 import shutil
-                shutil.rmtree(test_dir)
-                cleanup_actions.append(f"Removed {len(test_files)} language test files")
+                if is_source_repo:
+                    # Simulation mode - don't actually delete
+                    print(f"🎭 SIMULATION: Would remove {len(test_files)} language test files")
+                    cleanup_actions.append(f"SIMULATED: Would remove {len(test_files)} language test files")
+                else:
+                    # Production mode - actually delete files
+                    shutil.rmtree(test_dir)
+                    cleanup_actions.append(f"Removed {len(test_files)} language test files")
             except Exception as e:
                 print(f"⚠️  Could not remove test files: {e}")
+                # Don't fail the entire cleanup if this fails
     
-    # Keep only last 5 history files
+    # Keep only last 5 history files (with verification)
     history_dir = Path("codebase_summary/history/")
     if history_dir.exists():
         history_files = sorted(history_dir.glob("*.json"))
         if len(history_files) > 5:
             files_to_remove = history_files[:-5]
             try:
-                for old_file in files_to_remove:
-                    old_file.unlink()
-                cleanup_actions.append(f"Archived {len(files_to_remove)} old history files")
+                # Verify files exist before attempting removal
+                existing_files_to_remove = [f for f in files_to_remove if f.exists()]
+                
+                if is_source_repo:
+                    # Simulation mode - don't actually delete
+                    print(f"🎭 SIMULATION: Would archive {len(existing_files_to_remove)} old history files")
+                    cleanup_actions.append(f"SIMULATED: Would archive {len(existing_files_to_remove)} old history files")
+                else:
+                    # Production mode - actually delete files
+                    for old_file in existing_files_to_remove:
+                        # Additional safety check
+                        if old_file.is_file() and old_file.suffix == '.json':
+                            old_file.unlink()
+                    
+                    if existing_files_to_remove:
+                        cleanup_actions.append(f"Archived {len(existing_files_to_remove)} old history files")
             except Exception as e:
                 print(f"⚠️  Could not archive history files: {e}")
+                # Continue with other cleanup operations
     
     if cleanup_actions:
         print("✅ Cleanup completed:")

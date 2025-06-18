@@ -39,9 +39,115 @@ class WorkflowSystemSetup:
     - Used by: project initialization, environment setup, deployment automation
     """
     def __init__(self):
-        self.project_root = Path.cwd()
         self.package_root = Path(__file__).parent
+        self.deployment_context = self._detect_deployment_context()
+        self.project_root = self._determine_project_root()
         self.detected_ide = self._detect_ide_environment()
+        self.existing_architecture = self._scan_existing_architecture()
+
+    def _detect_deployment_context(self):
+        """
+        # @codebase-summary: Deployment context detection system
+        - Detects if Arkival is being deployed as new project root or integrated into existing project
+        - Analyzes directory structure to determine deployment strategy
+        - Used by: setup automation, integration strategy, file placement decisions
+        """
+        current_dir = Path.cwd()
+        arkival_dir = self.package_root
+        
+        # Check if we're running from within a cloned Arkival directory
+        if current_dir.name.lower() == 'arkival' and current_dir.parent != current_dir:
+            # We're in /Arkival folder - this is existing project integration
+            print("🔍 Detected: Running from cloned Arkival directory")
+            return 'existing_project_integration'
+        
+        # Check if we're in the Arkival source directory (workspace)
+        if arkival_dir.name.lower() == 'workspace':
+            return 'new_project'
+        
+        # Check if parent directory has existing project structure
+        parent_dir = current_dir.parent
+        existing_indicators = [
+            'package.json', 'src/', 'app/', 'components/', 'public/', 
+            '.git/', 'node_modules/', 'requirements.txt', 'Cargo.toml',
+            'pom.xml', 'build.gradle', 'composer.json', 'README.md'
+        ]
+        
+        parent_count = sum(1 for indicator in existing_indicators 
+                          if (parent_dir / indicator).exists())
+        
+        if parent_count >= 2:
+            return 'existing_project_integration'
+        
+        return 'new_project'
+    
+    def _determine_project_root(self):
+        """
+        # @codebase-summary: Project root determination for flexible deployment
+        - Determines appropriate project root based on deployment context
+        - Handles both new project and existing project integration scenarios
+        - Used by: file placement, configuration generation, deployment strategy
+        """
+        current_dir = Path.cwd()
+        
+        # If we're in /Arkival folder, the project root is the parent directory
+        if current_dir.name.lower() == 'arkival' and self.deployment_context == 'existing_project_integration':
+            return current_dir.parent  # Parent directory is the actual project root
+        else:
+            return current_dir  # For new projects or source development
+    
+    def _scan_existing_architecture(self):
+        """
+        # @codebase-summary: Existing project architecture scanning system
+        - Scans for existing project files that should be preserved during integration
+        - Identifies technology stack, build tools, and workflow configurations
+        - Used by: integration strategy, conflict avoidance, selective deployment
+        """
+        if self.deployment_context == 'new_project':
+            return {}
+            
+        architecture = {
+            'technology_stack': [],
+            'existing_files': [],
+            'config_files': [],
+            'build_tools': [],
+            'important_directories': []
+        }
+        
+        # Scan for technology indicators
+        current_dir = Path.cwd()
+        
+        # Frontend frameworks and build tools
+        if (current_dir / 'package.json').exists():
+            architecture['technology_stack'].append('Node.js/npm')
+            architecture['config_files'].append('package.json')
+        
+        if (current_dir / 'vite.config.js').exists() or (current_dir / 'vite.config.ts').exists():
+            architecture['technology_stack'].append('Vite')
+        
+        if (current_dir / 'next.config.js').exists():
+            architecture['technology_stack'].append('Next.js')
+        
+        if (current_dir / 'vue.config.js').exists():
+            architecture['technology_stack'].append('Vue.js')
+        
+        # Backend frameworks
+        if (current_dir / 'requirements.txt').exists():
+            architecture['technology_stack'].append('Python')
+            architecture['config_files'].append('requirements.txt')
+        
+        if (current_dir / 'Cargo.toml').exists():
+            architecture['technology_stack'].append('Rust')
+            
+        if (current_dir / 'pom.xml').exists():
+            architecture['technology_stack'].append('Java/Maven')
+        
+        # Important directories to preserve
+        for dirname in ['src', 'app', 'components', 'public', 'assets', 'lib', 'utils', 'styles']:
+            if (current_dir / dirname).exists():
+                architecture['important_directories'].append(dirname)
+        
+        return architecture
 
     def _detect_ide_environment(self):
         """Detect the current IDE/development environment"""
@@ -63,16 +169,14 @@ class WorkflowSystemSetup:
         else:
             return 'generic'
 
-    def setup_complete_system(self):
+    def setup_new_project(self):
         """
-        # @codebase-summary: Complete workflow system setup orchestrator
-        - Manages full workflow system installation across all supported platforms
-        - Handles IDE detection, configuration, and validation
-        - Provides comprehensive setup with error handling and recovery
-        - Used by: project initialization, system deployment, environment setup
+        # @codebase-summary: New project setup for Arkival workflow system
+        - Sets up complete workflow system for new project deployment
+        - Creates all necessary files, directories, and configurations
+        - Used by: new project initialization, clean deployment scenarios
         """
-        """Set up the complete workflow orchestration system"""
-        print("🚀 SETTING UP CROSS-PLATFORM AGENT WORKFLOW ORCHESTRATION SYSTEM")
+        print("🚀 SETTING UP NEW PROJECT WITH ARKIVAL WORKFLOW SYSTEM")
         print("=" * 70)
         print(f"📍 Detected environment: {self.detected_ide.upper()}")
 
@@ -95,50 +199,353 @@ class WorkflowSystemSetup:
             # Step 6: Create initial documentation
             self._create_initial_documentation()
 
-            # Step 6.5: Create community standards files
+            # Step 7: Create community standards files
             self._create_community_standards_files()
 
-            # Step 7: Set up IDE integration files
+            # Step 8: Set up IDE integration files
             self._setup_ide_integration()
 
-            # Step 8: Run initial system check
+            # Step 9: Run initial system check
             self._run_system_verification()
 
-            print("\n✅ WORKFLOW SYSTEM SETUP COMPLETED SUCCESSFULLY!")
+            print("\n✅ ARKIVAL WORKFLOW SYSTEM SETUP COMPLETED!")
             print("=" * 70)
             print("Next steps:")
             print("1. Edit workflow_config.json with your project details")
             print("2. Review IDE-specific setup instructions in SETUP_GUIDE.md")
             print("3. Say 'Hi' to test the incoming agent workflow")
             print("4. Begin development with full workflow support")
-            print("\n🔍 Running post-setup validation...")
-            self._validate_deployment()
-            
-            print("\n🔬 Running comprehensive deployment validation...")
-            self._run_comprehensive_validation()
-            
-            print("\n🧪 AVAILABLE TESTING OPTIONS:")
-            print("=" * 40)
-            print("📋 System Validation (Recommended):")
-            print("   python3 validate_deployment.py")
-            print("")
-            print("💡 Run any of these commands to validate specific functionality")
-            
-            # Ask if user wants to run basic tests
-            self._prompt_for_testing()
 
         except Exception as e:
             print(f"❌ Setup failed: {e}")
             sys.exit(1)
+
+    def setup_existing_project_integration(self):
+        """
+        # @codebase-summary: Existing project integration for Arkival workflow system
+        - Integrates Arkival into existing projects without overwriting files
+        - Places Arkival files in arkival/ subdirectory to avoid conflicts
+        - Preserves existing project structure and workflows
+        - Used by: existing project integration, non-destructive deployment
+        """
+        print("🔧 INTEGRATING ARKIVAL INTO EXISTING PROJECT")
+        print("=" * 70)
+        print(f"📍 Detected environment: {self.detected_ide.upper()}")
+        print(f"🏗️ Existing architecture: {', '.join(self.existing_architecture.get('technology_stack', ['Unknown']))}")
+
+        try:
+            # Step 1: Create arkival subdirectory structure
+            self._create_arkival_subdirectory()
+            
+            # Step 2: Copy core files to arkival subdirectory
+            self._copy_arkival_files()
+            
+            # Step 3: Create integration-friendly configuration
+            self._create_integration_config()
+            
+            # Step 4: Set up arkival-specific changelog
+            self._initialize_arkival_changelog()
+            
+            # Step 5: Create integration documentation
+            self._create_integration_documentation()
+            
+            # Step 6: Validate integration
+            self._validate_integration()
+
+            print("\n✅ ARKIVAL INTEGRATION COMPLETED!")
+            print("=" * 70)
+            print("Integration summary:")
+            print("• Arkival files placed in arkival/ directory")
+            print("• Your existing project files remain unchanged")
+            print("• Run workflows from: python3 arkival/codebase_summary/agent_workflow_orchestrator.py")
+            print("• Configuration file: arkival/workflow_config.json")
+
+        except Exception as e:
+            print(f"❌ Integration failed: {e}")
+            sys.exit(1)
+
+    def _create_arkival_subdirectory(self):
+        """
+        # @codebase-summary: Arkival subdirectory creation for existing project integration
+        - Creates arkival/ subdirectory structure for non-destructive integration
+        - Preserves existing project structure while adding Arkival capabilities
+        - Used by: existing project integration, conflict-free deployment
+        """
+        arkival_base = self.project_root / "arkival"
+        
+        directories = [
+            "arkival/codebase_summary",
+            "arkival/codebase_summary/history", 
+            "arkival/.workflow_system",
+            "arkival/.workflow_system/scripts",
+            "arkival/.workflow_system/ide_configs"
+        ]
+
+        for directory in directories:
+            dir_path = self.project_root / directory
+            try:
+                dir_path.mkdir(parents=True, exist_ok=True)
+                print(f"📁 Created: {directory}")
+            except Exception as e:
+                print(f"❌ Failed to create {directory}: {e}")
+
+    def _copy_arkival_files(self):
+        """
+        # @codebase-summary: Arkival file copying for existing project integration
+        - Copies Arkival system files to arkival/ subdirectory
+        - Avoids overwriting existing project files
+        - Used by: existing project integration, selective file deployment
+        """
+        core_files = [
+            ("codebase_summary/agent_workflow_orchestrator.py", "arkival/codebase_summary/agent_workflow_orchestrator.py"),
+            ("codebase_summary/update_changelog.py", "arkival/codebase_summary/update_changelog.py"),
+            ("codebase_summary/update_project_summary.py", "arkival/codebase_summary/update_project_summary.py"),
+            ("NEW_AGENT_GREETING.md", "arkival/NEW_AGENT_GREETING.md"),
+            ("DEVELOPER_ONBOARDING.md", "arkival/DEVELOPER_ONBOARDING.md"),
+            ("AGENT_GUIDE.md", "arkival/AGENT_GUIDE.md")
+        ]
+
+        for source, dest in core_files:
+            source_path = self.package_root / source
+            dest_path = self.project_root / dest
+
+            if source_path.exists():
+                try:
+                    # Ensure destination directory exists
+                    dest_path.parent.mkdir(parents=True, exist_ok=True)
+                    
+                    # SAFETY CHECK: Never overwrite existing files
+                    if dest_path.exists():
+                        print(f"⏭️  Skipping {dest} - already exists (preserving existing file)")
+                        continue
+                    
+                    shutil.copy2(source_path, dest_path)
+                    print(f"📄 Copied to arkival/: {dest.replace('arkival/', '')}")
+                except Exception as e:
+                    print(f"❌ Failed to copy {dest}: {e}")
+            else:
+                print(f"⚠️  Source file not found: {source}")
+
+    def _create_integration_config(self):
+        """
+        # @codebase-summary: Integration-specific configuration generation
+        - Creates Arkival configuration that works with existing project
+        - Includes detected technology stack and existing architecture info
+        - Used by: existing project integration, context-aware configuration
+        """
+        config = {
+            "_generator": "Generated by setup_workflow_system.py - Arkival integration for existing project",
+            "deployment_mode": "existing_project_integration",
+            "project_name": f"Existing Project + Arkival",
+            "project_description": f"Existing {', '.join(self.existing_architecture.get('technology_stack', ['Unknown']))} project with Arkival workflow integration",
+            "version": "1.0.0",
+            "technology_stack": self.existing_architecture.get('technology_stack', ['Unknown']),
+            "existing_architecture": self.existing_architecture,
+            "environment": {
+                "detected_ide": self.detected_ide,
+                "platform": platform.system(),
+                "supports_integrated_terminal": True,
+                "supports_tasks": self.detected_ide in ['vscode', 'cursor', 'codespaces']
+            },
+            "workflow_settings": {
+                "auto_changelog": True,
+                "auto_documentation": True,
+                "cost_optimization": True,
+                "agent_handoff_enabled": True,
+                "ide_integration": True,
+                "arkival_subdirectory": True
+            },
+            "integration_notes": {
+                "arkival_location": "arkival/",
+                "original_project_preserved": True,
+                "workflow_commands": "Run from arkival/ subdirectory",
+                "configuration_file": "arkival/workflow_config.json"
+            },
+            "setup_timestamp": datetime.now().isoformat() + "Z"
+        }
+
+        config_path = self.project_root / "arkival" / "workflow_config.json"
+        try:
+            # Ensure parent directory exists
+            config_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            # SAFETY CHECK: Even in arkival subdirectory, don't overwrite
+            if config_path.exists():
+                print(f"⏭️  Skipping arkival/workflow_config.json - already exists")
+                return
+                
+            with open(config_path, 'w', encoding='utf-8') as f:
+                json.dump(config, f, indent=2)
+            print(f"⚙️  Created arkival/workflow_config.json")
+        except Exception as e:
+            print(f"❌ Failed to create integration config: {e}")
+
+    def _initialize_arkival_changelog(self):
+        """
+        # @codebase-summary: Arkival-specific changelog initialization for integration
+        - Creates changelog in arkival/ subdirectory for integration tracking
+        - Preserves existing project changelog if present
+        - Used by: existing project integration, change tracking isolation
+        """
+        changelog = {
+            "_generator": "Generated by setup_workflow_system.py - Arkival integration changelog",
+            "project_name": f"Arkival Integration",
+            "changelog_version": "1.0.0",
+            "last_updated": datetime.now().isoformat() + "Z",
+            "description": "Arkival workflow system integration tracking",
+            "integration_mode": True,
+            "entries": [
+                {
+                    "id": "integration_001",
+                    "timestamp": datetime.now().isoformat() + "Z",
+                    "author": "Arkival Setup",
+                    "version": "1.0.0",
+                    "type": "feature",
+                    "scope": "integration",
+                    "summary": "Integrated Arkival workflow system into existing project",
+                    "description": f"Added Arkival workflow capabilities to existing {', '.join(self.existing_architecture.get('technology_stack', ['Unknown']))} project without modifying original files",
+                    "files_changed": [
+                        {
+                            "file": "arkival/",
+                            "action": "created",
+                            "changes": ["Arkival workflow system integration"]
+                        }
+                    ],
+                    "breaking_changes": False,
+                    "migration_notes": "No migration required - integration preserves existing structure",
+                    "related_issues": [],
+                    "tags": ["arkival", "integration", "workflow"]
+                }
+            ]
+        }
+
+        changelog_path = self.project_root / "arkival" / "changelog_summary.json"
+        try:
+            # Ensure parent directory exists
+            changelog_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            # SAFETY CHECK: Even in arkival subdirectory, don't overwrite
+            if changelog_path.exists():
+                print("⏭️  Skipping arkival/changelog_summary.json - already exists")
+                return
+                
+            with open(changelog_path, 'w', encoding='utf-8') as f:
+                json.dump(changelog, f, indent=2)
+            print("📝 Created arkival/changelog_summary.json")
+        except Exception as e:
+            print(f"❌ Failed to create arkival changelog: {e}")
+
+    def _create_integration_documentation(self):
+        """
+        # @codebase-summary: Integration documentation generation
+        - Creates documentation specific to Arkival integration mode
+        - Provides usage instructions for existing project context
+        - Used by: existing project integration, user guidance
+        """
+        integration_guide = f"""# Arkival Integration Guide
+
+## Overview
+Arkival has been successfully integrated into your existing project without modifying any of your original files.
+
+## Project Structure
+- **Your existing files**: Unchanged and preserved
+- **Arkival files**: Located in `arkival/` directory
+- **Technology Stack Detected**: {', '.join(self.existing_architecture.get('technology_stack', ['Unknown']))}
+
+## Using Arkival Workflows
+
+### Agent Incoming Workflow
+```bash
+python3 arkival/codebase_summary/agent_workflow_orchestrator.py incoming
+```
+
+### Agent Outgoing Workflow  
+```bash
+python3 arkival/codebase_summary/agent_workflow_orchestrator.py outgoing --summary "Session summary" --type completed
+```
+
+### Update Changelog
+```bash
+python3 arkival/codebase_summary/update_changelog.py add --summary "Change description"
+```
+
+## Configuration
+- **Arkival Config**: `arkival/workflow_config.json`
+- **Arkival Changelog**: `arkival/changelog_summary.json` 
+- **Your Original Files**: Completely preserved
+
+## Integration Notes
+- Arkival operates independently in its subdirectory
+- Your existing build processes and workflows remain unchanged
+- You can use Arkival workflows alongside your existing development process
+- No conflicts with your existing project structure
+
+## Next Steps
+1. Review `arkival/workflow_config.json` and customize if needed
+2. Test the agent workflows using the commands above
+3. Begin AI collaboration with full workflow support
+4. Your existing project development continues normally
+
+## Technology Stack Integration
+Detected in your project:
+{chr(10).join(f'- {tech}' for tech in self.existing_architecture.get('technology_stack', ['Unknown']))}
+
+Existing directories preserved:
+{chr(10).join(f'- {dir_name}/' for dir_name in self.existing_architecture.get('important_directories', []))}
+"""
+
+        guide_path = self.project_root / "arkival" / "INTEGRATION_GUIDE.md"
+        try:
+            # Ensure parent directory exists  
+            guide_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            # SAFETY CHECK: Even in arkival subdirectory, don't overwrite
+            if guide_path.exists():
+                print("⏭️  Skipping arkival/INTEGRATION_GUIDE.md - already exists")
+            else:
+                with open(guide_path, 'w', encoding='utf-8') as f:
+                    f.write(integration_guide)
+                print("📖 Created arkival/INTEGRATION_GUIDE.md")
+        except Exception as e:
+            print(f"❌ Failed to create integration guide: {e}")
+
+    def _validate_integration(self):
+        """
+        # @codebase-summary: Integration validation and verification system
+        - Validates that Arkival integration completed successfully
+        - Checks for required files and proper directory structure
+        - Used by: existing project integration, deployment verification
+        """
+        print(f"\n🔍 VALIDATING ARKIVAL INTEGRATION...")
+        
+        required_arkival_files = [
+            "arkival/codebase_summary/agent_workflow_orchestrator.py",
+            "arkival/codebase_summary/update_changelog.py", 
+            "arkival/workflow_config.json",
+            "arkival/changelog_summary.json",
+            "arkival/INTEGRATION_GUIDE.md"
+        ]
+        
+        all_good = True
+        for file_path in required_arkival_files:
+            full_path = self.project_root / file_path
+            if full_path.exists():
+                print(f"✅ {file_path}")
+            else:
+                print(f"❌ {file_path} - MISSING")
+                all_good = False
+                
+        if all_good:
+            print("✅ Arkival integration completed successfully")
+            print("🎯 Your existing project files remain unchanged")
+        else:
+            print("❌ Some Arkival files missing - integration may be incomplete")
 
     def _create_directory_structure(self):
         """Create necessary directory structure"""
         directories = [
             "codebase_summary",
             "codebase_summary/history",
-            "attached_assets",
-            "reference_assets",
-            "reference_assets/workflow_docs",
             ".workflow_system",
             ".workflow_system/scripts",
             ".workflow_system/ide_configs"
@@ -146,8 +553,11 @@ class WorkflowSystemSetup:
 
         for directory in directories:
             dir_path = self.project_root / directory
-            dir_path.mkdir(parents=True, exist_ok=True)
-            print(f"📁 Created directory: {directory}")
+            try:
+                dir_path.mkdir(parents=True, exist_ok=True)
+                print(f"📁 Created directory: {directory}")
+            except Exception as e:
+                print(f"❌ Failed to create {directory}: {e}")
 
     def _copy_core_files(self):
         """Copy core system files to project"""
@@ -157,8 +567,7 @@ class WorkflowSystemSetup:
             ("codebase_summary/update_project_summary.py", "codebase_summary/update_project_summary.py"),
             ("NEW_AGENT_GREETING.md", "NEW_AGENT_GREETING.md"),
             ("DEVELOPER_ONBOARDING.md", "DEVELOPER_ONBOARDING.md"),
-            ("workflow_assets/workflow_docs/breadcrumb_guide.md", "codebase_summary/breadcrumb_guide.md"),
-            ("workflow_assets/workflow_docs/engineering_best_practices.md", "codebase_summary/engineering_best_practices.md")
+            ("AGENT_GUIDE.md", "AGENT_GUIDE.md")
         ]
 
         for source, dest in core_files:
@@ -171,8 +580,19 @@ class WorkflowSystemSetup:
                 continue
 
             if source_path.exists():
-                shutil.copy2(source_path, dest_path)
-                print(f"📄 Copied: {dest}")
+                try:
+                    # Ensure destination directory exists
+                    dest_path.parent.mkdir(parents=True, exist_ok=True)
+                    
+                    # SAFETY CHECK: Never overwrite existing files
+                    if dest_path.exists():
+                        print(f"⏭️  Skipping {dest} - already exists (preserving existing file)")
+                        continue
+                    
+                    shutil.copy2(source_path, dest_path)
+                    print(f"📄 Copied: {dest}")
+                except Exception as e:
+                    print(f"❌ Failed to copy {dest}: {e}")
             else:
                 print(f"⚠️  Source file not found: {source}")
 
@@ -213,10 +633,20 @@ class WorkflowSystemSetup:
         }
 
         config_path = self.project_root / "workflow_config.json"
-        with open(config_path, 'w', encoding='utf-8') as f:
-            json.dump(config, f, indent=2)
-
-        print(f"⚙️  Created workflow_config.json for {self.detected_ide}")
+        try:
+            # Ensure parent directory exists
+            config_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            # SAFETY CHECK: Never overwrite existing config
+            if config_path.exists():
+                print(f"⏭️  Skipping workflow_config.json - already exists (preserving existing configuration)")
+                return
+            
+            with open(config_path, 'w', encoding='utf-8') as f:
+                json.dump(config, f, indent=2)
+            print(f"⚙️  Created workflow_config.json for {self.detected_ide}")
+        except Exception as e:
+            print(f"❌ Failed to create workflow_config.json: {e}")
 
     def _get_workflow_method(self):
         """Get the workflow method based on IDE"""
@@ -306,8 +736,14 @@ args = "python3 codebase_summary/agent_workflow_orchestrator.py outgoing --summa
 
         # Write the main .replit file
         replit_file_path = self.project_root / ".replit"
-        with open(replit_file_path, 'w', encoding='utf-8') as f:
-            f.write(replit_file_config)
+        
+        # SAFETY CHECK: Never overwrite existing .replit file
+        if replit_file_path.exists():
+            print("⏭️  Skipping .replit - already exists (preserving existing Replit configuration)")
+        else:
+            with open(replit_file_path, 'w', encoding='utf-8') as f:
+                f.write(replit_file_config)
+            print("🔧 Created Replit .replit file with integrated workflows")
 
         # Also create backup in .workflow_system for reference
         workflow_path = self.project_root / ".workflow_system" / "replit_workflows.toml"
@@ -337,11 +773,13 @@ args = "echo '🚀 OUTGOING AGENT HANDOFF WORKFLOW'"
 task = "shell.exec"
 args = "python3 codebase_summary/agent_workflow_orchestrator.py outgoing --summary \\"Session summary\\" --type completed"
 '''
-        with open(workflow_path, 'w', encoding='utf-8') as f:
-            f.write(workflow_only_config)
-
-        print("🔧 Created Replit .replit file with integrated workflows")
-        print("🔧 Created Replit workflow configuration backup")
+        # SAFETY CHECK: Don't overwrite existing workflow backup
+        if workflow_path.exists():
+            print("⏭️  Skipping .workflow_system/replit_workflows.toml - already exists")
+        else:
+            with open(workflow_path, 'w', encoding='utf-8') as f:
+                f.write(workflow_only_config)
+            print("🔧 Created Replit workflow configuration backup")
 
     def _setup_vscode_tasks(self):
         """Set up VS Code tasks.json"""
@@ -418,10 +856,14 @@ args = "python3 codebase_summary/agent_workflow_orchestrator.py outgoing --summa
         vscode_dir.mkdir(exist_ok=True)
 
         tasks_path = vscode_dir / "tasks.json"
-        with open(tasks_path, 'w', encoding='utf-8') as f:
-            json.dump(vscode_tasks, f, indent=2)
-
-        print("🔧 Created VS Code tasks.json")
+        
+        # SAFETY CHECK: Never overwrite existing VS Code tasks
+        if tasks_path.exists():
+            print("⏭️  Skipping .vscode/tasks.json - already exists (preserving existing tasks)")
+        else:
+            with open(tasks_path, 'w', encoding='utf-8') as f:
+                json.dump(vscode_tasks, f, indent=2)
+            print("🔧 Created VS Code tasks.json")
 
     def _setup_gitpod_tasks(self):
         """Set up Gitpod tasks in .gitpod.yml"""
@@ -443,10 +885,14 @@ vscode:
 """
 
         gitpod_path = self.project_root / ".gitpod.yml"
-        with open(gitpod_path, 'w', encoding='utf-8') as f:
-            f.write(gitpod_config)
-
-        print("🔧 Created .gitpod.yml configuration")
+        
+        # SAFETY CHECK: Never overwrite existing .gitpod.yml
+        if gitpod_path.exists():
+            print("⏭️  Skipping .gitpod.yml - already exists (preserving existing Gitpod configuration)")
+        else:
+            with open(gitpod_path, 'w', encoding='utf-8') as f:
+                f.write(gitpod_config)
+            print("🔧 Created .gitpod.yml configuration")
 
     def _setup_shell_scripts(self):
         """Set up shell scripts for generic IDE environments"""
@@ -484,6 +930,12 @@ python3 codebase_summary/update_changelog.py add --summary "$1"
 
         for script_name, script_content in scripts.items():
             script_path = scripts_dir / script_name
+            
+            # SAFETY CHECK: Don't overwrite existing scripts
+            if script_path.exists():
+                print(f"⏭️  Skipping {script_name} - already exists")
+                continue
+                
             with open(script_path, 'w', encoding='utf-8') as f:
                 f.write(script_content)
 
@@ -542,6 +994,12 @@ python3 codebase_summary/update_changelog.py add --summary "$1"
         }
 
         changelog_path = self.project_root / "changelog_summary.json"
+        
+        # SAFETY CHECK: Never overwrite existing changelog
+        if changelog_path.exists():
+            print("⏭️  Skipping changelog_summary.json - already exists (preserving existing changelog)")
+            return
+            
         with open(changelog_path, 'w', encoding='utf-8') as f:
             json.dump(changelog, f, indent=2)
 
@@ -589,10 +1047,14 @@ python3 codebase_summary/update_changelog.py add --summary "$1"
         }
 
         summary_path = self.project_root / "codebase_summary" / "codebase_summary.json"
-        with open(summary_path, 'w', encoding='utf-8') as f:
-            json.dump(codebase_summary, f, indent=2)
-
-        print("📊 Created codebase_summary.json")
+        
+        # SAFETY CHECK: Never overwrite existing codebase summary
+        if summary_path.exists():
+            print("⏭️  Skipping codebase_summary/codebase_summary.json - already exists")
+        else:
+            with open(summary_path, 'w', encoding='utf-8') as f:
+                json.dump(codebase_summary, f, indent=2)
+            print("📊 Created codebase_summary.json")
 
     def _create_community_standards_files(self):
         """Create GitHub community standards files"""
@@ -677,8 +1139,14 @@ codebase_summary/history/
 """
 
         gitignore_path = self.project_root / ".gitignore"
-        with open(gitignore_path, 'w', encoding='utf-8') as f:
-            f.write(gitignore_content)
+        
+        # SAFETY CHECK: Never overwrite existing .gitignore
+        if gitignore_path.exists():
+            print("⏭️  Skipping .gitignore - already exists (preserving existing file)")
+        else:
+            with open(gitignore_path, 'w', encoding='utf-8') as f:
+                f.write(gitignore_content)
+            print("📄 Created .gitignore")
 
         # Create LICENSE (Attribution to Spitfire Products)
         license_content = """Attribution License
@@ -716,8 +1184,14 @@ Arkival - AI Agent Workflow Orchestration System
 """
 
         license_path = self.project_root / "LICENSE"
-        with open(license_path, 'w', encoding='utf-8') as f:
-            f.write(license_content)
+        
+        # SAFETY CHECK: Never overwrite existing LICENSE
+        if license_path.exists():
+            print("⏭️  Skipping LICENSE - already exists (preserving existing file)")
+        else:
+            with open(license_path, 'w', encoding='utf-8') as f:
+                f.write(license_content)
+            print("📄 Created LICENSE")
 
         # Create CONTRIBUTING.md
         contributing_content = """# Contributing to Arkival
@@ -799,8 +1273,14 @@ Thank you for contributing to making AI agent workflows more efficient!
 """
 
         contributing_path = self.project_root / "CONTRIBUTING.md"
-        with open(contributing_path, 'w', encoding='utf-8') as f:
-            f.write(contributing_content)
+        
+        # SAFETY CHECK: Never overwrite existing CONTRIBUTING.md
+        if contributing_path.exists():
+            print("⏭️  Skipping CONTRIBUTING.md - already exists (preserving existing file)")
+        else:
+            with open(contributing_path, 'w', encoding='utf-8') as f:
+                f.write(contributing_content)
+            print("📄 Created CONTRIBUTING.md")
 
         # Create SECURITY.md
         security_content = """# Security Policy
@@ -860,24 +1340,34 @@ Thank you for helping keep Arkival secure!
 """
 
         security_path = self.project_root / "SECURITY.md"
-        with open(security_path, 'w', encoding='utf-8') as f:
-            f.write(security_content)
+        
+        # SAFETY CHECK: Never overwrite existing SECURITY.md
+        if security_path.exists():
+            print("⏭️  Skipping SECURITY.md - already exists (preserving existing file)")
+        else:
+            with open(security_path, 'w', encoding='utf-8') as f:
+                f.write(security_content)
+            print("📄 Created SECURITY.md")
 
-        print("📋 Created community standards files (.gitignore, LICENSE, CONTRIBUTING.md, SECURITY.md)")
+        # Summary message handled by individual file creation
 
     def _setup_ide_integration(self):
         """Set up IDE-specific integration files"""
         # Create setup guide
         setup_guide = self._generate_setup_guide()
         guide_path = self.project_root / "SETUP_GUIDE.md"
-        with open(guide_path, 'w', encoding='utf-8') as f:
-            f.write(setup_guide)
+        
+        # SAFETY CHECK: Never overwrite existing SETUP_GUIDE.md
+        if guide_path.exists():
+            print("⏭️  Skipping SETUP_GUIDE.md - already exists (preserving existing file)")
+        else:
+            with open(guide_path, 'w', encoding='utf-8') as f:
+                f.write(setup_guide)
+            print(f"📖 Created setup guide for {self.detected_ide.upper()}")
 
         # Create IDE-specific settings if applicable
         if self.detected_ide in ['vscode', 'cursor', 'codespaces']:
             self._create_vscode_settings()
-
-        print(f"📖 Created setup guide for {self.detected_ide.upper()}")
 
     def _generate_setup_guide(self):
         """Generate IDE-specific setup guide"""
@@ -986,12 +1476,16 @@ Edit `workflow_config.json` to customize the system for your project needs, or a
         }
 
         vscode_dir = self.project_root / ".vscode"
+        vscode_dir.mkdir(exist_ok=True)
         settings_path = vscode_dir / "settings.json"
 
-        with open(settings_path, 'w', encoding='utf-8') as f:
-            json.dump(vscode_settings, f, indent=2)
-
-        print("⚙️  Created VS Code settings.json")
+        # SAFETY CHECK: Never overwrite existing VS Code settings
+        if settings_path.exists():
+            print("⏭️  Skipping .vscode/settings.json - already exists (preserving existing settings)")
+        else:
+            with open(settings_path, 'w', encoding='utf-8') as f:
+                json.dump(vscode_settings, f, indent=2)
+            print("⚙️  Created VS Code settings.json")
 
     def _run_system_verification(self):
         """Verify system setup (enhanced)"""
@@ -1108,17 +1602,38 @@ Edit `workflow_config.json` to customize the system for your project needs, or a
 
 def main():
     """
-    # @codebase-summary: Standard workflow system setup entry point
-    - Main orchestrator for basic workflow system installation
-    - Coordinates setup scripts and configuration validation
-    - Used by: project initialization, basic setup procedures, system deployment
+    # @codebase-summary: Main execution entry point for workflow system setup
+    - Orchestrates complete setup process based on deployment context detection
+    - Handles both new project deployment and existing project integration scenarios
+    - Provides comprehensive error handling and user feedback throughout setup
+    - Used by: deployment automation, project initialization, integration workflows
     """
-    """Main setup function"""
     if not validate_dependencies():
         sys.exit(1)
-    
-    setup = WorkflowSystemSetup()
-    setup.setup_complete_system()
+
+    print("🚀 Arkival Workflow System Setup")
+    print("=" * 50)
+
+    try:
+        setup = WorkflowSystemSetup()
+        
+        print(f"📍 Deployment Context: {setup.deployment_context}")
+        print(f"🔍 Detected IDE: {setup.detected_ide}")
+        print(f"📁 Project Root: {setup.project_root}")
+        
+        if setup.deployment_context == 'existing_project_integration':
+            setup.setup_existing_project_integration()
+        else:
+            setup.setup_new_project()
+            
+        print("\n✅ Arkival Workflow System setup completed!")
+        print("🎯 Your development environment is now ready for AI collaboration")
+        
+    except Exception as e:
+        print(f"\n❌ Setup failed: {e}")
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()

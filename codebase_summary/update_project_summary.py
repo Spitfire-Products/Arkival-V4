@@ -28,6 +28,55 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Dict, Any, List
 
+def find_arkival_paths():
+    """
+    Universal path resolution for Arkival subdirectory deployment
+    Returns: Dict with all required paths
+    """
+    current_dir = Path.cwd()
+    project_root = None
+    
+    # Search upward for arkival.config.json
+    search_path = current_dir
+    for _ in range(5):  # Max 5 levels up
+        if (search_path / "arkival.config.json").exists():
+            project_root = search_path
+            break
+        if search_path.parent == search_path:  # Reached filesystem root
+            break
+        search_path = search_path.parent
+    
+    # Try alternative detection methods
+    if not project_root:
+        # Look for Arkival directory as indicator
+        search_path = current_dir
+        for _ in range(5):
+            if (search_path / "Arkival").exists():
+                project_root = search_path
+                break
+            search_path = search_path.parent
+    
+    # Fallback - assume current directory
+    if not project_root:
+        project_root = current_dir
+    
+    # Return all paths
+    return {
+        'project_root': project_root,
+        'config_file': project_root / "arkival.config.json",
+        'arkival_dir': project_root / "Arkival",
+        'data_dir': project_root / "Arkival" / "data",
+        'scripts_dir': project_root / "Arkival" / "codebase_summary", 
+        'export_dir': project_root / "Arkival" / "export_package",
+        'checkpoints_dir': project_root / "Arkival" / "checkpoints",
+        
+        # Data files
+        'codebase_summary': project_root / "Arkival" / "data" / "codebase_summary.json",
+        'changelog_summary': project_root / "Arkival" / "data" / "changelog_summary.json",
+        'session_state': project_root / "Arkival" / "data" / "session_state.json",
+        'missing_breadcrumbs': project_root / "Arkival" / "data" / "missing_breadcrumbs.json"
+    }
+
 def get_current_version():
     """
     # @codebase-summary: Current version extraction and tracking system
@@ -35,8 +84,9 @@ def get_current_version():
     - Handles file access errors gracefully with fallback version handling
     - Used by: version management, deployment tracking, changelog correlation
     """
-    summary_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), "codebase_summary.json")
-    if os.path.exists(summary_file):
+    paths = find_arkival_paths()
+    summary_file = paths['codebase_summary']
+    if summary_file.exists():
         try:
             with open(summary_file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
@@ -71,8 +121,9 @@ def correlate_with_changelog():
     - Provides version alignment validation and tracking capabilities
     - Used by: version management, deployment coordination, changelog correlation
     """
-    changelog_file = "../changelog_summary.json"
-    if os.path.exists(changelog_file):
+    paths = find_arkival_paths()
+    changelog_file = paths['changelog_summary']
+    if changelog_file.exists():
         try:
             with open(changelog_file, 'r', encoding='utf-8') as f:
                 changelog = json.load(f)
@@ -258,12 +309,12 @@ class EnhancedProjectSummaryGenerator:
     - Used by: workflow orchestration, agent handoffs, project documentation
     """
     def __init__(self):
-        # Script is in codebase_summary/ folder, so project root is parent
-        script_dir = Path(__file__).parent
-        self.project_root = script_dir.parent
-        self.summary_path = self.project_root / "codebase_summary.json"  # Output to project root
-        self.config_path = self.project_root / "workflow_config.json"
-        self.history_dir = script_dir / "history"
+        # Use universal path resolution for Arkival subdirectory deployment
+        self.paths = find_arkival_paths()
+        self.project_root = self.paths['project_root']
+        self.summary_path = self.paths['codebase_summary']  # Output to Arkival/data/
+        self.config_path = self.paths['config_file']  # arkival.config.json
+        self.history_dir = self.paths['data_dir'] / "history"
 
     def generate_summary(self, enable_fix_components=False):
         """
@@ -2040,8 +2091,8 @@ class EnhancedProjectSummaryGenerator:
             "missing_breadcrumbs": missing_list
         }
 
-        # Output to codebase_summary folder where test expects it
-        report_path = Path(__file__).parent / "missing_breadcrumbs.json"
+        # Output to Arkival/data/ folder
+        report_path = self.paths['missing_breadcrumbs']
         try:
             # Ensure parent directory exists
             report_path.parent.mkdir(parents=True, exist_ok=True)
@@ -2064,6 +2115,8 @@ class EnhancedProjectSummaryGenerator:
     def _generate_markdown_summary(self, summary: Dict[str, Any], breadcrumbs: List):
         """Generate comprehensive markdown summary"""
         markdown_content = f"""# {summary['project_name']} - Enhanced Codebase Summary
+
+*Generated by: codebase_summary/update_project_summary.py - Enhanced project summary generator*
 
 **Version:** {summary['version']}  
 **Generated:** {datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}  
@@ -2287,6 +2340,7 @@ class EnhancedProjectSummaryGenerator:
         
         diagram_content = f"""# {summary['project_name']} - Architecture Diagrams
 
+*Generated by: codebase_summary/update_project_summary.py - Enhanced project summary generator*
 *Last updated: {timestamp}*
 *Generated from codebase analysis - Version: {summary.get('version', '1.0.0')}*
 *Architecture analysis system*
@@ -2419,7 +2473,7 @@ pie title Documentation Coverage Distribution
 
     def _get_changelog_version(self) -> str:
         """Get version from changelog for correlation"""
-        changelog_path = self.project_root / "changelog_summary.json"
+        changelog_path = self.paths['changelog_summary']
         if changelog_path.exists():
             try:
                 with open(changelog_path, 'r', encoding='utf-8') as f:

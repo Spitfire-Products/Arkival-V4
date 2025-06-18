@@ -12,6 +12,55 @@ from pathlib import Path
 from typing import Dict, Any, List, Optional
 import argparse
 
+def find_arkival_paths():
+    """
+    Universal path resolution for Arkival subdirectory deployment
+    Returns: Dict with all required paths
+    """
+    current_dir = Path.cwd()
+    project_root = None
+    
+    # Search upward for arkival.config.json
+    search_path = current_dir
+    for _ in range(5):  # Max 5 levels up
+        if (search_path / "arkival.config.json").exists():
+            project_root = search_path
+            break
+        if search_path.parent == search_path:  # Reached filesystem root
+            break
+        search_path = search_path.parent
+    
+    # Try alternative detection methods
+    if not project_root:
+        # Look for Arkival directory as indicator
+        search_path = current_dir
+        for _ in range(5):
+            if (search_path / "Arkival").exists():
+                project_root = search_path
+                break
+            search_path = search_path.parent
+    
+    # Fallback - assume current directory
+    if not project_root:
+        project_root = current_dir
+    
+    # Return all paths
+    return {
+        'project_root': project_root,
+        'config_file': project_root / "arkival.config.json",
+        'arkival_dir': project_root / "Arkival",
+        'data_dir': project_root / "Arkival" / "data",
+        'scripts_dir': project_root / "Arkival" / "codebase_summary", 
+        'export_dir': project_root / "Arkival" / "export_package",
+        'checkpoints_dir': project_root / "Arkival" / "checkpoints",
+        
+        # Data files
+        'codebase_summary': project_root / "Arkival" / "data" / "codebase_summary.json",
+        'changelog_summary': project_root / "Arkival" / "data" / "changelog_summary.json",
+        'session_state': project_root / "Arkival" / "data" / "session_state.json",
+        'missing_breadcrumbs': project_root / "Arkival" / "data" / "missing_breadcrumbs.json"
+    }
+
 class AgentWorkflowOrchestrator:
     """
     # @codebase-summary: Central agent handoff coordination system
@@ -33,18 +82,12 @@ class AgentWorkflowOrchestrator:
     """
 
     def __init__(self):
-        # Get the directory containing this script
-        script_dir = Path(__file__).parent
-        # Check if we're in a standalone deployment (script in codebase_summary/)
-        # or if codebase_summary is at project root
-        if script_dir.name == "codebase_summary":
-            self.project_root = script_dir.parent
-        else:
-            # Fallback for when script is run from project root
-            self.project_root = script_dir
-        self.codebase_summary_path = self.project_root / "codebase_summary" / "codebase_summary.json"
-        self.changelog_path = self.project_root / "changelog_summary.json"
-        self.session_state_path = self.project_root / "codebase_summary" / "session_state.json"
+        # Use universal path resolution for Arkival subdirectory deployment
+        self.paths = find_arkival_paths()
+        self.project_root = self.paths['project_root']
+        self.codebase_summary_path = self.paths['codebase_summary']
+        self.changelog_path = self.paths['changelog_summary']
+        self.session_state_path = self.paths['session_state']
 
     def trigger_outgoing_agent_workflow(self, session_summary: str, issue_type: str = "completed") -> Dict[str, Any]:
         """
@@ -197,7 +240,7 @@ class AgentWorkflowOrchestrator:
         except Exception as e:
             print(f"⚠️  Failed to save session state to {self.session_state_path}: {e}")
             # Try backup location
-            backup_path = self.project_root / "session_state_backup.json"
+            backup_path = self.paths['project_root'] / "session_state_backup.json"
             try:
                 with open(backup_path, 'w', encoding='utf-8') as f:
                     json.dump(session_state, f, indent=2)
@@ -221,7 +264,7 @@ class AgentWorkflowOrchestrator:
 
             cmd = [
                 sys.executable, 
-                str(self.project_root / "codebase_summary" / "update_changelog.py"),
+                str(self.paths['scripts_dir'] / "update_changelog.py"),
                 "add",
                 "--summary", session_summary,
                 "--type", entry_type,
@@ -277,7 +320,7 @@ class AgentWorkflowOrchestrator:
 
             cmd = [
                 sys.executable,
-                str(self.project_root / "codebase_summary" / "update_changelog.py"),
+                str(self.paths['scripts_dir'] / "update_changelog.py"),
                 "archive",
                 "--max-entries", "25"
             ]
@@ -308,7 +351,7 @@ class AgentWorkflowOrchestrator:
                 "priority_actions": self._extract_priority_items(session_summary, issue_type)
             }
 
-            handoff_path = self.project_root / "codebase_summary" / "agent_handoff.json"
+            handoff_path = self.paths['scripts_dir'] / "agent_handoff.json"
             
             try:
                 # Ensure parent directory exists
@@ -320,7 +363,7 @@ class AgentWorkflowOrchestrator:
             except Exception as e:
                 print(f"⚠️  Failed to save handoff documentation to {handoff_path}: {e}")
                 # Try backup location
-                backup_path = self.project_root / "agent_handoff_backup.json"
+                backup_path = self.paths['project_root'] / "agent_handoff_backup.json"
                 try:
                     with open(backup_path, 'w', encoding='utf-8') as f:
                         json.dump(handoff_doc, f, indent=2)
@@ -344,15 +387,37 @@ class AgentWorkflowOrchestrator:
         - Replicates handoff documentation across multiple system locations
         - Ensures redundancy and accessibility for incoming agents
         - Maintains synchronized copies in export package directory
+        - Resilient: creates directory and file if missing
         - Used by: documentation preservation, system redundancy, agent onboarding
         """
-        export_package_path = self.project_root / "export_package" / "agent_handoff.json"
+        export_package_dir = self.paths['export_dir']
+        export_package_path = export_package_dir / "agent_handoff.json"
+        
         try:
-            with open(export_package_path, 'w', encoding='utf-8') as f:
-                json.dump(handoff_doc, f, indent=2)
-            print(f"✅ Handoff documentation replicated to: {export_package_path}")
+            # Ensure export_package directory exists
+            export_package_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Check if source file exists and copy if target is missing or outdated
+            source_path = self.paths['scripts_dir'] / "agent_handoff.json"
+            if source_path.exists() and not export_package_path.exists():
+                # Copy from source if target doesn't exist
+                import shutil
+                shutil.copy2(source_path, export_package_path)
+                print(f"✅ Handoff documentation copied from source to: {export_package_path}")
+            else:
+                # Create/update with current handoff doc
+                with open(export_package_path, 'w', encoding='utf-8') as f:
+                    json.dump(handoff_doc, f, indent=2)
+                print(f"✅ Handoff documentation replicated to: {export_package_path}")
+                
         except Exception as e:
             print(f"❌ Failed to replicate handoff documentation: {e}")
+            # Try to at least ensure the directory exists for future attempts
+            try:
+                export_package_dir.mkdir(parents=True, exist_ok=True)
+                print(f"✅ Created export_package directory for future use")
+            except Exception as dir_error:
+                print(f"❌ Could not create export_package directory: {dir_error}")
 
     def _load_session_context(self) -> Dict[str, Any]:
         """
@@ -370,13 +435,13 @@ class AgentWorkflowOrchestrator:
                 context["session_state"] = json.load(f)
 
         # Load handoff documentation
-        handoff_path = self.project_root / "codebase_summary" / "agent_handoff.json"
+        handoff_path = self.paths['scripts_dir'] / "agent_handoff.json"
         if os.path.exists(handoff_path):
             with open(handoff_path, 'r', encoding='utf-8') as f:
                 context["handoff_documentation"] = json.load(f)
 
         # Load handoff documentation from export package (if available)
-        export_package_path = self.project_root / "export_package" / "agent_handoff.json"
+        export_package_path = self.paths['export_dir'] / "agent_handoff.json"
         if os.path.exists(export_package_path):
             with open(export_package_path, 'r', encoding='utf-8') as f:
                 context["export_package_handoff_documentation"] = json.load(f)
@@ -436,7 +501,7 @@ class AgentWorkflowOrchestrator:
 
             cmd = [
                 sys.executable,
-                str(self.project_root / "codebase_summary" / "update_project_summary.py"),
+                str(self.paths['scripts_dir'] / "update_project_summary.py"),
                 "--force"
             ]
 
@@ -473,7 +538,7 @@ class AgentWorkflowOrchestrator:
             consistency_check["versions_match"] = codebase_version == changelog_version
 
         # Check for missing breadcrumbs
-        missing_breadcrumbs_path = self.project_root / "codebase_summary" / "missing_breadcrumbs.json"
+        missing_breadcrumbs_path = self.paths['missing_breadcrumbs']
         if os.path.exists(missing_breadcrumbs_path):
             with open(missing_breadcrumbs_path, 'r', encoding='utf-8') as f:
                 missing_data = json.load(f)
@@ -607,8 +672,8 @@ class AgentWorkflowOrchestrator:
         - Provides migration status and guidance for documentation updates
         - Used by: agent onboarding, documentation compliance, best practices enforcement
         """
-        best_practices_file = self.project_root / "ENGINEERING_BEST_PRACTICES.md"
-        old_onboarding_docs = self.project_root / "reference_assets" / "old_onboarding_docs"
+        best_practices_file = self.paths['project_root'] / "ENGINEERING_BEST_PRACTICES.md"
+        old_onboarding_docs = self.paths['project_root'] / "reference_assets" / "old_onboarding_docs"
 
         file_exists = os.path.exists(best_practices_file)
         old_docs_exist = os.path.exists(old_onboarding_docs)
