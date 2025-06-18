@@ -1,0 +1,6 @@
+{
+  "deployment_mode": "subdirectory_integration",
+  "project_name": "Test Project with Arkival",
+  "arkival_directory": "./Arkival",
+  "version": "1.0.0"
+}

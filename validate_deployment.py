@@ -11,6 +11,55 @@ import sys
 from pathlib import Path
 from datetime import datetime
 
+def find_arkival_paths():
+    """
+    Universal path resolution for Arkival subdirectory deployment
+    Returns: Dict with all required paths
+    """
+    current_dir = Path.cwd()
+    project_root = None
+    
+    # Search upward for arkival.config.json
+    search_path = current_dir
+    for _ in range(5):  # Max 5 levels up
+        if (search_path / "arkival.config.json").exists():
+            project_root = search_path
+            break
+        if search_path.parent == search_path:  # Reached filesystem root
+            break
+        search_path = search_path.parent
+    
+    # Try alternative detection methods
+    if not project_root:
+        # Look for Arkival directory as indicator
+        search_path = current_dir
+        for _ in range(5):
+            if (search_path / "Arkival").exists():
+                project_root = search_path
+                break
+            search_path = search_path.parent
+    
+    # Fallback - assume current directory
+    if not project_root:
+        project_root = current_dir
+    
+    # Determine deployment context
+    if current_dir.name.lower() == 'arkival':
+        # Running from Arkival subdirectory - validate Arkival structure
+        arkival_root = current_dir
+        validation_root = current_dir
+    else:
+        # Running from project root - validate current structure
+        arkival_root = current_dir
+        validation_root = current_dir
+    
+    return {
+        'project_root': project_root,
+        'arkival_root': arkival_root,
+        'validation_root': validation_root,
+        'manifest_file': validation_root / "EXPORT_PACKAGE_MANIFEST.json"
+    }
+
 def validate_against_manifest():
     """
     # @codebase-summary: Validates deployment against EXPORT_PACKAGE_MANIFEST.json specifications
@@ -23,8 +72,12 @@ def validate_against_manifest():
     print("📋 VALIDATING AGAINST EXPORT PACKAGE MANIFEST")
     print("=" * 50)
     
+    paths = find_arkival_paths()
+    manifest_file = paths['manifest_file']
+    validation_root = paths['validation_root']
+    
     try:
-        with open("EXPORT_PACKAGE_MANIFEST.json", 'r') as f:
+        with open(manifest_file, 'r') as f:
             manifest = json.load(f)
         print(f"✅ Loaded manifest: {manifest['package_name']} v{manifest['version']}")
     except FileNotFoundError:
@@ -43,7 +96,8 @@ def validate_against_manifest():
         print(f"\n📁 Checking {category}:")
         for file_path in files:
             total_required += 1
-            if Path(file_path).exists():
+            full_path = validation_root / file_path
+            if full_path.exists():
                 print(f"  ✅ {file_path}")
                 found_files += 1
             else:
@@ -70,6 +124,9 @@ def validate_export_package():
     print("🔍 EXPORT PACKAGE DEPLOYMENT VALIDATION")
     print("=" * 50)
     
+    paths = find_arkival_paths()
+    validation_root = paths['validation_root']
+    
     required_files = [
         "setup_workflow_system.py",
         "workflow_config.json", 
@@ -85,7 +142,8 @@ def validate_export_package():
     print("📁 Checking required files...")
     missing_files = []
     for file_path in required_files:
-        if Path(file_path).exists():
+        full_path = validation_root / file_path
+        if full_path.exists():
             print(f"✅ {file_path}")
         else:
             print(f"❌ {file_path} - MISSING")
@@ -99,7 +157,8 @@ def validate_export_package():
     json_files = ["workflow_config.json", "changelog_summary.json"]
     for json_file in json_files:
         try:
-            with open(json_file, 'r') as f:
+            full_path = validation_root / json_file
+            with open(full_path, 'r') as f:
                 data = json.load(f)
             print(f"✅ {json_file} - Valid JSON")
         except json.JSONDecodeError as e:
