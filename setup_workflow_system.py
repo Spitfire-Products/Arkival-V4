@@ -234,34 +234,18 @@ class WorkflowSystemSetup:
         print(f"🏗️ Existing architecture: {', '.join(self.existing_architecture.get('technology_stack', ['Unknown']))}")
 
         try:
-            # Step 1: Create arkival subdirectory structure
-            self._create_arkival_subdirectory()
-            
-            # Step 2: Copy core files to arkival subdirectory
-            self._copy_arkival_files()
-            
-            # Step 3: Create integration-friendly configuration
-            self._create_integration_config()
-            
-            # Step 4: Create arkival_config.json trigger file
+            # Step 1: Create arkival_config.json trigger file in parent
             self._create_arkival_config()
             
-            # Step 5: Set up arkival-specific changelog
-            self._initialize_arkival_changelog()
-            
-            # Step 6: Create integration documentation
-            self._create_integration_documentation()
-            
-            # Step 7: Validate integration
-            self._validate_integration()
+            print("✅ Arkival integration completed - no files copied, everything stays in Arkival-V4/")
 
             print("\n✅ ARKIVAL INTEGRATION COMPLETED!")
             print("=" * 70)
             print("Integration summary:")
-            print("• Arkival files placed in arkival/ directory")
-            print("• Your existing project files remain unchanged")
-            print("• Run workflows from: python3 arkival/codebase_summary/agent_workflow_orchestrator.py")
-            print("• Configuration file: arkival/workflow_config.json")
+            print("• Only arkival_config.json added to parent directory")
+            print("• All Arkival files remain in Arkival-V4/ directory")
+            print("• Run workflows from: python3 Arkival-V4/codebase_summary/agent_workflow_orchestrator.py")
+            print("• Everything self-contained in Arkival-V4/")
 
         except Exception as e:
             print(f"❌ Integration failed: {e}")
@@ -392,7 +376,7 @@ class WorkflowSystemSetup:
                 "version": "4.0",
                 "deployment_mode": "subdirectory",
                 "arkival_directory": "arkival",
-                "created_at": datetime.datetime.now().isoformat(),
+                "created_at": datetime.now().isoformat(),
                 "note": "This file enables Arkival subdirectory mode detection"
             }
             
