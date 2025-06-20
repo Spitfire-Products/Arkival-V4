@@ -1,11 +1,11 @@
-# scan.ignore Configuration Guide
+# .scanignore Configuration Guide
 
-The `scan.ignore` file allows you to exclude directories and files from Arkival's codebase analysis. This improves performance and focuses the analysis on relevant code.
+The `.scanignore` file allows you to exclude directories and files from Arkival's codebase analysis. This improves performance and focuses the analysis on relevant code.
 
 ## 📍 File Location
 
-- **Development Mode**: Place `scan.ignore` in your project root directory
-- **Subdirectory Mode**: Place `scan.ignore` in the project root (same level as `/Arkival` folder)
+- **Development Mode**: Place `.scanignore` in your project root directory
+- **Subdirectory Mode**: Place `.scanignore` in the project root (same level as `/Arkival` folder)
 
 ## 📝 Format Rules
 

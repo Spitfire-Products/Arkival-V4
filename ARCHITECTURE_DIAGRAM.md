@@ -1,7 +1,44 @@
 # Arkival - Dynamic Architecture Analysis
 
 *Auto-generated from codebase structure analysis*
-*Version: 1.1.39 | Generated: 2025-06-18T22:13:31Z*
+*Version: 1.1.54 | Generated: 2025-06-20T17:57:57Z*
+
+## ⚠️ Version Systems - IMPORTANT
+| System | Current | Purpose | Updates |
+|--------|---------|---------|---------|
+| **Codebase Analysis** | v1.1.54 | Documentation scan version | Every `update_project_summary.py` run |
+| **Changelog/Project** | vNone | Feature release version | Major milestones only |
+
+**These are INDEPENDENT systems - version mismatch is NORMAL and EXPECTED**
+
+## 🎯 30-Second Overview
+| What | Details |
+|------|---------|
+| **System Type** | AI Agent Workflow Orchestration System for seamless knowledge transfer between AI agents and human developers |
+| **Architecture** | Python Application |
+| **State Management** | In-memory/Custom |
+| **Current State** | operational |
+| **Deployment Mode** | standalone |
+
+## 🗺️ Where Should I Start?
+```mermaid
+graph TD
+    START{What are you doing?} 
+    START -->|New to project| README[Check README/Documentation]
+    START -->|Adding feature| MAIN[Find main entry point]
+    START -->|Fixing bug| TESTS[Run test suite]
+    START -->|Understanding flow| STRUCTURE[Explore project structure]
+    
+    README --> DOCS[Read key documentation]
+    MAIN --> CODE[Examine codebase patterns]
+    TESTS --> DEBUG[Debug specific issues]
+```
+
+## 🔥 Critical Areas
+- **Active Issues**: 1 current issues
+- **Missing Docs**: 26 functions (see missing_breadcrumbs.json)
+- **Complexity**: medium complexity project
+- **Critical Files**: session_state.json, workflow_config.json, missing_breadcrumbs.json
 
 ## Core System Architecture
 ```mermaid
@@ -28,16 +65,16 @@ graph TB
     end
 
     subgraph "📊 Technology Distribution"
-        T1[Backend Files: 14]
-        T2[Frontend Files: 5]
-        T3[AI Integration: 2]
-        T4[Total Functions: 8017]
+        T1[Backend Files: 12]
+        T2[Frontend Files: 2]
+        T3[AI Integration: 3]
+        T4[Total Functions: 86]
     end
 
     subgraph "🤖 Agent Context"
-        A1[Documentation Coverage: 0.71%]
-        A2[Files Analyzed: 635]
-        A3[Missing Docs: 7960]
+        A1[Documentation Coverage: 69.77%]
+        A2[Files Analyzed: 13]
+        A3[Missing Docs: 26]
     end
 ```
 
@@ -63,6 +100,24 @@ flowchart LR
     MISSING --> OUTPUT
 ```
 
+## 🔥 Critical Execution Paths
+```mermaid
+sequenceDiagram
+    participant User
+    participant Setup
+    participant Orchestrator
+    participant Summary
+    participant State
+    
+    User->>Setup: setup_workflow_system.py
+    Setup->>State: Creates workflow_config.json
+    User->>Orchestrator: incoming agent workflow
+    Orchestrator->>State: Loads session_state.json
+    Orchestrator->>Summary: Triggers update_project_summary.py
+    Summary->>State: Updates codebase_summary.json
+    Note over State: All state in JSON files
+```
+
 ## Directory Structure Map
 ```mermaid
 graph TD
@@ -85,4 +140,4 @@ graph TD
 
 ---
 *Dynamic architecture analysis - reflects actual codebase structure*  
-*Core Directories: 6 | Patterns: 3 | Coverage: 0.71%*
+*Core Directories: 6 | Patterns: 3 | Coverage: 69.77%*

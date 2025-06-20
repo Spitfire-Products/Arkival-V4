@@ -1637,6 +1637,118 @@ Edit `workflow_config.json` to customize the system for your project needs, or a
         except Exception as e:
             print(f"\n⚠️  Could not run interactive testing: {e}")
 
+    def generate_simulation_report(self):
+        """
+        # @codebase-summary: Setup simulation report generator for source repository testing
+        - Generates detailed report of what setup would do without making changes
+        - Analyzes deployment logic and file creation patterns
+        - Creates .md report for validating setup behavior
+        - Used by: source repository testing, setup validation, deployment verification
+        """
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        report_path = self.project_root / f"SETUP_SIMULATION_REPORT_{timestamp}.md"
+        
+        report_content = f"""# Arkival Setup Simulation Report
+*Generated: {datetime.now().isoformat()}*
+*Mode: Source Repository Simulation*
+
+## Detection Results
+- **Deployment Context**: {self.deployment_context}
+- **IDE Environment**: {self.detected_ide}
+- **Project Root**: {self.project_root}
+- **Source Repository**: Yes (contains setup_workflow_system.py)
+- **Arkival Config**: Not present (as expected for source)
+
+## Deployment Logic Analysis
+
+### If deployed as NEW PROJECT:
+"""
+
+        # Simulate new project setup
+        if self.deployment_context != 'existing_project_integration':
+            report_content += """
+**Files that would be created:**
+1. `workflow_config.json` - Main workflow configuration
+2. `codebase_summary/codebase_summary.json` - Initial project analysis
+3. `SETUP_GUIDE.md` - IDE-specific setup instructions
+4. `.workflow_system/` directory structure
+5. IDE-specific configs (.vscode/tasks.json, etc.)
+
+**Directory structure:**
+```
+project-root/
+├── workflow_config.json
+├── codebase_summary/
+│   └── codebase_summary.json
+├── .workflow_system/
+│   ├── scripts/
+│   └── ide_configs/
+└── SETUP_GUIDE.md
+```
+
+**Git ignore additions:**
+- Generated JSON files
+- .workflow_system/ directory
+- IDE-specific temp files
+"""
+        else:
+            report_content += """
+**Files that would be created:**
+1. `arkival_config.json` - Subdirectory mode trigger (ROOT ONLY)
+
+**Directory structure:**
+```
+existing-project/
+├── arkival_config.json (ONLY file added)
+└── Arkival-V4/ (all files stay here)
+    ├── codebase_summary/
+    ├── export_package/
+    └── [all arkival files]
+```
+"""
+
+        report_content += f"""
+
+### Current Architecture Analysis:
+- **Technology Stack**: {', '.join(self.existing_architecture.get('technology_stack', ['None detected']))}
+- **Config Files**: {len(self.existing_architecture.get('config_files', []))} detected
+- **Important Directories**: {len(self.existing_architecture.get('important_directories', []))} preserved
+
+## Safety Checks That Would Apply:
+- ✅ Never overwrite existing files
+- ✅ Skip creation if files already exist
+- ✅ Preserve project structure in subdirectory mode
+- ✅ Only add arkival_config.json to existing projects
+
+## Environment-Specific Files (Git Ignored):
+- `.workflow_system/logs/`
+- `.workflow_system/backups/`
+- `codebase_summary.json` (generated)
+- `changelog_summary.json` (generated)
+- Session state files
+
+## Validation Results:
+- **Path Resolution**: Would work correctly
+- **IDE Integration**: {self.detected_ide} support available
+- **Cross-Platform**: Compatible with {platform.system()}
+
+## Recommended Testing:
+1. Deploy to test project: `mkdir test-project && cd test-project`
+2. Run setup: `python /path/to/setup_workflow_system.py`
+3. Verify file creation matches this simulation
+4. Test workflow execution
+
+---
+*This simulation prevents modifications to the source repository while validating setup logic.*
+"""
+
+        with open(report_path, 'w', encoding='utf-8') as f:
+            f.write(report_content)
+        
+        print(f"📋 Simulation report generated: {report_path.name}")
+        print("🔍 Review the report to validate setup behavior")
+        print("💡 To test actual setup, deploy to a separate directory")
+
 def main():
     """
     # @codebase-summary: Main execution entry point for workflow system setup
@@ -1658,7 +1770,18 @@ def main():
         print(f"🔍 Detected IDE: {setup.detected_ide}")
         print(f"📁 Project Root: {setup.project_root}")
         
-        if setup.deployment_context == 'existing_project_integration':
+        # Check if running in source repository (has .git and codebase_summary directory with scripts)
+        is_source_repo = (
+            (setup.project_root / ".git").exists() and
+            (setup.project_root / "codebase_summary" / "agent_workflow_orchestrator.py").exists() and
+            not (setup.project_root / "arkival_config.json").exists()
+        )
+        
+        if is_source_repo:
+            print("\n⚠️  DETECTED: Running in Arkival source repository")
+            print("🧪 Generating simulation report instead of making changes...")
+            setup.generate_simulation_report()
+        elif setup.deployment_context == 'existing_project_integration':
             setup.setup_existing_project_integration()
         else:
             setup.setup_new_project()

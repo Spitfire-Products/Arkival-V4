@@ -16,77 +16,101 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Dict, Any, List
 
-def find_project_paths():
+def find_arkival_paths():
     """
-    Universal path resolution for project summary generation
+    Universal path resolution for Arkival subdirectory deployment
     Returns: Dict with all required paths
     """
     current_dir = Path.cwd()
     project_root = None
     
     # Check if we're running from within the codebase_summary directory
-    if current_dir.name == "codebase_summary":
-        # Running from a codebase_summary directory
+    if current_dir.name == "codebase_summary" and current_dir.parent.name != "Arkival":
+        # Running from source repo's codebase_summary directory
         project_root = current_dir.parent
         is_in_scripts_dir = True
     else:
         is_in_scripts_dir = False
         
-        # Search upward for project config markers
+        # Search upward for arkival.config.json
         search_path = current_dir
-        config_markers = [".project_summary_config.json", "package.json", "pyproject.toml", ".git", "README.md"]
-        
         for _ in range(5):  # Max 5 levels up
-            # Check for any project root indicator
-            for marker in config_markers:
-                if (search_path / marker).exists():
-                    project_root = search_path
-                    break
-            if project_root:
+            if (search_path / "arkival.config.json").exists():
+                project_root = search_path
                 break
             if search_path.parent == search_path:  # Reached filesystem root
                 break
             search_path = search_path.parent
         
+        # Try alternative detection methods
+        if not project_root:
+            # Look for Arkival directory as indicator
+            search_path = current_dir
+            for _ in range(5):
+                if (search_path / "Arkival").exists():
+                    project_root = search_path
+                    break
+                search_path = search_path.parent
+        
         # Fallback - assume current directory
         if not project_root:
             project_root = current_dir
     
-    # Determine deployment mode and data directory
-    # Look for a summary config file first
-    config_file = project_root / ".project_summary_config.json"
-    data_dir = project_root
+    # Determine deployment mode
+    # Three scenarios:
+    # 1. Running from source repo (dev mode)
+    # 2. Running from subdirectory deployment (Arkival/)
+    # 3. Running from within codebase_summary directory in source repo
     
-    # Check if we're in a subdirectory deployment
-    if is_in_scripts_dir and current_dir.parent != project_root:
-        # Might be subdirectory deployment
-        data_dir = current_dir.parent
-    
-    # Set up paths - generic for any project
-    if is_in_scripts_dir:
-        scripts_dir = current_dir
+    if current_dir.name.lower() in ['arkival', 'arkival-v4'] or (
+        not is_in_scripts_dir and (project_root / "arkival_config.json").exists()
+    ):
+        # Subdirectory deployment mode - use SAME structure as development mode
+        arkival_dir = current_dir if current_dir.name.lower() in ['arkival', 'arkival-v4'] else project_root
+        return {
+            'project_root': project_root,
+            'config_file': project_root / "arkival_config.json",
+            'arkival_dir': arkival_dir,
+            'data_dir': arkival_dir,
+            'scripts_dir': arkival_dir / "codebase_summary",
+            'export_dir': arkival_dir / "export_package",
+            'checkpoints_dir': arkival_dir / "checkpoints",
+            
+            # Data files - SAME as development mode!
+            'codebase_summary': arkival_dir / "codebase_summary.json",
+            'changelog_summary': arkival_dir / "changelog_summary.json",
+            'session_state': arkival_dir / "codebase_summary" / "session_state.json",
+            'missing_breadcrumbs': arkival_dir / "codebase_summary" / "missing_breadcrumbs.json",
+            'scan_ignore': project_root / ".scanignore"
+        }
     else:
-        scripts_dir = project_root / "codebase_summary"
-    
-    return {
-        'project_root': project_root,
-        'config_file': config_file,
-        'data_dir': data_dir,
-        'scripts_dir': scripts_dir,
-        'export_dir': data_dir / "export_package",
-        'checkpoints_dir': data_dir / "checkpoints",
-        
-        # Data files in standard locations
-        'codebase_summary': data_dir / "codebase_summary.json",
-        'changelog_summary': data_dir / "changelog_summary.json", 
-        'session_state': scripts_dir / "session_state.json" if scripts_dir.exists() else data_dir / "session_state.json",
-        'missing_breadcrumbs': scripts_dir / "missing_breadcrumbs.json" if scripts_dir.exists() else data_dir / "missing_breadcrumbs.json",
-        'scan_ignore': project_root / ".scanignore"
-    }
+        # Development mode - use root directory structure
+        # Special handling when running from codebase_summary directory
+        if is_in_scripts_dir:
+            scripts_dir = current_dir
+        else:
+            scripts_dir = project_root / "codebase_summary"
+            
+        return {
+            'project_root': project_root,
+            'config_file': project_root / "arkival_config.json",
+            'arkival_dir': project_root,
+            'data_dir': project_root,
+            'scripts_dir': scripts_dir, 
+            'export_dir': project_root / "export_package",
+            'checkpoints_dir': project_root / "checkpoints",
+            
+            # Data files in root/standard locations
+            'codebase_summary': project_root / "codebase_summary.json",
+            'changelog_summary': project_root / "changelog_summary.json",
+            'session_state': scripts_dir / "session_state.json",
+            'missing_breadcrumbs': scripts_dir / "missing_breadcrumbs.json",
+            'scan_ignore': project_root / ".scanignore"
+        }
 
 class OptimizedProjectSummaryGenerator:
     def __init__(self):
-        self.paths = find_project_paths()
+        self.paths = find_arkival_paths()
         self.project_root = self.paths['project_root']
         self.summary_path = self.paths['codebase_summary']
         self.history_dir = self.paths['scripts_dir'] / "history"
@@ -403,7 +427,7 @@ class OptimizedProjectSummaryGenerator:
                     structure["technology_indicators"]["backend"].append(rel_path)
                 elif ext in ['.js', '.jsx', '.ts', '.tsx', '.vue']:
                     structure["technology_indicators"]["frontend"].append(rel_path)
-                elif any(ai_term in file.lower() for ai_term in ['ai', 'gpt', 'claude', 'gemini', 'llm', 'openai', 'anthropic', 'model']):
+                elif 'claude' in file.lower() or 'ai' in file.lower():
                     structure["technology_indicators"]["ai_integration"].append(rel_path)
                 elif ext in ['.sql', '.db']:
                     structure["technology_indicators"]["database"].append(rel_path)
@@ -495,50 +519,19 @@ class OptimizedProjectSummaryGenerator:
             }
         }
 
-        # AI integration detection - generic
+        # AI integration detection
         ai_files = structure["technology_indicators"]["ai_integration"]
-        ai_providers = self._detect_ai_providers(ai_files)
         ai_integration = {
-            "providers": ai_providers,
-            "capabilities": self._detect_ai_capabilities(ai_files, ai_providers),
+            "providers": ["Claude"] if any("claude" in f.lower() for f in ai_files) else [],
+            "capabilities": ["Text Generation"] if ai_files else [],
             "integration_files": [str(self.project_root / f) for f in ai_files[:5]]
         }
 
         # Architecture analysis
         architecture_analysis = self._analyze_codebase_architecture(structure, code_analysis)
 
-        # Get previous session context for critical context
-        last_agent_task = self._get_last_agent_task()
-        deployment_mode = self._detect_deployment_mode()
-        
         return {
             "_generator": "Generated by codebase_summary/update_project_summary.py - Core project documentation and analysis system",
-            "_critical_context": {
-                "what_this_is": project_info["description"],
-                "primary_purpose": project_info["description"],
-                "entry_points": self._detect_entry_points(structure),
-                "deployment_mode": deployment_mode,
-                "active_issues": self._get_active_issues(doc_gaps),
-                "last_agent_task": last_agent_task,
-                "current_state": "operational" if total_functions > 0 else "needs_setup"
-            },
-            "_version_systems_explained": {
-                "codebase_version": {
-                    "current": version,
-                    "purpose": "Tracks codebase structure analysis iterations",
-                    "updates": "Every time update_project_summary.py runs",
-                    "independent_from": "changelog/project versions"
-                },
-                "changelog_version": {
-                    "current": self._get_changelog_version(),
-                    "purpose": "Tracks user-facing feature releases", 
-                    "updates": "Only when major features/milestones complete",
-                    "location": "changelog_summary.json"
-                },
-                "why_different": "Codebase analysis runs frequently during development. Changelog updates only at release milestones. These are COMPLETELY INDEPENDENT systems."
-            },
-            "navigation_map": self._build_navigation_map(structure, file_analysis),
-            "function_hotspots": self._analyze_function_hotspots(missing_breadcrumbs, language_breakdown),
             "project_name": project_info["name"],
             "version": version,
             "updated_at": datetime.datetime.now().isoformat() + "Z",
@@ -578,7 +571,7 @@ class OptimizedProjectSummaryGenerator:
                 "complexity_score": "high" if total_functions > 500 else "medium" if total_functions > 100 else "low"
             },
             "deployment": {"platform": "Replit" if ".replit" in str(structure["key_files"]) else "unknown", "start_command": "unknown", "config_files": [f for f in structure["key_files"] if f.endswith(('.replit', 'Dockerfile', 'docker-compose.yml'))]},
-            "version_correlation": {"changelog_version": self._get_changelog_version(), "last_checkpoint": None, "archived_at": datetime.datetime.now().isoformat() + "Z", "note": "Enhanced summary version is independent of changelog milestones"},
+            "version_correlation": {"changelog_version": "1.1.10", "last_checkpoint": None, "archived_at": datetime.datetime.now().isoformat() + "Z", "note": "Enhanced summary version is independent of changelog milestones"},
             "future_enhancements": [
                 f"Improve documentation coverage from {round((documented_functions / max(1, total_functions)) * 100, 1)}% to 80%+",
                 "Complete database integration setup",
@@ -658,52 +651,10 @@ class OptimizedProjectSummaryGenerator:
         frontend_count = len(tech_stats.get("frontend", []))
         ai_count = len(tech_stats.get("ai_integration", []))
         
-        # Get critical context for enhanced diagram
-        critical_context = summary.get("_critical_context", {})
-        version_info = summary.get("_version_systems_explained", {})
-        hotspots = summary.get("function_hotspots", {})
-        
         diagram_content = f"""# {project_name} - Dynamic Architecture Analysis
 
 *Auto-generated from codebase structure analysis*
 *Version: {summary["version"]} | Generated: {summary["updated_at"][:19]}Z*
-
-## ⚠️ Version Systems - IMPORTANT
-| System | Current | Purpose | Updates |
-|--------|---------|---------|---------|
-| **Codebase Analysis** | v{summary["version"]} | Documentation scan version | Every `update_project_summary.py` run |
-| **Changelog/Project** | v{version_info.get("changelog_version", {}).get("current", "N/A")} | Feature release version | Major milestones only |
-
-**These are INDEPENDENT systems - version mismatch is NORMAL and EXPECTED**
-
-## 🎯 30-Second Overview
-| What | Details |
-|------|---------|
-| **System Type** | {critical_context.get("primary_purpose", "Software Project")} |
-| **Architecture** | {self._detect_architecture_type(arch)} |
-| **State Management** | {self._detect_state_management(summary)} |
-| **Current State** | {critical_context.get("current_state", "operational")} |
-| **Deployment Mode** | {critical_context.get("deployment_mode", "unknown")} |
-
-## 🗺️ Where Should I Start?
-```mermaid
-graph TD
-    START{{What are you doing?}} 
-    START -->|New to project| README[Check README/Documentation]
-    START -->|Adding feature| MAIN[Find main entry point]
-    START -->|Fixing bug| TESTS[Run test suite]
-    START -->|Understanding flow| STRUCTURE[Explore project structure]
-    
-    README --> DOCS[Read key documentation]
-    MAIN --> CODE[Examine codebase patterns]
-    TESTS --> DEBUG[Debug specific issues]
-```
-
-## 🔥 Critical Areas
-- **Active Issues**: {len(critical_context.get("active_issues", []))} current issues
-- **Missing Docs**: {stats["missing_count"]} functions (see missing_breadcrumbs.json)
-- **Complexity**: {hotspots.get("complexity_score", "low")} complexity project
-- **Critical Files**: session_state.json, workflow_config.json, missing_breadcrumbs.json
 
 ## Core System Architecture
 ```mermaid
@@ -749,24 +700,6 @@ flowchart LR
     
     ANALYSIS --> BREADCRUMBS
     MISSING --> OUTPUT
-```
-
-## 🔥 Critical Execution Paths
-```mermaid
-sequenceDiagram
-    participant User
-    participant Setup
-    participant Orchestrator
-    participant Summary
-    participant State
-    
-    User->>Setup: setup_workflow_system.py
-    Setup->>State: Creates workflow_config.json
-    User->>Orchestrator: incoming agent workflow
-    Orchestrator->>State: Loads session_state.json
-    Orchestrator->>Summary: Triggers update_project_summary.py
-    Summary->>State: Updates codebase_summary.json
-    Note over State: All state in JSON files
 ```
 
 ## Directory Structure Map
@@ -831,12 +764,12 @@ graph TD
 
 *Core project documentation system*
 
-## 🚀 Project Architecture
+## 🚀 Deployment Architecture
 
-This analysis was generated by an automated project summary tool that:
-- **Scans**: All source code files to detect functions and documentation
-- **Analyzes**: Project structure, dependencies, and architecture patterns
-- **Reports**: Documentation coverage, complexity metrics, and key insights
+This system supports **dual deployment modes** with universal path resolution:
+- **Development Mode**: Full integration with project root file structure
+- **Subdirectory Mode**: Non-destructive integration as `/Arkival` subdirectory
+- **Universal Path Resolution**: Automatic detection and path adjustment via `find_arkival_paths()`
 
 ## 📊 Project Overview
 
@@ -1016,308 +949,6 @@ This analysis was generated by an automated project summary tool that:
                 return True
         
         return False
-
-    def _get_last_agent_task(self) -> str:
-        """Get the last agent task from session state"""
-        try:
-            session_state_file = self.paths['session_state']
-            if session_state_file.exists():
-                with open(session_state_file, 'r', encoding='utf-8') as f:
-                    data = json.load(f)
-                    return data.get('last_summary', 'No previous agent task recorded')
-        except:
-            pass
-        return "No previous agent task recorded"
-
-    def _detect_deployment_mode(self) -> str:
-        """Detect if running in subdirectory or standalone mode"""
-        # Check if we're in a subdirectory by looking at path structure
-        if self.paths['data_dir'] != self.project_root:
-            return "subdirectory"
-        return "standalone"
-
-    def _get_active_issues(self, doc_gaps: List[Dict]) -> List[str]:
-        """Get current active issues from various sources"""
-        issues = []
-        
-        # Documentation gaps
-        if doc_gaps:
-            issues.append(f"{len(doc_gaps)} files with missing documentation")
-        
-        # Version mismatch - only if versions exist and differ significantly
-        changelog_version = self._get_changelog_version()
-        current_version = self._get_current_version()
-        if changelog_version and current_version and changelog_version != current_version:
-            # Only flag if major or minor version differs
-            changelog_parts = changelog_version.split('.')[:2]
-            current_parts = current_version.split('.')[:2]
-            if changelog_parts != current_parts:
-                issues.append(f"Version mismatch: codebase ({current_version}) vs changelog ({changelog_version})")
-        
-        # Check for previous agent recommendations
-        try:
-            session_state_file = self.paths['session_state']
-            if session_state_file.exists():
-                with open(session_state_file, 'r', encoding='utf-8') as f:
-                    data = json.load(f)
-                    if 'recommendations' in data:
-                        issues.extend(data['recommendations'])
-        except:
-            pass
-        
-        return issues[:5]  # Limit to top 5 issues
-
-    def _get_changelog_version(self) -> str:
-        """Get version from changelog_summary.json"""
-        try:
-            changelog_file = self.paths['changelog_summary']
-            if changelog_file.exists():
-                with open(changelog_file, 'r', encoding='utf-8') as f:
-                    data = json.load(f)
-                    return data.get('version', None)
-        except:
-            pass
-        return None
-
-    def _analyze_function_hotspots(self, missing_breadcrumbs: List[Dict], language_breakdown: Dict) -> Dict[str, Any]:
-        """Analyze function complexity and hotspots"""
-        hotspots = {
-            "most_complex_files": [],
-            "most_documented_languages": [],
-            "critical_missing_docs": [],
-            "complexity_score": "low"
-        }
-        
-        # Find files with most missing documentation
-        if missing_breadcrumbs:
-            complex_files = sorted(missing_breadcrumbs, key=lambda x: len(x["missing"]), reverse=True)[:5]
-            hotspots["most_complex_files"] = [
-                {"file": item["file"], "missing_functions": len(item["missing"])} 
-                for item in complex_files
-            ]
-            
-            # Critical missing docs (files with >3 undocumented functions)
-            hotspots["critical_missing_docs"] = [
-                item["file"] for item in complex_files if len(item["missing"]) > 3
-            ]
-        
-        # Language documentation coverage
-        if language_breakdown:
-            lang_coverage = []
-            for lang, stats in language_breakdown.items():
-                if stats["functions"] > 0:
-                    lang_coverage.append({
-                        "language": lang,
-                        "total_functions": stats["functions"],
-                        "files": stats["files"]
-                    })
-            hotspots["most_documented_languages"] = sorted(lang_coverage, key=lambda x: x["total_functions"], reverse=True)[:5]
-        
-        # Overall complexity score
-        total_missing = sum(len(item["missing"]) for item in missing_breadcrumbs)
-        if total_missing > 30:
-            hotspots["complexity_score"] = "high"
-        elif total_missing > 10:
-            hotspots["complexity_score"] = "medium"
-        
-        return hotspots
-
-    def _detect_entry_points(self, structure: Dict) -> Dict[str, str]:
-        """Detect common entry points in the project"""
-        entry_points = {}
-        
-        # Look for common entry point patterns
-        common_patterns = [
-            ('main', ['main.py', 'app.py', 'index.js', 'server.js', 'main.go', 'main.rs']),
-            ('setup', ['setup.py', 'install.py', 'setup.sh', 'install.sh']),
-            ('test', ['test.py', 'run_tests.py', 'test.sh', 'pytest.ini']),
-            ('build', ['build.py', 'build.sh', 'Makefile', 'package.json']),
-            ('docs', ['docs.py', 'mkdocs.yml', 'sphinx-build'])
-        ]
-        
-        all_files = []
-        for root, dirs, files in os.walk(self.project_root):
-            root_path = Path(root)
-            if self._should_ignore_path(root_path):
-                continue
-            dirs[:] = [d for d in dirs if not self._should_ignore_path(root_path / d)]
-            for file in files:
-                rel_path = str(Path(root) / file).replace(str(self.project_root) + '/', '')
-                all_files.append(rel_path)
-        
-        for entry_type, patterns in common_patterns:
-            for pattern in patterns:
-                for file in all_files:
-                    if file.endswith(pattern) or pattern in file:
-                        entry_points[entry_type] = file
-                        break
-                if entry_type in entry_points:
-                    break
-        
-        # Add update_summary if this script exists
-        if (self.paths['scripts_dir'] / "update_project_summary.py").exists():
-            rel_path = str(self.paths['scripts_dir'] / "update_project_summary.py").replace(str(self.project_root) + '/', '')
-            entry_points['update_summary'] = f"python3 {rel_path}"
-        
-        return entry_points
-
-    def _build_navigation_map(self, structure: Dict, file_analysis: List[Dict]) -> Dict[str, Any]:
-        """Build navigation map based on actual project structure"""
-        nav_map = {
-            "where_to_start": {},
-            "key_files": {},
-            "common_patterns": {}
-        }
-        
-        # Detect key files
-        key_files = {
-            "readme": None,
-            "config": None,
-            "main": None,
-            "tests": None
-        }
-        
-        for file in structure.get("key_files", []):
-            if "readme" in file.lower():
-                key_files["readme"] = file
-            elif any(cfg in file.lower() for cfg in ["config", "settings", ".json", ".yaml", ".toml"]):
-                if not key_files["config"]:
-                    key_files["config"] = file
-        
-        # Find main entry points
-        backend_files = structure["technology_indicators"].get("backend", [])
-        if backend_files:
-            for file in backend_files:
-                if any(main in file.lower() for main in ["main.", "app.", "server.", "index."]):
-                    key_files["main"] = file
-                    break
-        
-        # Build navigation suggestions
-        if key_files["readme"]:
-            nav_map["where_to_start"]["documentation"] = [key_files["readme"]]
-        
-        if key_files["main"]:
-            nav_map["where_to_start"]["new_feature"] = [key_files["main"]]
-        
-        if key_files["config"]:
-            nav_map["where_to_start"]["configuration"] = [key_files["config"]]
-        
-        # Find test files
-        test_files = [f for f in structure.get("key_files", []) + backend_files if "test" in f.lower()]
-        if test_files:
-            nav_map["where_to_start"]["testing"] = test_files[:3]
-        
-        # Key files for reference
-        nav_map["key_files"] = {k: v for k, v in key_files.items() if v}
-        
-        # Common patterns detected
-        if structure.get("file_types", {}).get(".py"):
-            nav_map["common_patterns"]["language"] = "Python"
-        elif structure.get("file_types", {}).get(".js") or structure.get("file_types", {}).get(".ts"):
-            nav_map["common_patterns"]["language"] = "JavaScript/TypeScript"
-        
-        return nav_map
-
-    def _detect_ai_providers(self, ai_files: List[str]) -> List[str]:
-        """Detect AI providers from file names and paths"""
-        providers = []
-        provider_patterns = {
-            "OpenAI": ["openai", "gpt", "chatgpt"],
-            "Claude": ["claude", "anthropic"],
-            "Google": ["gemini", "palm", "bard", "google-ai"],
-            "Hugging Face": ["huggingface", "transformers"],
-            "Cohere": ["cohere"],
-            "Azure": ["azure", "cognitive"],
-            "Custom": ["model", "llm", "ai"]
-        }
-        
-        for provider, patterns in provider_patterns.items():
-            for file in ai_files:
-                if any(pattern in file.lower() for pattern in patterns):
-                    if provider not in providers:
-                        providers.append(provider)
-        
-        return providers if providers else ["Unknown"]
-
-    def _detect_ai_capabilities(self, ai_files: List[str], providers: List[str]) -> List[str]:
-        """Detect AI capabilities from files and providers"""
-        capabilities = []
-        
-        capability_patterns = {
-            "Text Generation": ["generate", "completion", "text", "chat"],
-            "Embeddings": ["embed", "vector", "similarity"],
-            "Classification": ["classify", "sentiment", "categorize"],
-            "Translation": ["translate", "language"],
-            "Speech": ["speech", "audio", "voice"],
-            "Vision": ["vision", "image", "ocr"],
-            "Code Generation": ["code", "copilot", "assist"]
-        }
-        
-        for capability, patterns in capability_patterns.items():
-            for file in ai_files:
-                if any(pattern in file.lower() for pattern in patterns):
-                    if capability not in capabilities:
-                        capabilities.append(capability)
-        
-        # Default capability if none detected but AI files exist
-        if not capabilities and ai_files:
-            capabilities = ["Text Generation"]
-        
-        return capabilities
-
-    def _detect_architecture_type(self, arch: Dict) -> str:
-        """Detect the architecture type from patterns"""
-        patterns = arch.get("architecture_patterns", [])
-        
-        if "API Layer" in patterns or "REST" in patterns:
-            return "API/Service Architecture"
-        elif "Component Architecture" in patterns:
-            return "Component-Based Architecture"
-        elif "Microservices" in patterns:
-            return "Microservices Architecture"
-        elif "MVC" in patterns:
-            return "MVC Architecture"
-        else:
-            # Detect from file structure
-            lang_breakdown = arch.get("complexity_indicators", {}).get("function_distribution", {})
-            if ".py" in lang_breakdown:
-                return "Python Application"
-            elif ".js" in lang_breakdown or ".ts" in lang_breakdown:
-                return "JavaScript/TypeScript Application"
-            else:
-                return "Modular Application"
-
-    def _detect_state_management(self, summary: Dict) -> str:
-        """Detect how the project manages state"""
-        tech_indicators = summary.get("project_structure", {}).get("technology_indicators", {})
-        
-        # Check for databases
-        if tech_indicators.get("database"):
-            db_files = tech_indicators["database"]
-            if any("postgres" in f.lower() or "pg" in f.lower() for f in db_files):
-                return "PostgreSQL Database"
-            elif any("mysql" in f.lower() or "maria" in f.lower() for f in db_files):
-                return "MySQL/MariaDB Database"
-            elif any("mongo" in f.lower() for f in db_files):
-                return "MongoDB Database"
-            elif any("sqlite" in f.lower() or ".db" in f for f in db_files):
-                return "SQLite Database"
-            else:
-                return "Database-backed"
-        
-        # Check for state management patterns
-        all_files = []
-        for cat, files in tech_indicators.items():
-            all_files.extend(files)
-        
-        if any("redux" in f.lower() for f in all_files):
-            return "Redux State Management"
-        elif any("vuex" in f.lower() for f in all_files):
-            return "Vuex State Management"
-        elif any(".json" in f for f in all_files):
-            return "File-based (JSON)"
-        else:
-            return "In-memory/Custom"
 
     def generate_summary(self):
         """Generate optimized project summary"""

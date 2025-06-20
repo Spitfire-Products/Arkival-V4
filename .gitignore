@@ -105,6 +105,9 @@ package.json
 package-lock.json
 node_modules/
 
+# Setup simulation reports (testing only)
+SETUP_SIMULATION_REPORT_*.md
+
 
 # Token optimization entries added by update_project_summary.py
 # Python cache
@@ -146,6 +149,10 @@ codebase_summary/session_state.json
 codebase_summary/agent_handoff.json
 codebase_summary/missing_breadcrumbs.json
 export_package/agent_handoff.json
+
+# Export validation files (generated during deployment prep)
+EXPORT_READINESS_MANIFEST.json
+EXPORT_VALIDATION_RESULTS.json
 
 # Arkival data directory (subdirectory mode)
 Arkival/data/

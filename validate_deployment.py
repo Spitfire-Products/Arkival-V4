@@ -278,9 +278,9 @@ def validate_export_package():
 def cleanup_post_deployment():
     """
     # @codebase-summary: Post-deployment cleanup for prompt caching optimization
-    - Removes test files and excessive history after successful deployment
+    - Adds test files to .scanignore and archives excessive history after successful deployment
     - Optimizes prompt caching by reducing context size (~5000 tokens)
-    - Preserves essential functionality while improving performance
+    - Preserves test files for debugging while excluding them from scans
     - Used by: deployment automation, performance optimization
     """
     print("🧹 POST-DEPLOYMENT CLEANUP")
@@ -301,23 +301,38 @@ def cleanup_post_deployment():
     
     cleanup_actions = []
     
-    # Remove language scan test files
+    # Add language scan test files to .scanignore (don't delete them)
     test_dir = Path("codebase_summary/language_scan_tests/")
     if test_dir.exists():
         test_files = list(test_dir.glob("*"))
         if test_files:
             try:
-                import shutil
-                if is_source_repo:
-                    # Simulation mode - don't actually delete
-                    print(f"🎭 SIMULATION: Would remove {len(test_files)} language test files")
-                    cleanup_actions.append(f"SIMULATED: Would remove {len(test_files)} language test files")
+                scanignore_path = Path(".scanignore")
+                pattern_to_add = "codebase_summary/language_scan_tests/"
+                
+                # Check if pattern already exists
+                pattern_exists = False
+                if scanignore_path.exists():
+                    with open(scanignore_path, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                        if pattern_to_add in content:
+                            pattern_exists = True
+                
+                if not pattern_exists:
+                    # Add pattern to .scanignore
+                    with open(scanignore_path, 'a', encoding='utf-8') as f:
+                        f.write(f"\n# Added by post-deployment cleanup\n{pattern_to_add}\n")
+                    
+                    if is_source_repo:
+                        print(f"🎭 SIMULATION: Would add {len(test_files)} language test files to .scanignore")
+                        cleanup_actions.append(f"SIMULATED: Would add language_scan_tests/ to .scanignore")
+                    else:
+                        print(f"✅ Added language_scan_tests/ to .scanignore ({len(test_files)} test files preserved)")
+                        cleanup_actions.append(f"Added language_scan_tests/ to .scanignore")
                 else:
-                    # Production mode - actually delete files
-                    shutil.rmtree(test_dir)
-                    cleanup_actions.append(f"Removed {len(test_files)} language test files")
+                    print(f"✅ language_scan_tests/ already in .scanignore")
             except Exception as e:
-                print(f"⚠️  Could not remove test files: {e}")
+                print(f"⚠️  Could not update .scanignore: {e}")
                 # Don't fail the entire cleanup if this fails
     
     # Keep only last 5 history files (with verification)

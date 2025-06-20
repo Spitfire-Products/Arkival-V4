@@ -95,3 +95,5 @@ _site/
 Arkival/.git/
 Arkival/__pycache__/
 Arkival/.cache/
+# Added by post-deployment cleanup
+codebase_summary/language_scan_tests/

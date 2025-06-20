@@ -20,35 +20,47 @@ def find_arkival_paths():
     current_dir = Path.cwd()
     project_root = None
     
-    # Search upward for arkival.config.json
-    search_path = current_dir
-    for _ in range(5):  # Max 5 levels up
-        if (search_path / "arkival.config.json").exists():
-            project_root = search_path
-            break
-        if search_path.parent == search_path:  # Reached filesystem root
-            break
-        search_path = search_path.parent
-    
-    # Try alternative detection methods
-    if not project_root:
-        # Look for Arkival directory as indicator
+    # Check if we're running from within the codebase_summary directory
+    if current_dir.name == "codebase_summary" and current_dir.parent.name != "Arkival":
+        # Running from source repo's codebase_summary directory
+        project_root = current_dir.parent
+        is_in_scripts_dir = True
+    else:
+        is_in_scripts_dir = False
+        
+        # Search upward for arkival.config.json
         search_path = current_dir
-        for _ in range(5):
-            if (search_path / "Arkival").exists():
+        for _ in range(5):  # Max 5 levels up
+            if (search_path / "arkival.config.json").exists():
                 project_root = search_path
                 break
+            if search_path.parent == search_path:  # Reached filesystem root
+                break
             search_path = search_path.parent
+        
+        # Try alternative detection methods
+        if not project_root:
+            # Look for Arkival directory as indicator
+            search_path = current_dir
+            for _ in range(5):
+                if (search_path / "Arkival").exists():
+                    project_root = search_path
+                    break
+                search_path = search_path.parent
+        
+        # Fallback - assume current directory
+        if not project_root:
+            project_root = current_dir
     
-    # Fallback - assume current directory
-    if not project_root:
-        project_root = current_dir
+    # Determine deployment mode
+    # Three scenarios:
+    # 1. Running from source repo (dev mode)
+    # 2. Running from subdirectory deployment (Arkival/)
+    # 3. Running from within codebase_summary directory in source repo
     
-    # Determine if we're in dev mode or subdirectory mode
-    # Dev mode: scripts are in codebase_summary/, data files in root
-    # Subdirectory mode: everything under Arkival/
-    
-    if current_dir.name.lower() in ['arkival', 'arkival-v4'] or (project_root / "arkival_config.json").exists():
+    if current_dir.name.lower() in ['arkival', 'arkival-v4'] or (
+        not is_in_scripts_dir and (project_root / "arkival_config.json").exists()
+    ):
         # Subdirectory deployment mode
         arkival_dir = project_root / "Arkival"
         return {
@@ -68,20 +80,26 @@ def find_arkival_paths():
         }
     else:
         # Development mode - use root directory structure
+        # Special handling when running from codebase_summary directory
+        if is_in_scripts_dir:
+            scripts_dir = current_dir
+        else:
+            scripts_dir = project_root / "codebase_summary"
+            
         return {
             'project_root': project_root,
             'config_file': project_root / "arkival_config.json",
             'arkival_dir': project_root,
             'data_dir': project_root,
-            'scripts_dir': project_root / "codebase_summary", 
+            'scripts_dir': scripts_dir, 
             'export_dir': project_root / "export_package",
             'checkpoints_dir': project_root / "checkpoints",
             
             # Data files in root/standard locations
             'codebase_summary': project_root / "codebase_summary.json",
             'changelog_summary': project_root / "changelog_summary.json",
-            'session_state': project_root / "codebase_summary" / "session_state.json",
-            'missing_breadcrumbs': project_root / "codebase_summary" / "missing_breadcrumbs.json"
+            'session_state': scripts_dir / "session_state.json",
+            'missing_breadcrumbs': scripts_dir / "missing_breadcrumbs.json"
         }
 
 class AgentWorkflowOrchestrator:
@@ -518,13 +536,25 @@ class AgentWorkflowOrchestrator:
     def _run_codebase_scan(self) -> bool:
         """Run codebase summary update"""
         print("📋 Triggering enhanced codebase summary update...")
+        
+        # Always run codebase scan - this is essential for maintaining project coherence
+        
         try:
             # Use force flag for comprehensive update during handoff
             import subprocess
 
+            # First check if script exists at expected path
+            script_path = self.paths['scripts_dir'] / "update_project_summary.py"
+            if not script_path.exists():
+                # Try current directory as fallback
+                script_path = Path(__file__).parent / "update_project_summary.py"
+                if not script_path.exists():
+                    print(f"❌ Could not find update_project_summary.py")
+                    return False
+
             cmd = [
                 sys.executable,
-                str(self.paths['scripts_dir'] / "update_project_summary.py"),
+                str(script_path),
                 "--force"
             ]
 
