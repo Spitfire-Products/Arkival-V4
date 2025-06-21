@@ -26,7 +26,6 @@ coverage.xml
 # IDE and Editor Files
 .vscode/
 .idea/
-.claude/
 *.swp
 *.swo
 *~
@@ -80,6 +79,21 @@ pids/
 .pythonlibs/
 .upm/
 .config/
+
+# Security - Credentials and API Keys
+*.credentials.json
+.credentials
+**/credentials.json
+**/.credentials.json
+*.key
+*.pem
+*secret*
+*api_key*
+
+# Claude Code Environment-Specific Configuration
+**/settings.local.json
+.claude/
+**/.claude/
 
 # Agent State Files
 .local/state/

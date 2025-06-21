@@ -13,7 +13,7 @@
   },
   "_version_systems_explained": {
     "codebase_version": {
-      "current": "1.1.74",
+      "current": "1.1.84",
       "purpose": "Tracks codebase structure analysis iterations",
       "updates": "Every time update_project_summary.py runs",
       "independent_from": "changelog/project versions"
@@ -29,14 +29,14 @@
   "navigation_map": {
     "where_to_start": {
       "documentation": [
-        "modules/claude-code/README.md"
+        "modules/claude-code/CLAUDE_README.md"
       ],
       "configuration": [
         "pyproject.toml"
       ]
     },
     "key_files": {
-      "readme": "modules/claude-code/README.md",
+      "readme": "modules/claude-code/CLAUDE_README.md",
       "config": "pyproject.toml"
     },
     "common_patterns": {
@@ -61,8 +61,8 @@
     "complexity_score": "low"
   },
   "project_name": "Arkival",
-  "version": "1.1.74",
-  "updated_at": "2025-06-21T08:54:22.521686Z",
+  "version": "1.1.84",
+  "updated_at": "2025-06-21T20:23:39.168874Z",
   "description": "AI Agent Workflow Orchestration System for seamless knowledge transfer between AI agents and human developers",
   "main_dependencies": {
     "runtime": [],
@@ -70,7 +70,7 @@
     "system": []
   },
   "project_structure": {
-    "total_files": 61,
+    "total_files": 56,
     "directories": [
       ".local",
       ".local/state",
@@ -81,7 +81,6 @@
       "client_templates",
       "documentation_assets",
       "documentation_assets/workflow_assets",
-      "documentation_assets/workflow_assets/workflow_docs",
       "documentation_assets/workflow_assets/ai_integrations",
       "documentation_assets/project_templates",
       ".upm",
@@ -122,7 +121,7 @@
       ".cfg": 1,
       ".2656274335": 2,
       ".evaluations": 1,
-      ".jsonl": 6,
+      ".jsonl": 1,
       ".sh": 2
     },
     "key_files": [
@@ -130,7 +129,7 @@
       "README.md",
       "pyproject.toml",
       "documentation_assets/REFERENCE_README.md",
-      "modules/claude-code/README.md"
+      "modules/claude-code/CLAUDE_README.md"
     ],
     "technology_indicators": {
       "frontend": [
@@ -151,7 +150,8 @@
         "documentation_assets/workflow_assets/ai_integrations/ai_api_integration_guide.md",
         "documentation_assets/workflow_assets/ai_integrations/model_provider_reference.md",
         "modules/claude-code/CLAUDE_BRIDGE_GUIDE.md",
-        "modules/claude-code/CLAUDE.md"
+        "modules/claude-code/CLAUDE.md",
+        "modules/claude-code/CLAUDE_README.md"
       ],
       "database": [],
       "deployment": [
@@ -166,12 +166,12 @@
         "CODEBASE_SUMMARY.md",
         "CONTRIBUTING.md",
         "replit.md",
+        "ENGINEERING_BEST_PRACTICES.md",
         "documentation_assets/WEBSOCKET_MITIGATION.md",
         "documentation_assets/COMPONENTS_AUTO_UPDATE.md",
         "documentation_assets/IDE_INTEGRATION.md",
         "documentation_assets/REFERENCE_README.md",
         "documentation_assets/mvp_launch_checklist_prd_v1.md",
-        "documentation_assets/workflow_assets/workflow_docs/engineering_best_practices.md",
         "documentation_assets/workflow_assets/ai_integrations/dependency_management.md",
         "documentation_assets/workflow_assets/ai_integrations/troubleshooting_guide.md",
         "documentation_assets/workflow_assets/ai_integrations/implementation_examples.md",
@@ -196,7 +196,7 @@
     },
     "documentation_gaps": [],
     "total_files_analyzed": 9,
-    "total_lines_of_code": 6555,
+    "total_lines_of_code": 7125,
     "coverage_percentage": 100.0,
     "missing_count": 0,
     "missing_breadcrumbs_summary": {
@@ -236,7 +236,8 @@
       "/home/runner/workspace/documentation_assets/workflow_assets/ai_integrations/ai_api_integration_guide.md",
       "/home/runner/workspace/documentation_assets/workflow_assets/ai_integrations/model_provider_reference.md",
       "/home/runner/workspace/modules/claude-code/CLAUDE_BRIDGE_GUIDE.md",
-      "/home/runner/workspace/modules/claude-code/CLAUDE.md"
+      "/home/runner/workspace/modules/claude-code/CLAUDE.md",
+      "/home/runner/workspace/modules/claude-code/CLAUDE_README.md"
     ]
   },
   "capabilities": [
@@ -275,11 +276,11 @@
       "client_templates",
       "documentation_assets",
       "documentation_assets/workflow_assets",
-      "documentation_assets/workflow_assets/workflow_docs",
       "documentation_assets/workflow_assets/ai_integrations",
       "documentation_assets/project_templates",
       ".claude",
-      ".claude/commands"
+      ".claude/commands",
+      "modules"
     ],
     "architecture_patterns": [
       "Workflow Orchestration",
@@ -298,7 +299,7 @@
           "functions": 2
         }
       },
-      "integration_points": 4
+      "integration_points": 5
     }
   },
   "recent_features": {
@@ -308,7 +309,7 @@
       "README.md",
       "pyproject.toml",
       "documentation_assets/REFERENCE_README.md",
-      "modules/claude-code/README.md",
+      "modules/claude-code/CLAUDE_README.md",
       "SECURITY.md",
       "README.md",
       "AGENT_GUIDE.md",
@@ -317,12 +318,12 @@
       "CODEBASE_SUMMARY.md",
       "CONTRIBUTING.md",
       "replit.md",
+      "ENGINEERING_BEST_PRACTICES.md",
       "documentation_assets/WEBSOCKET_MITIGATION.md",
       "documentation_assets/COMPONENTS_AUTO_UPDATE.md",
       "documentation_assets/IDE_INTEGRATION.md",
       "documentation_assets/REFERENCE_README.md",
       "documentation_assets/mvp_launch_checklist_prd_v1.md",
-      "documentation_assets/workflow_assets/workflow_docs/engineering_best_practices.md",
       "documentation_assets/workflow_assets/ai_integrations/dependency_management.md",
       "documentation_assets/workflow_assets/ai_integrations/troubleshooting_guide.md",
       "documentation_assets/workflow_assets/ai_integrations/implementation_examples.md",
@@ -334,9 +335,9 @@
     "feature_flags": []
   },
   "performance_metrics": {
-    "file_count": 61,
-    "directory_count": 37,
-    "function_density": 1.05,
+    "file_count": 56,
+    "directory_count": 36,
+    "function_density": 1.14,
     "documentation_coverage": 100.0,
     "complexity_score": "low"
   },
@@ -348,7 +349,7 @@
   "version_correlation": {
     "changelog_version": null,
     "last_checkpoint": null,
-    "archived_at": "2025-06-21T08:54:22.521933Z",
+    "archived_at": "2025-06-21T20:23:39.169285Z",
     "note": "Enhanced summary version is independent of changelog milestones"
   },
   "future_enhancements": [

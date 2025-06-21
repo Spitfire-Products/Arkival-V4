@@ -1,12 +1,12 @@
 # Arkival - Dynamic Architecture Analysis
 
 *Auto-generated from codebase structure analysis*
-*Version: 1.1.74 | Generated: 2025-06-21T08:54:22Z*
+*Version: 1.1.84 | Generated: 2025-06-21T20:23:39Z*
 
 ## ⚠️ Version Systems - IMPORTANT
 | System | Current | Purpose | Updates |
 |--------|---------|---------|---------|
-| **Codebase Analysis** | v1.1.74 | Documentation scan version | Every `update_project_summary.py` run |
+| **Codebase Analysis** | v1.1.84 | Documentation scan version | Every `update_project_summary.py` run |
 | **Changelog/Project** | vNone | Feature release version | Major milestones only |
 
 **These are INDEPENDENT systems - version mismatch is NORMAL and EXPECTED**
@@ -47,9 +47,9 @@ graph TB
         M0[Client Templates]
         M1[Documentation Assets]
         M2[Documentation Assets/Workflow Assets]
-        M3[Documentation Assets/Workflow Assets/Workflow Docs]
-        M4[Documentation Assets/Workflow Assets/Ai Integrations]
-        M5[Documentation Assets/Project Templates]
+        M3[Documentation Assets/Workflow Assets/Ai Integrations]
+        M4[Documentation Assets/Project Templates]
+        M5[.Claude]
 
         M0 --> M1
         M1 --> M2
@@ -67,7 +67,7 @@ graph TB
     subgraph "📊 Technology Distribution"
         T1[Backend Files: 8]
         T2[Frontend Files: 2]
-        T3[AI Integration: 4]
+        T3[AI Integration: 5]
         T4[Total Functions: 64]
     end
 
@@ -125,9 +125,9 @@ graph TD
     ROOT --> D0[client templates]
     ROOT --> D1[documentation assets]
     ROOT --> D2[documentation assets/workflow assets]
-    ROOT --> D3[documentation assets/workflow assets/workflow docs]
-    ROOT --> D4[documentation assets/workflow assets/ai integrations]
-    ROOT --> D5[documentation assets/project templates]
+    ROOT --> D3[documentation assets/workflow assets/ai integrations]
+    ROOT --> D4[documentation assets/project templates]
+    ROOT --> D5[.claude]
 
     classDef coreModule fill:#e3f2fd,stroke:#1976d2
     classDef analysis fill:#f3e5f5,stroke:#7b1fa2

@@ -39,11 +39,11 @@ This directory contains technical reference materials for Arkival system compone
   - Intelligent project type classification and framework detection
   - Semantic code relationship mapping without full file parsing
 
-- **[Grok Hyper Relevance Filter]** - Hybrid MoE LoRA model for latent space relevance filtering
+- **[Advanced Relevance Filter]** - Context-aware relevance scoring system
   - Real-time relevance scoring between query intent and token generation response
-  - Mixture of Experts architecture for domain-specific relevance weighting
-  - Low-Rank Adaptation fine-tuning for project-specific context optimization
-  - Latent space filtering to eliminate irrelevant token paths before generation
+  - Context-specific relevance weighting for improved accuracy
+  - Project-specific context optimization
+  - Semantic filtering to eliminate irrelevant token paths before generation
   - Dynamic attention mechanism adaptation based on codebase patterns and user intent
 
 ### Enhanced AI Integration Modules
@@ -59,9 +59,9 @@ This directory contains technical reference materials for Arkival system compone
 - **[Refactoring Opportunity Analysis]** - AI-powered code improvement suggestions
 
 ### Workflow Orchestration Extensions
-- **[Multi-Agent Coordination Hub]** - Concurrent multi-agent task coordination
-- **[Rollback and Recovery System]** - Version-aware agent action rollback capabilities
-- **[Agent Specialization Framework]** - Domain-specific agent deployment (frontend, backend, DevOps, etc.)
+- **[Enhanced Task Coordination]** - Advanced workflow task management and coordination
+- **[Rollback and Recovery System]** - Version-aware action rollback capabilities
+- **[Workflow Specialization Framework]** - Domain-specific workflow optimization (frontend, backend, DevOps, etc.)
 
 ### Cross-Platform Integration
 - **[Universal IDE Plugin Framework]** - Native plugin support for VS Code, IntelliJ, Vim, etc.
@@ -75,7 +75,6 @@ This directory contains technical reference materials for Arkival system compone
   - Style guide extraction and component library alignment
 
 ### Enterprise Features
-- **[Team Collaboration Dashboard]** - Multi-developer agent workflow coordination
 - **[Compliance and Audit Tracking]** - Enterprise-grade change tracking and compliance reporting
 - **[Custom Workflow Templates]** - Organization-specific workflow template creation and sharing
 

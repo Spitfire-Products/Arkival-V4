@@ -242,6 +242,46 @@ class AgentWorkflowOrchestrator:
             workflow_result["context_provided"]["engineering_practices"] = engineering_practices
             workflow_result["onboarding_steps"].append("engineering_practices_verified")
 
+            # Step 8: Provide project overview from key documentation
+            project_overview = self._provide_project_overview()
+            workflow_result["context_provided"]["project_overview"] = project_overview
+            workflow_result["onboarding_steps"].append("project_overview_provided")
+
+            # Step 9: Detect and explain deployment mode
+            deployment_info = self._detect_deployment_mode()
+            workflow_result["context_provided"]["deployment_info"] = deployment_info
+            workflow_result["onboarding_steps"].append("deployment_mode_detected")
+
+            # Step 10: Summarize key architecture insights
+            architecture_insights = self._summarize_architecture_insights()
+            workflow_result["context_provided"]["architecture_insights"] = architecture_insights
+            workflow_result["onboarding_steps"].append("architecture_insights_provided")
+
+            # Step 11: Identify external dependencies and requirements
+            dependencies_info = self._identify_external_dependencies()
+            workflow_result["context_provided"]["dependencies_info"] = dependencies_info
+            workflow_result["onboarding_steps"].append("external_dependencies_identified")
+
+            # Step 12: Provide user workflow examples and commands
+            workflow_examples = self._provide_workflow_examples()
+            workflow_result["context_provided"]["workflow_examples"] = workflow_examples
+            workflow_result["onboarding_steps"].append("workflow_examples_provided")
+
+            # Step 13: Analyze recent git activity
+            git_activity = self._analyze_recent_git_activity()
+            workflow_result["context_provided"]["git_activity"] = git_activity
+            workflow_result["onboarding_steps"].append("git_activity_analyzed")
+
+            # Step 14: Summarize system capabilities
+            system_capabilities = self._summarize_system_capabilities()
+            workflow_result["context_provided"]["system_capabilities"] = system_capabilities
+            workflow_result["onboarding_steps"].append("system_capabilities_summarized")
+
+            # Step 15: Provide command reference
+            command_reference = self._provide_command_reference()
+            workflow_result["context_provided"]["command_reference"] = command_reference
+            workflow_result["onboarding_steps"].append("command_reference_provided")
+
             print("✅ INCOMING AGENT WORKFLOW COMPLETED")
             return workflow_result
 
@@ -479,17 +519,17 @@ class AgentWorkflowOrchestrator:
             with open(self.session_state_path, 'r', encoding='utf-8') as f:
                 context["session_state"] = json.load(f)
 
-        # Load handoff documentation
+        # Load handoff documentation (primary location with fallback)
         handoff_path = self.paths['scripts_dir'] / "agent_handoff.json"
+        export_package_path = self.paths['export_dir'] / "agent_handoff.json"
+        
         if os.path.exists(handoff_path):
             with open(handoff_path, 'r', encoding='utf-8') as f:
                 context["handoff_documentation"] = json.load(f)
-
-        # Load handoff documentation from export package (if available)
-        export_package_path = self.paths['export_dir'] / "agent_handoff.json"
-        if os.path.exists(export_package_path):
+        elif os.path.exists(export_package_path):
+            # Fallback to export package if primary location unavailable
             with open(export_package_path, 'r', encoding='utf-8') as f:
-                context["export_package_handoff_documentation"] = json.load(f)
+                context["handoff_documentation"] = json.load(f)
 
         return context
 
@@ -746,6 +786,536 @@ class AgentWorkflowOrchestrator:
                 "migration_note": "Use documentation_assets/workflow_assets/workflow_docs/engineering_best_practices.md and DEVELOPER_ONBOARDING.md instead"
             }
         }
+
+    def _provide_project_overview(self) -> Dict[str, Any]:
+        """
+        # @codebase-summary: Project overview generation from key documentation
+        - Auto-reads and summarizes README.md and agent guide documentation
+        - Provides incoming agents with essential project context and purpose
+        - Includes system capabilities, deployment modes, and core functionality
+        - Used by: agent onboarding, project understanding, context establishment
+        """
+        overview = {
+            "readme_summary": "",
+            "agent_guide_summary": "",
+            "claude_integration": False,
+            "key_features": [],
+            "system_purpose": ""
+        }
+
+        try:
+            # Read main README.md
+            readme_path = self.paths['project_root'] / "README.md"
+            if readme_path.exists():
+                with open(readme_path, 'r', encoding='utf-8') as f:
+                    readme_content = f.read()
+                    # Extract key sections
+                    overview["readme_summary"] = self._extract_readme_key_points(readme_content)
+
+            # Read AGENT_GUIDE.md (agent-agnostic)
+            agent_guide_path = self.paths['project_root'] / "AGENT_GUIDE.md"
+            if agent_guide_path.exists():
+                with open(agent_guide_path, 'r', encoding='utf-8') as f:
+                    guide_content = f.read()
+                    overview["agent_guide_summary"] = self._extract_agent_guide_key_points(guide_content)
+
+            # Check if Claude module is available
+            claude_md_path = self.paths['project_root'] / "modules" / "claude-code" / "CLAUDE_README.md"
+            overview["claude_integration"] = claude_md_path.exists()
+
+            # Extract system purpose from codebase summary
+            if os.path.exists(self.codebase_summary_path):
+                with open(self.codebase_summary_path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    overview["system_purpose"] = data.get("description", "")
+                    overview["key_features"] = data.get("capabilities", [])
+
+        except Exception as e:
+            overview["error"] = f"Failed to load project overview: {e}"
+
+        return overview
+
+    def _detect_deployment_mode(self) -> Dict[str, Any]:
+        """
+        # @codebase-summary: Deployment mode detection and explanation system
+        - Detects current deployment mode (standalone vs subdirectory)
+        - Explains path resolution and file location behaviors
+        - Provides deployment-specific guidance for agents
+        - Used by: agent onboarding, path resolution, deployment understanding
+        """
+        deployment_info = {
+            "mode": "unknown",
+            "explanation": "",
+            "file_locations": {},
+            "config_location": "",
+            "analysis_scope": ""
+        }
+
+        try:
+            # Use existing path resolution logic
+            paths = self.paths
+            current_dir = Path.cwd()
+
+            if current_dir.name.lower() in ['arkival', 'arkival-v4'] or (paths['project_root'] / "arkival_config.json").exists():
+                deployment_info["mode"] = "subdirectory"
+                deployment_info["explanation"] = "Arkival is deployed as a subdirectory in an existing project. Generated documentation reflects the host project."
+                deployment_info["config_location"] = "Parent directory (arkival_config.json)"
+                deployment_info["analysis_scope"] = "Host project structure and metadata"
+            else:
+                deployment_info["mode"] = "standalone"
+                deployment_info["explanation"] = "Arkival is running as the main project. Generated documentation reflects Arkival itself."
+                deployment_info["config_location"] = "Project root"
+                deployment_info["analysis_scope"] = "Arkival system structure"
+
+            deployment_info["file_locations"] = {
+                "codebase_summary": str(paths['codebase_summary']),
+                "session_state": str(paths['session_state']),
+                "changelog": str(paths['changelog_summary']),
+                "scripts_dir": str(paths['scripts_dir'])
+            }
+
+        except Exception as e:
+            deployment_info["error"] = f"Failed to detect deployment mode: {e}"
+
+        return deployment_info
+
+    def _summarize_architecture_insights(self) -> Dict[str, Any]:
+        """
+        # @codebase-summary: Architecture insights extraction from generated diagrams
+        - Extracts key architectural patterns and insights from ARCHITECTURE_DIAGRAM.md
+        - Provides agents with structural understanding and design patterns
+        - Includes complexity metrics and module relationships with compressed technology stack
+        - Used by: agent onboarding, architectural understanding, design guidance
+        """
+        insights = {
+            "architecture_patterns": [],
+            "core_modules": [],
+            "complexity_assessment": "",
+            "key_relationships": [],
+            "technology_stack": {}
+        }
+
+        try:
+            # Read architecture diagram
+            arch_path = self.paths['project_root'] / "ARCHITECTURE_DIAGRAM.md"
+            if arch_path.exists():
+                with open(arch_path, 'r', encoding='utf-8') as f:
+                    arch_content = f.read()
+                    insights = self._extract_architecture_insights(arch_content)
+
+            # Enhance with codebase summary data
+            if os.path.exists(self.codebase_summary_path):
+                with open(self.codebase_summary_path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    insights["architecture_patterns"] = data.get("architecture_analysis", {}).get("architecture_patterns", [])
+                    insights["complexity_assessment"] = data.get("function_hotspots", {}).get("complexity_score", "unknown")
+                    
+                    # Compress technology stack for onboarding efficiency
+                    raw_tech_stack = data.get("project_structure", {}).get("technology_indicators", {})
+                    insights["technology_stack"] = self._compress_technology_stack(raw_tech_stack)
+
+        except Exception as e:
+            insights["error"] = f"Failed to summarize architecture insights: {e}"
+
+        return insights
+
+    def _compress_technology_stack(self, raw_tech_stack: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        # @codebase-summary: Technology stack compression for efficient onboarding
+        - Converts verbose file path lists to summary counts and technology types
+        - Reduces token load while preserving essential architectural understanding
+        - Maintains actionable insight for agent decision-making
+        - Used by: agent onboarding optimization, context efficiency
+        """
+        compressed = {}
+        
+        for category, files in raw_tech_stack.items():
+            if not files:  # Skip empty categories
+                continue
+                
+            file_count = len(files)
+            
+            # Extract technology types based on file extensions and patterns
+            tech_types = self._extract_technology_types(files, category)
+            
+            # Create compressed summary
+            compressed[category] = {
+                "count": file_count,
+                "types": tech_types
+            }
+            
+            # Add key locations for important categories (not full paths)
+            if category in ["backend", "ai_integration"] and file_count > 0:
+                key_dirs = set()
+                for file_path in files[:3]:  # Sample first 3 files for directory patterns
+                    if "/" in file_path:
+                        dir_part = "/".join(file_path.split("/")[:-1])
+                        if len(dir_part) > 0:
+                            # Simplify long paths
+                            if len(dir_part) > 30:
+                                parts = dir_part.split("/")
+                                if len(parts) > 2:
+                                    key_dirs.add(f"{parts[0]}/.../{parts[-1]}")
+                                else:
+                                    key_dirs.add(dir_part)
+                            else:
+                                key_dirs.add(dir_part)
+                
+                if key_dirs:
+                    compressed[category]["key_locations"] = list(key_dirs)[:3]  # Max 3 locations
+        
+        return compressed
+    
+    def _extract_technology_types(self, files: List[str], category: str) -> List[str]:
+        """
+        # @codebase-summary: Technology type extraction from file patterns
+        - Analyzes file extensions and names to identify technologies
+        - Provides meaningful technology context without verbose file lists
+        - Categorizes by actual technology stack rather than file paths
+        - Used by: technology stack compression, architectural understanding
+        """
+        tech_types = set()
+        
+        for file_path in files:
+            # Extract from file extensions
+            if file_path.endswith('.py'):
+                tech_types.add("Python")
+            elif file_path.endswith(('.tsx', '.ts')):
+                tech_types.add("TypeScript/React")
+            elif file_path.endswith('.js'):
+                tech_types.add("JavaScript")
+            elif file_path.endswith('.md'):
+                if category == "ai_integration":
+                    tech_types.add("AI Documentation")
+                else:
+                    tech_types.add("Documentation")
+            elif file_path.endswith('.toml'):
+                tech_types.add("Configuration")
+            elif file_path.endswith('.replit'):
+                tech_types.add("Replit Config")
+            
+            # Extract from file names and paths
+            if "claude" in file_path.lower():
+                tech_types.add("Claude Integration")
+            elif "workflow" in file_path.lower():
+                tech_types.add("Workflow System")
+            elif "agent" in file_path.lower():
+                tech_types.add("Agent Management")
+            elif "api" in file_path.lower():
+                tech_types.add("API Integration")
+            elif "template" in file_path.lower():
+                tech_types.add("Templates")
+            elif "guide" in file_path.lower() or "reference" in file_path.lower():
+                tech_types.add("Guides")
+        
+        # Provide category-specific fallbacks
+        if not tech_types:
+            if category == "frontend":
+                tech_types.add("Web Frontend")
+            elif category == "backend":
+                tech_types.add("Backend Scripts")
+            elif category == "documentation":
+                tech_types.add("Project Documentation")
+            elif category == "deployment":
+                tech_types.add("Deployment Config")
+        
+        return sorted(list(tech_types))[:4]  # Max 4 types to keep concise
+
+    def _identify_external_dependencies(self) -> Dict[str, Any]:
+        """
+        # @codebase-summary: External dependencies and requirements identification
+        - Identifies required external services, APIs, and system dependencies
+        - Checks for configuration files and environment requirements
+        - Provides agents with deployment and runtime requirements context
+        - Used by: agent onboarding, dependency management, setup validation
+        """
+        dependencies = {
+            "runtime_dependencies": [],
+            "development_dependencies": [],
+            "system_requirements": [],
+            "external_services": [],
+            "configuration_files": [],
+            "environment_variables": []
+        }
+
+        try:
+            # Check codebase summary for dependencies
+            if os.path.exists(self.codebase_summary_path):
+                with open(self.codebase_summary_path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    deps = data.get("main_dependencies", {})
+                    dependencies["runtime_dependencies"] = deps.get("runtime", [])
+                    dependencies["development_dependencies"] = deps.get("development", [])
+                    dependencies["system_requirements"] = deps.get("system", [])
+
+            # Check for common config files
+            config_files = ["requirements.txt", "package.json", "pyproject.toml", "Dockerfile", ".env.example"]
+            for config_file in config_files:
+                if (self.paths['project_root'] / config_file).exists():
+                    dependencies["configuration_files"].append(config_file)
+
+            # Check for external service indicators
+            # This could be enhanced to scan for API endpoints, database connections, etc.
+            dependencies["external_services"] = ["None detected - Pure Python system"]
+
+        except Exception as e:
+            dependencies["error"] = f"Failed to identify dependencies: {e}"
+
+        return dependencies
+
+    def _provide_workflow_examples(self) -> Dict[str, Any]:
+        """
+        # @codebase-summary: Daily workflow examples and command patterns
+        - Provides agents with common usage patterns and command examples
+        - Includes morning routine, development workflow, and session completion
+        - Offers practical guidance for effective agent collaboration
+        - Used by: agent onboarding, workflow guidance, best practices
+        """
+        examples = {
+            "morning_routine": [],
+            "development_commands": [],
+            "session_completion": [],
+            "common_patterns": [],
+            "troubleshooting": []
+        }
+
+        try:
+            examples["morning_routine"] = [
+                "python3 codebase_summary/agent_workflow_orchestrator.py incoming",
+                "Review codebase_summary.json for current state",
+                "Check ARCHITECTURE_DIAGRAM.md for project overview"
+            ]
+
+            examples["development_commands"] = [
+                "python3 codebase_summary/update_project_summary.py --force",
+                "python3 validate_deployment.py",
+                "python3 validate_export_readiness.py"
+            ]
+
+            examples["session_completion"] = [
+                "python3 codebase_summary/agent_workflow_orchestrator.py outgoing --summary 'Session summary'",
+                "python3 codebase_summary/update_changelog.py add --summary 'Detailed changelog entry'",
+                "Commit changes with comprehensive commit message"
+            ]
+
+            examples["common_patterns"] = [
+                "Always run codebase scan before starting major changes",
+                "Use agent orchestrator for proper session management",
+                "Document functions with @codebase-summary breadcrumbs",
+                "Check deployment mode via _critical_context"
+            ]
+
+            examples["troubleshooting"] = [
+                "Check file permissions in codebase_summary/ directory",
+                "Verify current working directory matches deployment mode",
+                "Review find_arkival_paths() output in logs for path issues"
+            ]
+
+        except Exception as e:
+            examples["error"] = f"Failed to provide workflow examples: {e}"
+
+        return examples
+
+    def _analyze_recent_git_activity(self) -> Dict[str, Any]:
+        """
+        # @codebase-summary: Recent git activity analysis for context
+        - Analyzes recent commits and current branch status
+        - Provides agents with recent development context and changes
+        - Includes current branch, recent commits, and working tree status
+        - Used by: agent onboarding, development context, change awareness
+        """
+        git_info = {
+            "current_branch": "",
+            "recent_commits": [],
+            "working_tree_status": "",
+            "staged_changes": [],
+            "modified_files": []
+        }
+
+        try:
+            import subprocess
+
+            # Get current branch
+            result = subprocess.run(['git', 'branch', '--show-current'], 
+                                  capture_output=True, text=True, cwd=self.paths['project_root'])
+            if result.returncode == 0:
+                git_info["current_branch"] = result.stdout.strip()
+
+            # Get recent commits
+            result = subprocess.run(['git', 'log', '--oneline', '-5'], 
+                                  capture_output=True, text=True, cwd=self.paths['project_root'])
+            if result.returncode == 0:
+                git_info["recent_commits"] = result.stdout.strip().split('\n')
+
+            # Get working tree status
+            result = subprocess.run(['git', 'status', '--porcelain'], 
+                                  capture_output=True, text=True, cwd=self.paths['project_root'])
+            if result.returncode == 0:
+                status_lines = result.stdout.strip().split('\n') if result.stdout.strip() else []
+                git_info["working_tree_status"] = "clean" if not status_lines else "modified"
+                for line in status_lines:
+                    if line.startswith('M '):
+                        git_info["modified_files"].append(line[2:])
+                    elif line.startswith('A '):
+                        git_info["staged_changes"].append(line[2:])
+
+        except Exception as e:
+            git_info["error"] = f"Failed to analyze git activity: {e}"
+
+        return git_info
+
+    def _summarize_system_capabilities(self) -> Dict[str, Any]:
+        """
+        # @codebase-summary: System capabilities summary for agent understanding
+        - Summarizes key system capabilities and limitations
+        - Provides agents with understanding of what Arkival can and cannot do
+        - Includes supported languages, features, and integration options
+        - Used by: agent onboarding, capability awareness, scope understanding
+        """
+        capabilities = {
+            "core_features": [],
+            "supported_languages": [],
+            "ai_integrations": [],
+            "deployment_options": [],
+            "limitations": [],
+            "documentation_coverage": ""
+        }
+
+        try:
+            if os.path.exists(self.codebase_summary_path):
+                with open(self.codebase_summary_path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    
+                    capabilities["core_features"] = data.get("capabilities", [])
+                    
+                    # Extract supported languages from language breakdown
+                    lang_breakdown = data.get("code_analysis", {}).get("language_breakdown", {})
+                    capabilities["supported_languages"] = list(lang_breakdown.keys())
+                    
+                    capabilities["ai_integrations"] = data.get("ai_integration", {}).get("providers", [])
+                    capabilities["documentation_coverage"] = f"{data.get('code_analysis', {}).get('coverage_percentage', 0)}%"
+
+            capabilities["deployment_options"] = [
+                "Standalone mode - Arkival as main project",
+                "Subdirectory mode - Non-destructive integration",
+                "Universal IDE support - VS Code, Cursor, Terminal, etc."
+            ]
+
+            capabilities["limitations"] = [
+                "Pure Python system - no external service dependencies",
+                "Documentation analysis focused on function-level breadcrumbs",
+                "Version systems are independent (codebase vs changelog)"
+            ]
+
+        except Exception as e:
+            capabilities["error"] = f"Failed to summarize capabilities: {e}"
+
+        return capabilities
+
+    def _provide_command_reference(self) -> Dict[str, Any]:
+        """
+        # @codebase-summary: Command reference guide for agent operations
+        - Provides quick reference of essential commands for agents
+        - Includes analysis, workflow, validation, and troubleshooting commands
+        - Organized by use case and frequency of usage
+        - Used by: agent onboarding, command lookup, operational guidance
+        """
+        commands = {
+            "essential_commands": {},
+            "workflow_commands": {},
+            "validation_commands": {},
+            "troubleshooting_commands": {},
+            "advanced_commands": {}
+        }
+
+        try:
+            commands["essential_commands"] = {
+                "Update project analysis": "python3 codebase_summary/update_project_summary.py --force",
+                "Start agent session": "python3 codebase_summary/agent_workflow_orchestrator.py incoming",
+                "End agent session": "python3 codebase_summary/agent_workflow_orchestrator.py outgoing --summary 'description'"
+            }
+
+            commands["workflow_commands"] = {
+                "Setup workflow system": "python3 setup_workflow_system.py",
+                "Add changelog entry": "python3 codebase_summary/update_changelog.py add --summary 'entry'",
+                "Archive old entries": "python3 codebase_summary/update_changelog.py archive"
+            }
+
+            commands["validation_commands"] = {
+                "Validate deployment": "python3 validate_deployment.py",
+                "Check export readiness": "python3 validate_export_readiness.py",
+                "Git status check": "git status"
+            }
+
+            commands["troubleshooting_commands"] = {
+                "Force regenerate all": "python3 codebase_summary/update_project_summary.py --force",
+                "Check file permissions": "ls -la codebase_summary/",
+                "Verify paths": "Check find_arkival_paths() output in logs"
+            }
+
+            commands["advanced_commands"] = {
+                "Remove changelog duplicates": "python3 codebase_summary/update_changelog.py remove-duplicates",
+                "Custom analysis scope": "Modify ignore patterns in update_project_summary.py",
+                "Manual session state": "Edit codebase_summary/session_state.json directly"
+            }
+
+        except Exception as e:
+            commands["error"] = f"Failed to provide command reference: {e}"
+
+        return commands
+
+    # Helper methods for content extraction
+    def _extract_readme_key_points(self, content: str) -> str:
+        """Extract key points from README content"""
+        lines = content.split('\n')
+        key_points = []
+        
+        for line in lines[:20]:  # First 20 lines usually contain key info
+            if line.startswith('# ') or line.startswith('## '):
+                key_points.append(line.strip())
+            elif line.startswith('**') or line.startswith('- **'):
+                key_points.append(line.strip())
+        
+        return '\n'.join(key_points[:10])  # Top 10 key points
+
+    def _extract_agent_guide_key_points(self, content: str) -> str:
+        """Extract key points from agent guide content"""
+        lines = content.split('\n')
+        key_sections = []
+        
+        in_important_section = False
+        for line in lines:
+            if '## 🚀 Quick Start' in line or '## 🏗 Deployment Modes' in line:
+                in_important_section = True
+                key_sections.append(line.strip())
+            elif line.startswith('## ') and in_important_section:
+                in_important_section = False
+            elif in_important_section and (line.startswith('- ') or line.startswith('**')):
+                key_sections.append(line.strip())
+        
+        return '\n'.join(key_sections[:15])  # Top 15 relevant lines
+
+    def _extract_architecture_insights(self, content: str) -> Dict[str, Any]:
+        """Extract architecture insights from ARCHITECTURE_DIAGRAM.md"""
+        insights = {
+            "architecture_patterns": [],
+            "core_modules": [],
+            "complexity_assessment": "",
+            "key_relationships": []
+        }
+        
+        lines = content.split('\n')
+        for line in lines:
+            if 'Architecture Patterns' in line:
+                # Extract pattern information from following lines
+                pass
+            elif 'Core Modules' in line:
+                # Extract module information
+                pass
+            elif 'complexity' in line.lower():
+                insights["complexity_assessment"] = line.strip()
+        
+        return insights
 
 def main():
     """
