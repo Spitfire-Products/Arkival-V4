@@ -1,12 +1,12 @@
 # Arkival - Dynamic Architecture Analysis
 
 *Auto-generated from codebase structure analysis*
-*Version: 1.1.54 | Generated: 2025-06-20T17:57:57Z*
+*Version: 1.1.69 | Generated: 2025-06-21T07:39:14Z*
 
 ## ⚠️ Version Systems - IMPORTANT
 | System | Current | Purpose | Updates |
 |--------|---------|---------|---------|
-| **Codebase Analysis** | v1.1.54 | Documentation scan version | Every `update_project_summary.py` run |
+| **Codebase Analysis** | v1.1.69 | Documentation scan version | Every `update_project_summary.py` run |
 | **Changelog/Project** | vNone | Feature release version | Major milestones only |
 
 **These are INDEPENDENT systems - version mismatch is NORMAL and EXPECTED**
@@ -35,9 +35,9 @@ graph TD
 ```
 
 ## 🔥 Critical Areas
-- **Active Issues**: 1 current issues
-- **Missing Docs**: 26 functions (see missing_breadcrumbs.json)
-- **Complexity**: medium complexity project
+- **Active Issues**: 0 current issues
+- **Missing Docs**: 0 functions (see missing_breadcrumbs.json)
+- **Complexity**: low complexity project
 - **Critical Files**: session_state.json, workflow_config.json, missing_breadcrumbs.json
 
 ## Core System Architecture
@@ -65,16 +65,16 @@ graph TB
     end
 
     subgraph "📊 Technology Distribution"
-        T1[Backend Files: 12]
+        T1[Backend Files: 8]
         T2[Frontend Files: 2]
-        T3[AI Integration: 3]
-        T4[Total Functions: 86]
+        T3[AI Integration: 4]
+        T4[Total Functions: 64]
     end
 
     subgraph "🤖 Agent Context"
-        A1[Documentation Coverage: 69.77%]
-        A2[Files Analyzed: 13]
-        A3[Missing Docs: 26]
+        A1[Documentation Coverage: 100.0%]
+        A2[Files Analyzed: 9]
+        A3[Missing Docs: 0]
     end
 ```
 
@@ -140,4 +140,4 @@ graph TD
 
 ---
 *Dynamic architecture analysis - reflects actual codebase structure*  
-*Core Directories: 6 | Patterns: 3 | Coverage: 69.77%*
+*Core Directories: 6 | Patterns: 3 | Coverage: 100.0%*

@@ -13,6 +13,10 @@ from datetime import datetime
 
 def find_arkival_paths():
     """
+    # @codebase-summary: Universal path resolution for Arkival subdirectory deployment
+    - Detects deployment mode and returns all required file paths for validation
+    - Used by deployment validation system to locate configuration files
+    
     Universal path resolution for Arkival subdirectory deployment
     Returns: Dict with all required paths
     """

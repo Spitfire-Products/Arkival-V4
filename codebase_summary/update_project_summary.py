@@ -16,77 +16,92 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Dict, Any, List
 
-def find_project_paths():
+def find_arkival_paths():
     """
-    Universal path resolution for project summary generation
+    # @codebase-summary: Universal path resolution for Arkival subdirectory deployment
+    - Detects deployment mode (standalone vs subdirectory) and returns all required file paths
+    - Handles both development mode and production subdirectory deployment scenarios
+    
+    Universal path resolution for Arkival subdirectory deployment
     Returns: Dict with all required paths
     """
     current_dir = Path.cwd()
     project_root = None
     
-    # Check if we're running from within the codebase_summary directory
-    if current_dir.name == "codebase_summary":
-        # Running from a codebase_summary directory
-        project_root = current_dir.parent
-        is_in_scripts_dir = True
-    else:
-        is_in_scripts_dir = False
-        
-        # Search upward for project config markers
+    # Search upward for arkival.config.json
+    search_path = current_dir
+    for _ in range(5):  # Max 5 levels up
+        if (search_path / "arkival.config.json").exists():
+            project_root = search_path
+            break
+        if search_path.parent == search_path:  # Reached filesystem root
+            break
+        search_path = search_path.parent
+    
+    # Try alternative detection methods
+    if not project_root:
+        # Look for Arkival directory as indicator
         search_path = current_dir
-        config_markers = [".project_summary_config.json", "package.json", "pyproject.toml", ".git", "README.md"]
-        
-        for _ in range(5):  # Max 5 levels up
-            # Check for any project root indicator
-            for marker in config_markers:
-                if (search_path / marker).exists():
-                    project_root = search_path
-                    break
-            if project_root:
-                break
-            if search_path.parent == search_path:  # Reached filesystem root
+        for _ in range(5):
+            if (search_path / "Arkival").exists():
+                project_root = search_path
                 break
             search_path = search_path.parent
-        
-        # Fallback - assume current directory
-        if not project_root:
-            project_root = current_dir
     
-    # Determine deployment mode and data directory
-    # Look for a summary config file first
-    config_file = project_root / ".project_summary_config.json"
-    data_dir = project_root
+    # Fallback - assume current directory
+    if not project_root:
+        project_root = current_dir
     
-    # Check if we're in a subdirectory deployment
-    if is_in_scripts_dir and current_dir.parent != project_root:
-        # Might be subdirectory deployment
-        data_dir = current_dir.parent
+    # Determine if we're in dev mode or subdirectory mode
+    # Dev mode: scripts are in codebase_summary/, data files in root
+    # Subdirectory mode: everything under Arkival/
     
-    # Set up paths - generic for any project
-    if is_in_scripts_dir:
-        scripts_dir = current_dir
+    if current_dir.name.lower() in ['arkival', 'arkival-v4'] or (project_root / "arkival_config.json").exists():
+        # Subdirectory deployment mode - use SAME structure as development mode
+        arkival_dir = current_dir if current_dir.name.lower() in ['arkival', 'arkival-v4'] else project_root
+        return {
+            'project_root': project_root,
+            'config_file': project_root / "arkival_config.json",
+            'arkival_dir': arkival_dir,
+            'data_dir': arkival_dir,
+            'scripts_dir': arkival_dir / "codebase_summary",
+            'export_dir': arkival_dir / "export_package",
+            'checkpoints_dir': arkival_dir / "checkpoints",
+            
+            # Data files - SAME as development mode!
+            'codebase_summary': arkival_dir / "codebase_summary.json",
+            'changelog_summary': arkival_dir / "changelog_summary.json",
+            'session_state': arkival_dir / "codebase_summary" / "session_state.json",
+            'missing_breadcrumbs': arkival_dir / "codebase_summary" / "missing_breadcrumbs.json",
+            'scan_ignore': project_root / ".scanignore"
+        }
     else:
-        scripts_dir = project_root / "codebase_summary"
-    
-    return {
-        'project_root': project_root,
-        'config_file': config_file,
-        'data_dir': data_dir,
-        'scripts_dir': scripts_dir,
-        'export_dir': data_dir / "export_package",
-        'checkpoints_dir': data_dir / "checkpoints",
-        
-        # Data files in standard locations
-        'codebase_summary': data_dir / "codebase_summary.json",
-        'changelog_summary': data_dir / "changelog_summary.json", 
-        'session_state': scripts_dir / "session_state.json" if scripts_dir.exists() else data_dir / "session_state.json",
-        'missing_breadcrumbs': scripts_dir / "missing_breadcrumbs.json" if scripts_dir.exists() else data_dir / "missing_breadcrumbs.json",
-        'scan_ignore': project_root / ".scanignore"
-    }
+        # Development mode - use root directory structure
+        return {
+            'project_root': project_root,
+            'config_file': project_root / "arkival_config.json",
+            'arkival_dir': project_root,
+            'data_dir': project_root,
+            'scripts_dir': project_root / "codebase_summary",
+            'export_dir': project_root / "export_package",
+            'checkpoints_dir': project_root / "checkpoints",
+            
+            # Data files in root/standard locations
+            'codebase_summary': project_root / "codebase_summary.json",
+            'changelog_summary': project_root / "changelog_summary.json",
+            'session_state': project_root / "codebase_summary" / "session_state.json",
+            'missing_breadcrumbs': project_root / "codebase_summary" / "missing_breadcrumbs.json",
+            'scan_ignore': project_root / ".scanignore"
+        }
 
 class OptimizedProjectSummaryGenerator:
+    """
+    # @codebase-summary: Optimized project analysis and documentation generator
+    - Streamlined for AI agent deployment with reduced memory footprint
+    - Generates comprehensive codebase analysis while maintaining performance
+    """
     def __init__(self):
-        self.paths = find_project_paths()
+        self.paths = find_arkival_paths()
         self.project_root = self.paths['project_root']
         self.summary_path = self.paths['codebase_summary']
         self.history_dir = self.paths['scripts_dir'] / "history"
@@ -228,8 +243,21 @@ class OptimizedProjectSummaryGenerator:
         """Auto-detect project name and description from codebase"""
         project_info = {"name": "Unknown Project", "description": "Project description not found"}
         
+        # Determine if we're in subdirectory deployment mode
+        current_dir = Path.cwd()
+        search_dir = self.project_root
+        
+        # Check if we're in Arkival subdirectory deployment mode
+        if (current_dir.name.lower() in ['arkival', 'arkival-v4'] or 
+            (self.project_root / "arkival_config.json").exists() or
+            'arkival_dir' in self.paths and self.paths['arkival_dir'] != self.paths['project_root']):
+            # We're in subdirectory mode - look at parent project for metadata
+            search_dir = self.project_root
+            if current_dir.name.lower() in ['arkival', 'arkival-v4']:
+                search_dir = current_dir.parent
+        
         # Priority 1: package.json
-        package_json = self.project_root / "package.json"
+        package_json = search_dir / "package.json"
         if package_json.exists():
             try:
                 with open(package_json, 'r', encoding='utf-8') as f:
@@ -243,7 +271,7 @@ class OptimizedProjectSummaryGenerator:
                 pass
         
         # Priority 2: pyproject.toml
-        pyproject_toml = self.project_root / "pyproject.toml"
+        pyproject_toml = search_dir / "pyproject.toml"
         if pyproject_toml.exists():
             try:
                 with open(pyproject_toml, 'r', encoding='utf-8') as f:
@@ -258,10 +286,10 @@ class OptimizedProjectSummaryGenerator:
             except:
                 pass
         
-        # Priority 3: README.md
+        # Priority 3: README.md (exclude Arkival's own README files)
         readme_files = ["README.md", "readme.md", "ReadMe.md"]
         for readme_name in readme_files:
-            readme_path = self.project_root / readme_name
+            readme_path = search_dir / readme_name
             if readme_path.exists():
                 try:
                     with open(readme_path, 'r', encoding='utf-8') as f:
@@ -271,26 +299,30 @@ class OptimizedProjectSummaryGenerator:
                             # Use first header as project name
                             first_line = lines[0]
                             if first_line.startswith('#'):
-                                project_info["name"] = first_line.lstrip('#').strip()
+                                project_name = first_line.lstrip('#').strip()
                             else:
-                                project_info["name"] = first_line.strip()
+                                project_name = first_line.strip()
                             
-                            # Use first substantial paragraph as description
-                            for line in lines[1:]:
-                                if (len(line) > 20 and not line.startswith('#') and 
-                                    not line.startswith('[') and not line.startswith('!')):
-                                    # Clean up markdown
-                                    clean_desc = re.sub(r'\*\*([^*]+)\*\*', r'\1', line)
-                                    clean_desc = re.sub(r'\*([^*]+)\*', r'\1', clean_desc)
-                                    project_info["description"] = clean_desc.strip()
-                                    break
-                        return project_info
+                            # Skip if this looks like Arkival's own README
+                            if project_name.lower() not in ['arkival', 'arkival-v4']:
+                                project_info["name"] = project_name
+                                
+                                # Use first substantial paragraph as description
+                                for line in lines[1:]:
+                                    if (len(line) > 20 and not line.startswith('#') and 
+                                        not line.startswith('[') and not line.startswith('!')):
+                                        # Clean up markdown
+                                        clean_desc = re.sub(r'\*\*([^*]+)\*\*', r'\1', line)
+                                        clean_desc = re.sub(r'\*([^*]+)\*', r'\1', clean_desc)
+                                        project_info["description"] = clean_desc.strip()
+                                        break
+                                return project_info
                 except:
                     pass
         
         # Fallback
-        project_info["name"] = self.project_root.name
-        project_info["description"] = f"Code analysis for {self.project_root.name} project"
+        project_info["name"] = search_dir.name
+        project_info["description"] = f"Code analysis for {search_dir.name} project"
         return project_info
 
     def _analyze_code_file(self, file_path: str) -> Dict[str, Any]:
@@ -891,6 +923,176 @@ This analysis was generated by an automated project summary tool that:
 *This enhanced summary was automatically generated from comprehensive codebase analysis.*
 """
 
+    def _is_subdirectory_mode(self) -> bool:
+        """
+        # @codebase-summary: Deployment mode detection for CONTRIBUTING.md generation
+        - Detects if Arkival is running in subdirectory mode vs dev mode
+        - Returns True for subdirectory mode, False for dev mode
+        """
+        current_dir = Path.cwd()
+        return (current_dir.name.lower() in ['arkival', 'arkival-v4'] or 
+                (self.project_root / "arkival_config.json").exists() or
+                'arkival_dir' in self.paths and self.paths['arkival_dir'] != self.paths['project_root'])
+
+    def _generate_contributing_md(self, summary: Dict) -> str:
+        """
+        # @codebase-summary: Dynamic CONTRIBUTING.md generation with deployment-aware content
+        - Dev mode: Adapts to user's project name and repository
+        - Subdirectory mode: Always references Arkival project and repository
+        """
+        is_subdirectory = self._is_subdirectory_mode()
+        
+        if is_subdirectory:
+            # Subdirectory mode: CONTRIBUTING.md is about contributing to Arkival itself
+            project_name = "Arkival"
+            repo_url = "https://github.com/Spitfire-Products/Arkival-V4.git"
+            repo_dir = "Arkival-V4"
+            project_description = "Arkival enables seamless knowledge transfer between AI agents and human developers across different development environments."
+        else:
+            # Dev mode: User has forked/cloned Arkival as base for their own project
+            project_info = self._detect_project_info()
+            project_name = project_info["name"]
+            project_description = f"{project_name} enables seamless knowledge transfer between AI agents and human developers across different development environments."
+            # In dev mode, user should update repository URL to their own
+            repo_url = "{your-repository-url}"
+            repo_dir = project_name.lower().replace(" ", "-")
+        
+        return f"""# Contributing to {project_name}
+
+*Generated by: codebase_summary/update_project_summary.py - Dynamic contributing guidelines*
+
+Thank you for your interest in contributing! {project_description}
+
+## Getting Started
+
+1. Fork the repository
+2. Clone your fork locally
+3. Run the setup script: `python3 setup_workflow_system.py`
+4. Test your changes with: `python3 validate_deployment.py`
+
+## Development Process
+
+### Setting up the Development Environment
+
+```bash
+# Clone the repository
+git clone {repo_url}
+cd {repo_dir}
+
+# Run the setup
+python3 setup_workflow_system.py
+
+# Validate the setup
+python3 validate_deployment.py
+```
+
+### Making Changes
+
+1. Create a feature branch: `git checkout -b feature/your-feature-name`
+
+## File Generation Best Practices
+
+### Generator Attribution Requirements
+
+**All generated or updated files MUST include generator attribution to prevent development token waste.** This rule applies to any file that is created or modified by Python scripts.
+
+#### For JSON Files
+Add `_generator` field as the first property:
+```json
+{{
+  "_generator": "Generated by script_name.py - Brief description of purpose",
+  "other_data": "..."
+}}
+```
+
+#### For Markdown Files  
+Add generator attribution in the header or footer:
+```markdown
+# Document Title
+
+Content here...
+
+*Generated by: script_name.py - Brief description of purpose*
+```
+
+#### Implementation in Python Scripts
+When writing files, always include generator information:
+
+```python
+# For JSON files
+data_with_generator = {{
+    "_generator": "Generated by my_script.py - Purpose description",
+    **existing_data
+}}
+json.dump(data_with_generator, file, indent=2)
+
+# For Markdown files
+content = f\"\"\"# Title
+Content here...
+
+*Generated by: my_script.py - Purpose description*
+\"\"\"
+```
+
+#### Current Generator Registry
+- `setup_workflow_system.py` → `workflow_config.json`, `changelog_summary.json`
+- `update_project_summary.py` → `codebase_summary.json`, `missing_breadcrumbs.json`, `CODEBASE_SUMMARY.md`, `ARCHITECTURE_DIAGRAM.md`, `CONTRIBUTING.md`
+- `update_changelog.py` → `changelog_summary.json`, `CHANGELOG.md`
+- `agent_workflow_orchestrator.py` → `session_state.json`, `agent_handoff.json`
+
+### Why This Matters
+- **Token Efficiency**: Prevents wasted development time searching for file origins
+- **Debugging**: Quickly identify which script to modify when issues arise
+- **Maintenance**: Understand file relationships and dependencies
+- **Documentation**: Self-documenting codebase with clear data flow
+2. Make your changes
+3. Add tests for new functionality
+4. Validate the setup: `python3 validate_deployment.py`
+5. Update documentation as needed
+6. Commit your changes with clear messages
+
+### Code Style
+
+- Follow PEP 8 for Python code
+- Use meaningful variable and function names
+- Add docstrings for all functions and classes
+- Include breadcrumb documentation using `@codebase-summary:` format
+
+### Testing
+
+- Write tests for new features
+- Ensure all tests pass before submitting
+- Test across different IDE environments when possible
+
+### Documentation
+
+- Update README.md if needed
+- Add or update docstrings
+- Include examples for new features
+- Update CHANGELOG.md following semantic versioning
+
+## Submitting Changes
+
+1. Push your branch to your fork
+2. Submit a pull request
+3. Describe your changes clearly
+4. Link any related issues
+
+## Code of Conduct
+
+- Be respectful and inclusive
+- Focus on constructive feedback
+- Help maintain a welcoming environment for all contributors
+
+## Questions?
+
+- Open an issue for bugs or feature requests
+- Start a discussion for general questions
+- Check existing issues before creating new ones
+
+Thank you for contributing to making AI agent workflows more efficient!
+"""
+
     def _write_missing_breadcrumbs(self, missing_breadcrumbs: List[Dict], total_funcs: int, doc_funcs: int, language_breakdown: Dict):
         """Write separate missing breadcrumbs file"""
         missing_data = {
@@ -1320,7 +1522,13 @@ This analysis was generated by an automated project summary tool that:
             return "In-memory/Custom"
 
     def generate_summary(self):
-        """Generate optimized project summary"""
+        """
+        # @codebase-summary: Main project summary generation orchestrator
+        - Coordinates comprehensive codebase analysis and documentation generation
+        - Produces enhanced JSON output with agent-friendly structure and navigation aids
+        
+        Generate optimized project summary
+        """
         print("🔍 OPTIMIZED PROJECT SUMMARY GENERATION")
         if "--verbose" in sys.argv:
             print("   📄 Running in VERBOSE mode (detailed output)")
@@ -1388,6 +1596,12 @@ This analysis was generated by an automated project summary tool that:
             with open(markdown_path, 'w', encoding='utf-8') as f:
                 f.write(markdown_summary)
             
+            # Generate contributing guidelines
+            contributing_md = self._generate_contributing_md(summary)
+            contributing_path = self.project_root / "CONTRIBUTING.md"
+            with open(contributing_path, 'w', encoding='utf-8') as f:
+                f.write(contributing_md)
+            
             print("✅ Enhanced project summary generated successfully")
             print(f"\n📊 PROJECT SUMMARY STATISTICS")
             print(f"Project: {summary['project_name']} v{summary['version']}")
@@ -1403,7 +1617,13 @@ This analysis was generated by an automated project summary tool that:
         return True
 
 def main():
-    """Main entry point"""
+    """
+    # @codebase-summary: Main CLI interface for optimized project summary generation
+    - Provides command-line interface for project analysis and documentation generation
+    - Orchestrates complete summary generation process with error handling
+    
+    Main entry point
+    """
     generator = OptimizedProjectSummaryGenerator()
     generator.generate_summary()
 

@@ -146,8 +146,11 @@ class ClaudeBridge:
     
     def send_message(self, message, timeout=None):
         """
+        # @codebase-summary: Core Claude message sending functionality with error handling
+        - Sends messages to Claude API and handles response processing with timeout management
+        - Primary communication interface for all Claude interactions in the bridge system
+        
         Send message to Claude and return response
-        # @codebase-summary: feature="claude_communication" purpose="Core message sending functionality with error handling"
         # @codebase-summary: description="Executes Claude CLI subprocess call with timeout, captures output, handles common errors, returns structured response with caching"
         """
         try:
@@ -274,8 +277,11 @@ If you need more information, please ask specific questions.
     
     async def test_connection_async(self):
         """
+        # @codebase-summary: Asynchronous Claude connection testing and validation
+        - Tests Claude API connectivity and response capabilities in non-blocking mode
+        - Used for health checks and connection verification in async workflows
+        
         Test Claude communication asynchronously
-        # @codebase-summary: feature="async_operations" purpose="Asynchronous connection testing"
         # @codebase-summary: description="Provides async interface to connection testing for non-blocking diagnostics and health checks"
         """
         loop = asyncio.get_event_loop()

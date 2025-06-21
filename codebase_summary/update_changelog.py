@@ -18,6 +18,10 @@ import re
 
 def find_arkival_paths():
     """
+    # @codebase-summary: Universal path resolution for Arkival subdirectory deployment
+    - Detects deployment mode and returns all required file paths for changelog management
+    - Used by changelog system to locate configuration and data files across deployment modes
+    
     Universal path resolution for Arkival subdirectory deployment
     Returns: Dict with all required paths
     """
@@ -601,6 +605,8 @@ def mark_handoff_ready(changelog: Dict[str, Any]) -> None:
 # - Integrates with agent workflow orchestration for automated tracking  
 # - Handles version incrementing, checkpoint creation, and handoff preparation
 # - Used by: agent handoffs, manual workflow triggers, deployment tracking, session transitions
+# @codebase-summary: Core changelog entry creation and workflow integration system
+# - Creates structured changelog entries with version correlation and validation
 # - Critical path: All project changes and agent transitions flow through this function
 def add_changelog_entry(
     author: str = "AI Assistant",

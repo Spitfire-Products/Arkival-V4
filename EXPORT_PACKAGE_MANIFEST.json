@@ -48,7 +48,6 @@
     ],
     "documentation": [
       "README.md",
-      "SETUP_GUIDE.md",
       "AGENT_GUIDE.md",
       "CONTRIBUTING.md",
       "SECURITY.md",
@@ -61,7 +60,7 @@
       "modules/claude-code/msg.py",
       "modules/claude-code/README.md",
       "modules/claude-code/CLAUDE_BRIDGE_GUIDE.md",
-      "modules/claude-code/msgs.md"
+      "modules/claude-code/CLAUDE.md"
     ],
     "documentation_assets": [
       "documentation_assets/REFERENCE_README.md",

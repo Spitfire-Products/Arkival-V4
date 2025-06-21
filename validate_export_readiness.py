@@ -14,6 +14,10 @@ from typing import Dict, Any, List
 
 def find_arkival_paths():
     """
+    # @codebase-summary: Universal path resolution for Arkival subdirectory deployment
+    - Detects deployment mode and returns all required file paths for export validation
+    - Used by export readiness validation system to locate and verify core files
+    
     Universal path resolution for Arkival subdirectory deployment
     Returns: Dict with all required paths
     """
@@ -148,9 +152,7 @@ class ExportReadinessValidator:
             "codebase_summary/update_project_summary.py",
             "codebase_summary/update_changelog.py",
             "README.md",
-            "SETUP_GUIDE.md",
             "AGENT_GUIDE.md",
-            "DEVELOPER_ONBOARDING.md",
             ".scanignore"
         ]
         
@@ -236,12 +238,12 @@ class ExportReadinessValidator:
         
         doc_files = [
             "README.md",
-            "SETUP_GUIDE.md", 
             "AGENT_GUIDE.md",
-            "DEVELOPER_ONBOARDING.md",
             "CODEBASE_SUMMARY.md",
             "ARCHITECTURE_DIAGRAM.md",
-            "SCAN_IGNORE_DOCS.md"
+            "CONTRIBUTING.md",
+            "SECURITY.md",
+            "CHANGELOG.md"
         ]
         
         missing_docs = []
@@ -332,7 +334,13 @@ class ExportReadinessValidator:
         print(f"   Documentation: {self.validation_results['metrics'].get('documentation_coverage', 0):.1f}%")
 
 def main():
-    """Main validation execution"""
+    """
+    # @codebase-summary: Main export readiness validation execution entry point
+    - Orchestrates complete export readiness validation process for Arkival deployment
+    - Validates system configuration, file integrity, and deployment prerequisites
+    
+    Main validation execution
+    """
     if len(sys.argv) > 1 and sys.argv[1] == "--help":
         print("Export Readiness Validation Script")
         print("Usage: python3 validate_export_readiness.py")

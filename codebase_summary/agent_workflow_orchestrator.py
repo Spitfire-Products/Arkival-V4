@@ -14,6 +14,10 @@ import argparse
 
 def find_arkival_paths():
     """
+    # @codebase-summary: Universal path resolution for Arkival subdirectory deployment
+    - Detects deployment mode and returns all required file paths for agent workflow orchestration
+    - Used by agent handoff system to locate session state and configuration files
+    
     Universal path resolution for Arkival subdirectory deployment
     Returns: Dict with all required paths
     """

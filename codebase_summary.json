@@ -7,15 +7,13 @@
       "update_summary": "python3 codebase_summary/update_project_summary.py"
     },
     "deployment_mode": "standalone",
-    "active_issues": [
-      "10 files with missing documentation"
-    ],
+    "active_issues": [],
     "last_agent_task": "No previous agent task recorded",
     "current_state": "operational"
   },
   "_version_systems_explained": {
     "codebase_version": {
-      "current": "1.1.54",
+      "current": "1.1.69",
       "purpose": "Tracks codebase structure analysis iterations",
       "updates": "Every time update_project_summary.py runs",
       "independent_from": "changelog/project versions"
@@ -31,14 +29,14 @@
   "navigation_map": {
     "where_to_start": {
       "documentation": [
-        "arkival_docs/README.md"
+        "modules/claude-code/README.md"
       ],
       "configuration": [
         "pyproject.toml"
       ]
     },
     "key_files": {
-      "readme": "arkival_docs/README.md",
+      "readme": "modules/claude-code/README.md",
       "config": "pyproject.toml"
     },
     "common_patterns": {
@@ -46,33 +44,12 @@
     }
   },
   "function_hotspots": {
-    "most_complex_files": [
-      {
-        "file": "schema_comparison_analysis.py",
-        "missing_functions": 4
-      },
-      {
-        "file": "detailed_schema_comparison.py",
-        "missing_functions": 4
-      },
-      {
-        "file": "codebase_summary/update_project_summary.py",
-        "missing_functions": 4
-      },
-      {
-        "file": "codebase_summary/update_project_summary_backup_20250620_173959.py",
-        "missing_functions": 4
-      },
-      {
-        "file": "modules/claude-code/claude_bridge.py",
-        "missing_functions": 3
-      }
-    ],
+    "most_complex_files": [],
     "most_documented_languages": [
       {
         "language": ".py",
-        "total_functions": 84,
-        "files": 12
+        "total_functions": 62,
+        "files": 8
       },
       {
         "language": ".tsx",
@@ -80,17 +57,12 @@
         "files": 1
       }
     ],
-    "critical_missing_docs": [
-      "schema_comparison_analysis.py",
-      "detailed_schema_comparison.py",
-      "codebase_summary/update_project_summary.py",
-      "codebase_summary/update_project_summary_backup_20250620_173959.py"
-    ],
-    "complexity_score": "medium"
+    "critical_missing_docs": [],
+    "complexity_score": "low"
   },
   "project_name": "Arkival",
-  "version": "1.1.54",
-  "updated_at": "2025-06-20T17:57:57.798681Z",
+  "version": "1.1.69",
+  "updated_at": "2025-06-21T07:39:14.724461Z",
   "description": "AI Agent Workflow Orchestration System for seamless knowledge transfer between AI agents and human developers",
   "main_dependencies": {
     "runtime": [],
@@ -98,7 +70,7 @@
     "system": []
   },
   "project_structure": {
-    "total_files": 78,
+    "total_files": 60,
     "directories": [
       ".local",
       ".local/state",
@@ -136,13 +108,13 @@
       ".workflow_system",
       ".workflow_system/scripts",
       ".workflow_system/ide_configs",
-      "arkival_docs"
+      "changelog_archives"
     ],
     "file_types": {
-      ".md": 42,
-      "": 4,
+      ".md": 28,
+      "": 3,
       ".toml": 4,
-      ".py": 12,
+      ".py": 8,
       ".html": 2,
       ".tsx": 1,
       ".js": 1,
@@ -150,7 +122,7 @@
       ".cfg": 1,
       ".2656274335": 2,
       ".evaluations": 1,
-      ".jsonl": 5,
+      ".jsonl": 6,
       ".sh": 2
     },
     "key_files": [
@@ -158,9 +130,7 @@
       "README.md",
       "pyproject.toml",
       "documentation_assets/REFERENCE_README.md",
-      "modules/claude-code/README.md",
-      "arkival_docs/README.md",
-      "arkival_docs/ARKIVAL_LICENSE"
+      "modules/claude-code/README.md"
     ],
     "technology_indicators": {
       "frontend": [
@@ -169,22 +139,19 @@
       ],
       "backend": [
         "validate_deployment.py",
-        "setup_workflow_system.py",
-        "schema_comparison_analysis.py",
-        "detailed_schema_comparison.py",
         "validate_export_readiness.py",
+        "setup_workflow_system.py",
         "modules/claude-code/claude_bridge.py",
         "modules/claude-code/msg.py",
         "codebase_summary/agent_workflow_orchestrator.py",
         "codebase_summary/update_changelog.py",
-        "codebase_summary/update_project_summary.py",
-        "codebase_summary/update_project_summary_original_backup.py",
-        "codebase_summary/update_project_summary_backup_20250620_173959.py"
+        "codebase_summary/update_project_summary.py"
       ],
       "ai_integration": [
         "documentation_assets/workflow_assets/ai_integrations/ai_api_integration_guide.md",
         "documentation_assets/workflow_assets/ai_integrations/model_provider_reference.md",
-        "modules/claude-code/CLAUDE_BRIDGE_GUIDE.md"
+        "modules/claude-code/CLAUDE_BRIDGE_GUIDE.md",
+        "modules/claude-code/CLAUDE.md"
       ],
       "database": [],
       "deployment": [
@@ -194,92 +161,47 @@
         "SECURITY.md",
         "README.md",
         "AGENT_GUIDE.md",
-        "PROJECT_CONFIG.md",
         "ARCHITECTURE_DIAGRAM.md",
         "CHANGELOG.md",
         "CODEBASE_SUMMARY.md",
         "CONTRIBUTING.md",
-        "SETUP_GUIDE.md",
-        "DEPLOYMENT_GUIDE.md",
-        "bugs_fixed_summary.md",
-        "codebase_summary_optimization_plan.md",
-        "schema_compatibility_analysis.md",
-        "SCAN_IGNORE_DOCS.md",
-        "SETUP_SIMULATION_REPORT_20250619_100152.md",
-        "SETUP_SIMULATION_REPORT_20250619_100429.md",
-        "DEVELOPER_ONBOARDING.md",
         "documentation_assets/COMPREHENSIVE_BREADCRUMB_GUIDE.md",
         "documentation_assets/WEBSOCKET_MITIGATION.md",
-        "documentation_assets/COMPONENTS_AUTO_UPDATE.md"
+        "documentation_assets/COMPONENTS_AUTO_UPDATE.md",
+        "documentation_assets/IDE_INTEGRATION.md",
+        "documentation_assets/REFERENCE_README.md",
+        "documentation_assets/mvp_launch_checklist_prd_v1.md",
+        "documentation_assets/workflow_assets/workflow_docs/engineering_best_practices.md",
+        "documentation_assets/workflow_assets/ai_integrations/dependency_management.md",
+        "documentation_assets/workflow_assets/ai_integrations/troubleshooting_guide.md",
+        "documentation_assets/workflow_assets/ai_integrations/implementation_examples.md",
+        "documentation_assets/project_templates/TEMPLATE_USAGE_GUIDE.md",
+        ".claude/commands/analyze.md",
+        ".claude/commands/refactor.md"
       ]
     }
   },
   "code_analysis": {
-    "total_functions": 86,
-    "documented_functions": 60,
+    "total_functions": 64,
+    "documented_functions": 64,
     "language_breakdown": {
       ".py": {
-        "files": 12,
-        "functions": 84
+        "files": 8,
+        "functions": 62
       },
       ".tsx": {
         "files": 1,
         "functions": 2
       }
     },
-    "documentation_gaps": [
-      {
-        "file": "schema_comparison_analysis.py",
-        "undocumented": 4
-      },
-      {
-        "file": "detailed_schema_comparison.py",
-        "undocumented": 4
-      },
-      {
-        "file": "codebase_summary/update_project_summary.py",
-        "undocumented": 4
-      },
-      {
-        "file": "codebase_summary/update_project_summary_backup_20250620_173959.py",
-        "undocumented": 4
-      },
-      {
-        "file": "modules/claude-code/claude_bridge.py",
-        "undocumented": 3
-      },
-      {
-        "file": "validate_export_readiness.py",
-        "undocumented": 2
-      },
-      {
-        "file": "codebase_summary/update_changelog.py",
-        "undocumented": 2
-      },
-      {
-        "file": "validate_deployment.py",
-        "undocumented": 1
-      },
-      {
-        "file": "codebase_summary/agent_workflow_orchestrator.py",
-        "undocumented": 1
-      },
-      {
-        "file": "codebase_summary/update_project_summary_original_backup.py",
-        "undocumented": 1
-      }
-    ],
-    "total_files_analyzed": 13,
-    "total_lines_of_code": 10879,
-    "coverage_percentage": 69.77,
-    "missing_count": 26,
+    "documentation_gaps": [],
+    "total_files_analyzed": 9,
+    "total_lines_of_code": 6548,
+    "coverage_percentage": 100.0,
+    "missing_count": 0,
     "missing_breadcrumbs_summary": {
-      "total_missing": 26,
-      "by_directory": {
-        "codebase_summary": 12,
-        "": 11,
-        "modules/claude-code": 3
-      }
+      "total_missing": 0,
+      "by_directory": {}
     }
   },
   "core_modules": [],
@@ -313,7 +235,8 @@
     "integration_files": [
       "/home/runner/workspace/documentation_assets/workflow_assets/ai_integrations/ai_api_integration_guide.md",
       "/home/runner/workspace/documentation_assets/workflow_assets/ai_integrations/model_provider_reference.md",
-      "/home/runner/workspace/modules/claude-code/CLAUDE_BRIDGE_GUIDE.md"
+      "/home/runner/workspace/modules/claude-code/CLAUDE_BRIDGE_GUIDE.md",
+      "/home/runner/workspace/modules/claude-code/CLAUDE.md"
     ]
   },
   "capabilities": [
@@ -332,12 +255,7 @@
       "codebase_summary/agent_workflow_orchestrator.py"
     ],
     "api_documentation": [],
-    "deployment_guides": [
-      "SETUP_GUIDE.md",
-      "DEPLOYMENT_GUIDE.md",
-      "SETUP_SIMULATION_REPORT_20250619_100152.md",
-      "SETUP_SIMULATION_REPORT_20250619_100429.md"
-    ]
+    "deployment_guides": []
   },
   "database_readiness": {
     "database_type": "unknown",
@@ -372,15 +290,15 @@
       "total_directories": 15,
       "function_distribution": {
         ".py": {
-          "files": 12,
-          "functions": 84
+          "files": 8,
+          "functions": 62
         },
         ".tsx": {
           "files": 1,
           "functions": 2
         }
       },
-      "integration_points": 3
+      "integration_points": 4
     }
   },
   "recent_features": {
@@ -391,37 +309,35 @@
       "pyproject.toml",
       "documentation_assets/REFERENCE_README.md",
       "modules/claude-code/README.md",
-      "arkival_docs/README.md",
-      "arkival_docs/ARKIVAL_LICENSE",
       "SECURITY.md",
       "README.md",
       "AGENT_GUIDE.md",
-      "PROJECT_CONFIG.md",
       "ARCHITECTURE_DIAGRAM.md",
       "CHANGELOG.md",
       "CODEBASE_SUMMARY.md",
       "CONTRIBUTING.md",
-      "SETUP_GUIDE.md",
-      "DEPLOYMENT_GUIDE.md",
-      "bugs_fixed_summary.md",
-      "codebase_summary_optimization_plan.md",
-      "schema_compatibility_analysis.md",
-      "SCAN_IGNORE_DOCS.md",
-      "SETUP_SIMULATION_REPORT_20250619_100152.md",
-      "SETUP_SIMULATION_REPORT_20250619_100429.md",
-      "DEVELOPER_ONBOARDING.md",
       "documentation_assets/COMPREHENSIVE_BREADCRUMB_GUIDE.md",
       "documentation_assets/WEBSOCKET_MITIGATION.md",
-      "documentation_assets/COMPONENTS_AUTO_UPDATE.md"
+      "documentation_assets/COMPONENTS_AUTO_UPDATE.md",
+      "documentation_assets/IDE_INTEGRATION.md",
+      "documentation_assets/REFERENCE_README.md",
+      "documentation_assets/mvp_launch_checklist_prd_v1.md",
+      "documentation_assets/workflow_assets/workflow_docs/engineering_best_practices.md",
+      "documentation_assets/workflow_assets/ai_integrations/dependency_management.md",
+      "documentation_assets/workflow_assets/ai_integrations/troubleshooting_guide.md",
+      "documentation_assets/workflow_assets/ai_integrations/implementation_examples.md",
+      "documentation_assets/project_templates/TEMPLATE_USAGE_GUIDE.md",
+      ".claude/commands/analyze.md",
+      ".claude/commands/refactor.md"
     ],
     "modified_files": [],
     "feature_flags": []
   },
   "performance_metrics": {
-    "file_count": 78,
+    "file_count": 60,
     "directory_count": 37,
-    "function_density": 1.1,
-    "documentation_coverage": 69.77,
+    "function_density": 1.07,
+    "documentation_coverage": 100.0,
     "complexity_score": "low"
   },
   "deployment": {
@@ -432,11 +348,11 @@
   "version_correlation": {
     "changelog_version": null,
     "last_checkpoint": null,
-    "archived_at": "2025-06-20T17:57:57.798881Z",
+    "archived_at": "2025-06-21T07:39:14.724702Z",
     "note": "Enhanced summary version is independent of changelog milestones"
   },
   "future_enhancements": [
-    "Improve documentation coverage from 69.8% to 80%+",
+    "Improve documentation coverage from 100.0% to 80%+",
     "Complete database integration setup",
     "Add comprehensive testing suite"
   ]

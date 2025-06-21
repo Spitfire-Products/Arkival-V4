@@ -1248,7 +1248,7 @@ Thank you for your interest in contributing! Arkival enables seamless knowledge 
 
 ```bash
 # Clone the repository
-git clone https://github.com/spitfire-products/arkival.git
+git clone https://github.com/Spitfire-Products/Arkival-V4.git
 cd arkival
 
 # Run the setup

@@ -1,0 +1,36 @@
+{
+  "archived_at": "2025-06-20T21:49:29.695426Z",
+  "project_version_correlation": "1.1.60",
+  "archive_reason": "Automatic archiving during checkpoint creation - kept 25 most recent entries",
+  "archived_entries_count": 1,
+  "workflow_triggered": true,
+  "entries": [
+    {
+      "id": "change_001",
+      "timestamp": "2025-06-18T06:28:34.714198Z",
+      "author": "AI Assistant",
+      "version": "1.2.0",
+      "type": "fix",
+      "scope": "development",
+      "summary": "Fixed changelog version tracking - Decoupled changelog versioning from codebase summary versioning. Changelog now maintains its own independent version in changelog_summary.json. Removed automatic codebase summary updates after changelog entries. Fixed file path inconsistency between load and save operations.",
+      "description": "",
+      "files_changed": [
+        {
+          "file": "multiple",
+          "action": "modified",
+          "changes": [
+            "See description for details"
+          ]
+        }
+      ],
+      "breaking_changes": false,
+      "migration_notes": "No migration required",
+      "related_issues": [],
+      "tags": [],
+      "workflow_context": {
+        "triggered_by_workflow": true,
+        "session_type": "agent_collaboration"
+      }
+    }
+  ]
+}
