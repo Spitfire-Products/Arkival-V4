@@ -1,12 +1,12 @@
 # Arkival - Dynamic Architecture Analysis
 
 *Auto-generated from codebase structure analysis*
-*Version: 1.1.84 | Generated: 2025-06-21T20:23:39Z*
+*Version: 1.1.86 | Generated: 2025-06-21T22:38:04Z*
 
 ## ⚠️ Version Systems - IMPORTANT
 | System | Current | Purpose | Updates |
 |--------|---------|---------|---------|
-| **Codebase Analysis** | v1.1.84 | Documentation scan version | Every `update_project_summary.py` run |
+| **Codebase Analysis** | v1.1.86 | Documentation scan version | Every `update_project_summary.py` run |
 | **Changelog/Project** | vNone | Feature release version | Major milestones only |
 
 **These are INDEPENDENT systems - version mismatch is NORMAL and EXPECTED**
@@ -49,7 +49,7 @@ graph TB
         M2[Documentation Assets/Workflow Assets]
         M3[Documentation Assets/Workflow Assets/Ai Integrations]
         M4[Documentation Assets/Project Templates]
-        M5[.Claude]
+        M5[Modules]
 
         M0 --> M1
         M1 --> M2
@@ -127,7 +127,7 @@ graph TD
     ROOT --> D2[documentation assets/workflow assets]
     ROOT --> D3[documentation assets/workflow assets/ai integrations]
     ROOT --> D4[documentation assets/project templates]
-    ROOT --> D5[.claude]
+    ROOT --> D5[modules]
 
     classDef coreModule fill:#e3f2fd,stroke:#1976d2
     classDef analysis fill:#f3e5f5,stroke:#7b1fa2

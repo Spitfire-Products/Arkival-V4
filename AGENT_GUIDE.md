@@ -27,23 +27,49 @@ python3 codebase_summary/agent_workflow_orchestrator.py incoming
 python3 codebase_summary/agent_workflow_orchestrator.py outgoing "Detailed session summary here"
 ```
 
-**⚠️ CRITICAL: Changelog Update Requirements**
-When updating changelog, ALWAYS provide detailed summary:
+**⚠️ CRITICAL: Agent Handoff System Overview**
+
+Agent handoff uses a **THREE-PART SYSTEM** that works together:
+
+1. **session_state.json** - Current session tracking and technical state
+2. **agent_handoff.json** - Structured handoff instructions and context  
+3. **changelog_summary.json** - Historical record with detailed session summary
+
+### Primary Handoff Method: Agent Workflow Orchestrator
 ```bash
-# ❌ WRONG - Missing detail
-python3 codebase_summary/update_changelog.py add --summary "Fixed some bugs"
+# ALWAYS use the workflow orchestrator for proper handoff
+python3 codebase_summary/agent_workflow_orchestrator.py outgoing \
+  --summary "Complete session description with technical details and accomplishments"
 
-# ✅ CORRECT - Comprehensive detail  
-python3 codebase_summary/update_changelog.py add --summary "Fixed critical path resolution bugs in agent_workflow_orchestrator.py
-
-## Key Accomplishments:
-- **Specific fix 1**: Detailed description of what was fixed
-- **Specific fix 2**: Impact and scope of changes  
-- **Testing**: Validation steps completed
-- **Documentation**: Updated relevant docs
-
-Impact: System now handles all deployment modes correctly."
+# This automatically:
+# - Updates session_state.json with current session
+# - Creates/updates agent_handoff.json with next agent instructions
+# - Triggers changelog entry creation with version correlation
+# - Maintains consistency across all handoff documents
 ```
+
+### Manual Changelog Method (If Needed)
+```bash
+# Only use if workflow orchestrator fails - normally automated
+python3 codebase_summary/update_changelog.py add \
+  --summary "AGENT HANDOFF COMPLETE: [Session Type] - [Main Achievement]
+
+## Primary Accomplishments:
+- **Specific Change 1**: Detailed description with file references
+- **Specific Change 2**: Impact, scope, and purpose of changes
+- **Testing/Verification**: What was tested and validated
+
+Ready for next agent with complete handoff documentation." \
+  --type "feature" \
+  --scope "workflow" \
+  --tags "agent-handoff,session-complete"
+```
+
+**CRITICAL UNDERSTANDING**: 
+- **session_state.json** = Current session context and technical state
+- **agent_handoff.json** = Structured instructions for next agent
+- **changelog_summary.json** = Historical record and detailed session notes
+- All three work together - never update just one manually
 
 ## 🏗 Deployment Modes (Auto-Detected)
 
@@ -159,17 +185,45 @@ EOF
 )"
 ```
 
-### 3. Update Changelog with Detailed Summary
+### 3. **MANDATORY**: Complete Agent Handoff using Workflow Orchestrator
 ```bash
-python3 codebase_summary/update_changelog.py add --summary "Session title with comprehensive details
+# This is THE MOST IMPORTANT step - handles ALL handoff documentation
+python3 codebase_summary/agent_workflow_orchestrator.py outgoing \
+  --summary "AGENT HANDOFF COMPLETE: [Your Session Title Here]
 
-## Key Accomplishments:
-- **Specific Achievement**: Detailed description and impact
-- **Technical Change**: Scope and purpose 
-- **Documentation**: What was updated/added/removed
+## 📋 Session Summary
+- **Session Type**: [Description of work done]
+- **Completion Status**: [Completed Successfully/Partial/etc.]
 
-Transform brief summary into detailed context for future agents."
+## 🎯 Primary Accomplishments
+- **Achievement 1**: [Specific change with file references, e.g., 'Modified update_project_summary.py lines 698-830']
+- **Achievement 2**: [Impact and scope of changes]
+- **Achievement 3**: [Testing/verification completed]
+
+## 🛠 Technical Changes
+- **Files Modified**: [List with line numbers where applicable]
+- **System Improvements**: [Describe enhancements made]
+- **Architecture Changes**: [Any structural changes]
+
+## 📊 Current System State
+- **Documentation Coverage**: [X]% ([Y] functions documented, [Z] missing breadcrumbs)
+- **System Health**: [Operational status]
+- **Application Status**: [Running/Issues]
+
+## 🔄 Next Agent Context
+- **Priority Items**: [Specific tasks or 'System ready for new tasks']
+- **Known Issues**: [Any unresolved items or 'None']
+- **Recommendations**: [Guidance for next agent]
+
+System handoff complete with full documentation."
 ```
+
+**🚨 CRITICAL UNDERSTANDING**: 
+- The workflow orchestrator updates ALL THREE handoff files automatically
+- **session_state.json** gets current session context and technical state
+- **agent_handoff.json** gets structured next agent instructions
+- **changelog_summary.json** gets detailed historical record with version correlation
+- This ensures consistency across the entire handoff system
 
 ### 4. **CRITICAL**: Only ONE changelog_summary.json file should exist
 - **PRIMARY**: `/home/runner/workspace/changelog_summary.json` (root level)
@@ -247,17 +301,48 @@ Use TodoWrite to set clear priorities for the next session with specific actiona
 
 ### Incoming Agent Checklist
 1. **Load project context**: Run `python3 codebase_summary/agent_workflow_orchestrator.py incoming`
-2. **Review session state**: Check `session_state.json` for previous agent tasks and context
+2. **Review ALL handoff documentation**:
+   - **session_state.json** - Current session context and technical state
+   - **agent_handoff.json** - Structured instructions from previous agent
+   - **changelog_summary.json** - Recent session summaries and historical context
 3. **Understand deployment mode**: Check `_critical_context.deployment_mode` in codebase_summary.json
-4. **Check for unresolved issues**: Review any incomplete work or known problems
-5. **Verify system state**: Ensure application is running and all systems operational
+4. **Check priority items**: Review `next_agent_context.priority_items` in session_state.json
+5. **Verify system state**: Ensure application is running and all systems operational per handoff docs
 
-### Outgoing Agent Checklist
-1. **Update session state**: Document completed tasks and current project state
-2. **Run outgoing workflow**: `python3 codebase_summary/agent_workflow_orchestrator.py outgoing --summary "Detailed session summary"`
-3. **Update changelog**: Add comprehensive entry with specific accomplishments and impact
-4. **Set priorities**: Use TodoWrite to establish clear priorities for next agent session
-5. **Commit changes**: Follow structured commit message format with session summary
+### Outgoing Agent Checklist - MANDATORY HANDOFF STEPS
+
+1. **🚨 PRIMARY METHOD - Use Agent Workflow Orchestrator**: 
+   ```bash
+   # This handles ALL handoff documentation automatically
+   python3 codebase_summary/agent_workflow_orchestrator.py outgoing \
+     --summary "Complete session description including:
+   
+   ## Technical Accomplishments:
+   - Specific files modified (with line numbers where applicable)
+   - System improvements and architecture changes
+   - Testing/verification completed
+   - Documentation updates
+   
+   ## Current System State:
+   - Application status: [operational/issues]
+   - Documentation coverage: [X% with Y functions documented]
+   - System health: [any critical notes]
+   
+   ## Next Agent Context:
+   - Priority items: [specific tasks if any]
+   - Known issues: [any unresolved items]
+   - Recommendations: [guidance for next agent]"
+   ```
+   
+   **This automatically updates ALL THREE handoff files:**
+   - `session_state.json` - Current session and technical state
+   - `agent_handoff.json` - Structured next agent instructions  
+   - `changelog_summary.json` - Historical record with version correlation
+
+2. **Set priorities**: Use TodoWrite to establish clear priorities for next agent session
+3. **Commit changes**: Follow structured commit message format with session summary
+
+**⚠️ CRITICAL**: The workflow orchestrator maintains consistency across all handoff documents. Don't manually edit session_state.json, agent_handoff.json, or changelog_summary.json unless the orchestrator fails.
 
 ## 🔧 Troubleshooting Common Issues
 
