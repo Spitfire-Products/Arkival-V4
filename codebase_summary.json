@@ -13,7 +13,7 @@
   },
   "_version_systems_explained": {
     "codebase_version": {
-      "current": "1.1.69",
+      "current": "1.1.74",
       "purpose": "Tracks codebase structure analysis iterations",
       "updates": "Every time update_project_summary.py runs",
       "independent_from": "changelog/project versions"
@@ -61,8 +61,8 @@
     "complexity_score": "low"
   },
   "project_name": "Arkival",
-  "version": "1.1.69",
-  "updated_at": "2025-06-21T07:39:14.724461Z",
+  "version": "1.1.74",
+  "updated_at": "2025-06-21T08:54:22.521686Z",
   "description": "AI Agent Workflow Orchestration System for seamless knowledge transfer between AI agents and human developers",
   "main_dependencies": {
     "runtime": [],
@@ -70,7 +70,7 @@
     "system": []
   },
   "project_structure": {
-    "total_files": 60,
+    "total_files": 61,
     "directories": [
       ".local",
       ".local/state",
@@ -111,7 +111,7 @@
       "changelog_archives"
     ],
     "file_types": {
-      ".md": 28,
+      ".md": 29,
       "": 3,
       ".toml": 4,
       ".py": 8,
@@ -165,7 +165,7 @@
         "CHANGELOG.md",
         "CODEBASE_SUMMARY.md",
         "CONTRIBUTING.md",
-        "documentation_assets/COMPREHENSIVE_BREADCRUMB_GUIDE.md",
+        "replit.md",
         "documentation_assets/WEBSOCKET_MITIGATION.md",
         "documentation_assets/COMPONENTS_AUTO_UPDATE.md",
         "documentation_assets/IDE_INTEGRATION.md",
@@ -196,7 +196,7 @@
     },
     "documentation_gaps": [],
     "total_files_analyzed": 9,
-    "total_lines_of_code": 6548,
+    "total_lines_of_code": 6555,
     "coverage_percentage": 100.0,
     "missing_count": 0,
     "missing_breadcrumbs_summary": {
@@ -316,7 +316,7 @@
       "CHANGELOG.md",
       "CODEBASE_SUMMARY.md",
       "CONTRIBUTING.md",
-      "documentation_assets/COMPREHENSIVE_BREADCRUMB_GUIDE.md",
+      "replit.md",
       "documentation_assets/WEBSOCKET_MITIGATION.md",
       "documentation_assets/COMPONENTS_AUTO_UPDATE.md",
       "documentation_assets/IDE_INTEGRATION.md",
@@ -334,9 +334,9 @@
     "feature_flags": []
   },
   "performance_metrics": {
-    "file_count": 60,
+    "file_count": 61,
     "directory_count": 37,
-    "function_density": 1.07,
+    "function_density": 1.05,
     "documentation_coverage": 100.0,
     "complexity_score": "low"
   },
@@ -348,7 +348,7 @@
   "version_correlation": {
     "changelog_version": null,
     "last_checkpoint": null,
-    "archived_at": "2025-06-21T07:39:14.724702Z",
+    "archived_at": "2025-06-21T08:54:22.521933Z",
     "note": "Enhanced summary version is independent of changelog milestones"
   },
   "future_enhancements": [

@@ -1,12 +1,12 @@
 # Arkival - Dynamic Architecture Analysis
 
 *Auto-generated from codebase structure analysis*
-*Version: 1.1.69 | Generated: 2025-06-21T07:39:14Z*
+*Version: 1.1.74 | Generated: 2025-06-21T08:54:22Z*
 
 ## ⚠️ Version Systems - IMPORTANT
 | System | Current | Purpose | Updates |
 |--------|---------|---------|---------|
-| **Codebase Analysis** | v1.1.69 | Documentation scan version | Every `update_project_summary.py` run |
+| **Codebase Analysis** | v1.1.74 | Documentation scan version | Every `update_project_summary.py` run |
 | **Changelog/Project** | vNone | Feature release version | Major milestones only |
 
 **These are INDEPENDENT systems - version mismatch is NORMAL and EXPECTED**

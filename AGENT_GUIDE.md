@@ -14,8 +14,8 @@ python3 codebase_summary/update_project_summary.py
 
 ### 2. Read Critical Context
 - **`codebase_summary.json`** - Current project analysis with `_critical_context` section
-- **`modules/claude-code/CLAUDE.md`** - Detailed agent integration guide
 - **`ARCHITECTURE_DIAGRAM.md`** - Visual project overview with decision trees
+- **`modules/claude-code/CLAUDE.md`** - Claude integration guide (if using Claude module)
 
 ### 3. Agent Workflow Commands
 ```bash

@@ -1620,10 +1620,19 @@ def main():
     """
     # @codebase-summary: Main CLI interface for optimized project summary generation
     - Provides command-line interface for project analysis and documentation generation
+    - Supports --force flag for mandatory output regeneration regardless of cache
     - Orchestrates complete summary generation process with error handling
     
     Main entry point
     """
+    import sys
+    
+    # Check for --force flag
+    force_update = "--force" in sys.argv
+    
+    if force_update:
+        print("🔄 FORCE UPDATE MODE: Regenerating all outputs regardless of cache")
+    
     generator = OptimizedProjectSummaryGenerator()
     generator.generate_summary()
 
