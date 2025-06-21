@@ -259,28 +259,21 @@ class ExportReadinessValidator:
             self.validation_results["errors"].extend([f"Missing documentation: {d}" for d in missing_docs])
     
     def _generate_export_manifest(self):
-        """Generate updated export manifest with current metrics"""
+        """Generate export manifest with current metrics - fully regenerated"""
         print("📦 Generating updated export manifest...")
         
         try:
-            # Load existing manifest as template
-            if self.paths['manifest_file'].exists():
-                with open(self.paths['manifest_file'], 'r') as f:
-                    manifest = json.load(f)
-            else:
-                manifest = {"package_name": "Arkival Export Package"}
-            
-            # Update with current metrics
+            # Generate fresh manifest without dependency on existing files
             current_metrics = self.validation_results["metrics"]
             
-            manifest.update({
+            manifest = {
                 "package_name": "Arkival V4 - Cross-Platform Workflow Export Package",
                 "version": current_metrics.get("project_version", "1.0.0"),
                 "export_date": datetime.datetime.now().isoformat() + "Z",
                 "status": "VALIDATING",
                 "confidence_level": "HIGH" if len(self.validation_results["errors"]) == 0 else "MEDIUM",
                 "validation_timestamp": self.validation_results["timestamp"]
-            })
+            }
             
             # Update quality metrics with current data
             manifest["quality_metrics"] = {
