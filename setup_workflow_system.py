@@ -397,6 +397,31 @@ class WorkflowSystemSetup:
             
         except Exception as e:
             print(f"❌ Failed to create arkival_config.json: {e}")
+            
+        # Migrate .scanignore to parent root for subdirectory deployments
+        self._migrate_scanignore_to_parent()
+
+    def _migrate_scanignore_to_parent(self):
+        """Migrate .scanignore to parent project root in subdirectory mode"""
+        try:
+            source_scanignore = self.package_root / ".scanignore"
+            target_scanignore = self.project_root / ".scanignore"
+            
+            if not source_scanignore.exists():
+                print("⚠️  No .scanignore found in Arkival directory")
+                return
+                
+            if target_scanignore.exists():
+                print("⏭️  Skipping .scanignore migration - already exists in parent")
+                return
+                
+            # Copy .scanignore to parent project root
+            import shutil
+            shutil.copy2(source_scanignore, target_scanignore)
+            print("⚙️  Migrated .scanignore to parent project root")
+            
+        except Exception as e:
+            print(f"❌ Failed to migrate .scanignore: {e}")
 
     def _initialize_arkival_changelog(self):
         """

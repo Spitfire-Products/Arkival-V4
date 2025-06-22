@@ -82,13 +82,98 @@ docs/build/
 site/
 _site/
 
-# ====== PYTHON DEPENDENCY EXCLUSIONS ======
-# Python dependencies and virtual environments (performance optimization)
+# ====== COMPREHENSIVE LANGUAGE DEPENDENCY EXCLUSIONS ======
+# Critical: exclude dependency directories to prevent function count inflation
+
+# Python dependencies and virtual environments
 .pythonlibs/
+*/.pythonlibs/
+**/.pythonlibs/
 site-packages/
+*/site-packages/
+**/site-packages/
 *.pyi
 .local/
 .config/
+venv/
+env/
+.venv/
+.env/
+__pycache__/
+.pytest_cache/
+
+# Node.js / JavaScript dependencies
+node_modules/
+*/node_modules/
+**/node_modules/
+.npm/
+.yarn/
+bower_components/
+
+# Java dependencies
+target/
+.m2/
+.gradle/
+build/
+lib/
+*.jar
+
+# C# / .NET dependencies
+bin/
+obj/
+packages/
+.nuget/
+*.dll
+*.exe
+
+# Ruby dependencies
+vendor/
+.bundle/
+gems/
+
+# PHP dependencies
+vendor/
+composer.lock
+
+# Go dependencies
+vendor/
+go.sum
+
+# Rust dependencies
+target/
+Cargo.lock
+
+# Swift dependencies
+.build/
+Packages/
+*.xcodeproj/
+*.xcworkspace/
+
+# Dart / Flutter dependencies
+.dart_tool/
+.packages
+pubspec.lock
+
+# Kotlin dependencies
+build/
+.gradle/
+
+# Scala dependencies
+target/
+project/target/
+project/project/
+
+# C/C++ dependencies
+build/
+cmake-build-*/
+*.o
+*.so
+*.a
+
+# R dependencies
+renv/
+packrat/
+.Rproj.user/
 
 # ====== CUSTOM PROJECT EXCLUSIONS ======
 # Add your project-specific exclusions below:
