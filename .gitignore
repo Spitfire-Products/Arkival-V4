@@ -111,6 +111,11 @@ codebase_summary/agent_handoff.json
 codebase_summary/missing_breadcrumbs.json
 export_package/agent_handoff.json
 
+# Generated documentation files (auto-created by workflow system)
+CHANGELOG.md
+checkpoints/
+checkpoints/*.md
+
 # Export validation files (generated during deployment prep)
 EXPORT_READINESS_MANIFEST.json
 EXPORT_VALIDATION_RESULTS.json
