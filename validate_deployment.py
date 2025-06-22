@@ -35,11 +35,15 @@ def find_arkival_paths():
     
     # Try alternative detection methods
     if not project_root:
-        # Look for Arkival directory as indicator
+        # Look for Arkival directory as indicator (check multiple variations)
         search_path = current_dir
         for _ in range(5):
-            if (search_path / "Arkival").exists():
-                project_root = search_path
+            arkival_variations = ["Arkival", "Arkival-V4", "arkival", "arkival-v4"]
+            for variation in arkival_variations:
+                if (search_path / variation).exists():
+                    project_root = search_path
+                    break
+            if project_root:
                 break
             search_path = search_path.parent
     
@@ -51,12 +55,21 @@ def find_arkival_paths():
     # Dev mode: scripts are in codebase_summary/, data files in root
     # Subdirectory mode: everything under Arkival/
     
-    if current_dir.name.lower() in ['arkival', 'arkival-v4'] or (project_root / "arkival_config.json").exists():
-        # Subdirectory deployment mode
-        arkival_dir = project_root / "Arkival"
+    if current_dir.name.lower() in ['arkival', 'arkival-v4'] or (project_root / "arkival.config.json").exists():
+        # Subdirectory deployment mode - detect actual Arkival directory name
+        arkival_dir = None
+        arkival_variations = ["Arkival", "Arkival-V4", "arkival", "arkival-v4"]
+        for variation in arkival_variations:
+            if (project_root / variation).exists():
+                arkival_dir = project_root / variation
+                break
+        
+        # Fallback to current directory if we're inside an Arkival directory
+        if not arkival_dir and current_dir.name.lower() in ['arkival', 'arkival-v4']:
+            arkival_dir = current_dir
         return {
             'project_root': project_root,
-            'config_file': project_root / "arkival_config.json",
+            'config_file': project_root / "arkival.config.json",
             'arkival_dir': arkival_dir,
             'data_dir': arkival_dir,  # Same as arkival_dir, no separate data folder
             'scripts_dir': arkival_dir / "codebase_summary", 
@@ -75,7 +88,7 @@ def find_arkival_paths():
         # Development mode - use root directory structure
         return {
             'project_root': project_root,
-            'config_file': project_root / "arkival_config.json",
+            'config_file': project_root / "arkival.config.json",
             'arkival_dir': project_root,
             'data_dir': project_root,
             'scripts_dir': project_root / "codebase_summary", 
