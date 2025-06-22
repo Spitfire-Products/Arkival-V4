@@ -30,36 +30,34 @@ def find_arkival_paths():
     # Debug output for deployment troubleshooting
     print(f"🔍 DEBUG: Script running from: {current_dir}")
     
-    # Find the project root by searching for arkival_config.json workflow flag
+    # The setup script places arkival_config.json in the parent directory when in subdirectory mode
+    # Search upward for this workflow flag to determine deployment mode
     project_root = None
     search_path = current_dir
     
-    # Search upward for arkival_config.json (the workflow flag)
-    for _ in range(5):  # Max 5 levels up
-        if (search_path / "arkival_config.json").exists():
+    for _ in range(5):  # Search up to 5 levels up
+        workflow_flag = search_path / "arkival_config.json"
+        if workflow_flag.exists():
             project_root = search_path
-            print(f"🔍 DEBUG: Found arkival_config.json at: {project_root}")
+            subdirectory_mode = True
+            print(f"🔍 DEBUG: Found workflow flag at: {workflow_flag}")
+            print(f"🔍 DEBUG: Subdirectory mode - project root: {project_root}")
             break
         if search_path.parent == search_path:  # Reached filesystem root
             break
         search_path = search_path.parent
     
-    # Determine deployment mode based on workflow flag
-    if project_root:
-        # Subdirectory mode: arkival_config.json workflow flag found
-        subdirectory_mode = True
-        print(f"🔍 DEBUG: Subdirectory mode detected - workflow flag at {project_root}")
-    else:
-        # Development mode: no workflow flag found
-        subdirectory_mode = False
+    if project_root is None:
+        # No workflow flag found - development mode
         project_root = current_dir
-        print(f"🔍 DEBUG: Development mode detected - no workflow flag found")
+        subdirectory_mode = False
+        print(f"🔍 DEBUG: No workflow flag found - development mode at: {project_root}")
     
     if subdirectory_mode:
-        # Subdirectory deployment mode - arkival_config.json workflow flag found
-        # Scan parent project but place ALL generated files in Arkival-V4 directory
+        # Subdirectory deployment mode - place ALL generated files in Arkival-V4 directory
         arkival_dir = project_root / "Arkival-V4"
         print(f"🔍 DEBUG: All files will be written to: {arkival_dir}")
+        
         return {
             'project_root': project_root,         # Parent project directory (for scanning)
             'scan_root': project_root,            # Directory to scan (parent project)
@@ -1470,22 +1468,21 @@ Thank you for contributing to making AI agent workflows more efficient!
         return "No previous agent task recorded"
 
     def _detect_deployment_mode(self) -> str:
-        """Detect deployment mode using arkival_config.json workflow flag"""
+        """Detect deployment mode by searching for arkival_config.json workflow flag"""
         current_dir = Path.cwd()
-        workflow_flag_path = current_dir / "arkival_config.json"
-        
-        # Search upward for workflow flag (in case script is run from subdirectory)
         search_path = current_dir
+        
+        # Search upward for arkival_config.json workflow flag
         for _ in range(5):
-            flag_path = search_path / "arkival_config.json"
-            if flag_path.exists():
-                print(f"🔍 DEBUG: Deployment mode detection - found workflow flag at: {flag_path}")
+            workflow_flag = search_path / "arkival_config.json"
+            if workflow_flag.exists():
+                print(f"🔍 DEBUG: Deployment mode detection - found workflow flag: subdirectory mode")
                 return "subdirectory"
             if search_path.parent == search_path:
                 break
             search_path = search_path.parent
         
-        print(f"🔍 DEBUG: Deployment mode detection - no workflow flag found, using development mode")
+        print(f"🔍 DEBUG: Deployment mode detection - no workflow flag found: development mode")
         return "development"
     
     def _get_generator_path(self) -> str:
