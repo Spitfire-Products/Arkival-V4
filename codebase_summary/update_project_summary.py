@@ -1418,7 +1418,8 @@ Thank you for contributing to making AI agent workflows more efficient!
         default_ignores = {
             '.git', '__pycache__', 'node_modules', '.cache', '.vscode', '.idea',
             '.DS_Store', 'vendor', 'build', 'dist', 'target', 'bin', 'obj', 'out',
-            '.next', '.nuxt', 'coverage', 'test-results', '.pytest_cache'
+            '.next', '.nuxt', 'coverage', 'test-results', '.pytest_cache', '.claude',
+            '.cursor', '.aider', '.codeium', '.copilot'  # AI coding tools
         }
         ignore_patterns.update(default_ignores)
         
