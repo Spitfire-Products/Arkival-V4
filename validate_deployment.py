@@ -292,6 +292,133 @@ def validate_export_package():
     print("🚀 Ready for deployment to new projects")
     return True
 
+def sanitize_deployment():
+    """
+    # @codebase-summary: Sanitize deployment to fix duplicate directory and file issues
+    - Detects and resolves arkival-v4 vs Arkival-V4 directory duplication
+    - Consolidates duplicate generated files into proper structure
+    - Fixes deployment mess caused by git tracking of auto-generated files
+    - Safe simulation mode in source repositories
+    """
+    print("🧹 DEPLOYMENT SANITIZATION")
+    print("=" * 40)
+    
+    current_dir = Path.cwd()
+    
+    # Check if this is the source repository
+    is_source_repo = (
+        Path("EXPORT_PACKAGE_MANIFEST.json").exists() or
+        Path(".github").exists() or
+        Path("reference_assets").exists()
+    )
+    
+    if is_source_repo:
+        print("🔍 DETECTED SOURCE REPOSITORY - SIMULATION MODE")
+        print("   → Sanitization actions will be simulated, not executed")
+        print("   → This preserves development files in the main repo")
+        print("")
+    
+    issues_found = []
+    actions_taken = []
+    
+    # Check for duplicate Arkival directories
+    arkival_variations = {
+        "arkival-v4": current_dir / "arkival-v4",
+        "Arkival-V4": current_dir / "Arkival-V4",
+        "arkival": current_dir / "arkival", 
+        "Arkival": current_dir / "Arkival"
+    }
+    
+    existing_dirs = {name: path for name, path in arkival_variations.items() if path.exists()}
+    
+    if len(existing_dirs) > 1:
+        issues_found.append(f"Multiple Arkival directories detected: {list(existing_dirs.keys())}")
+        
+        # Determine the correct target directory (prefer Arkival-V4)
+        if "Arkival-V4" in existing_dirs:
+            target_dir = existing_dirs["Arkival-V4"]
+            target_name = "Arkival-V4"
+        else:
+            # Use the first one found as target
+            target_name = list(existing_dirs.keys())[0]
+            target_dir = existing_dirs[target_name]
+        
+        print(f"🎯 Target directory: {target_name}")
+        
+        # Consolidate files from other directories
+        for name, path in existing_dirs.items():
+            if name != target_name:
+                print(f"📁 Processing duplicate directory: {name}")
+                
+                if not is_source_repo:
+                    # Move unique files to target directory
+                    if path.exists():
+                        for item in path.iterdir():
+                            target_item = target_dir / item.name
+                            if not target_item.exists():
+                                if item.is_dir():
+                                    item.rename(target_item)
+                                    actions_taken.append(f"Moved directory {item} to {target_item}")
+                                else:
+                                    item.rename(target_item)
+                                    actions_taken.append(f"Moved file {item} to {target_item}")
+                        
+                        # Remove empty duplicate directory
+                        try:
+                            path.rmdir()
+                            actions_taken.append(f"Removed empty duplicate directory: {path}")
+                        except OSError:
+                            actions_taken.append(f"WARNING: Could not remove {path} (not empty)")
+                else:
+                    print(f"🎭 SIMULATION: Would consolidate {name} into {target_name}")
+    
+    # Check for duplicate generated files in root vs Arkival directory
+    generated_files = [
+        "CHANGELOG.md",
+        "codebase_summary.json", 
+        "changelog_summary.json"
+    ]
+    
+    for filename in generated_files:
+        root_file = current_dir / filename
+        if "Arkival-V4" in existing_dirs:
+            arkival_file = existing_dirs["Arkival-V4"] / filename
+            
+            if root_file.exists() and arkival_file.exists():
+                issues_found.append(f"Duplicate {filename} in root and Arkival-V4")
+                
+                if not is_source_repo:
+                    # Keep the newer file, remove the older one
+                    root_mtime = root_file.stat().st_mtime
+                    arkival_mtime = arkival_file.stat().st_mtime
+                    
+                    if arkival_mtime > root_mtime:
+                        root_file.unlink()
+                        actions_taken.append(f"Removed older {filename} from root")
+                    else:
+                        arkival_file.unlink()
+                        actions_taken.append(f"Removed older {filename} from Arkival-V4")
+                else:
+                    print(f"🎭 SIMULATION: Would remove duplicate {filename}")
+    
+    # Report results
+    if issues_found:
+        print(f"\n🔍 ISSUES DETECTED ({len(issues_found)}):")
+        for issue in issues_found:
+            print(f"   • {issue}")
+    else:
+        print("\n✅ NO DUPLICATION ISSUES DETECTED")
+    
+    if actions_taken:
+        print(f"\n🔧 ACTIONS TAKEN ({len(actions_taken)}):")
+        for action in actions_taken:
+            print(f"   • {action}")
+        print(f"\n🎉 SANITIZATION COMPLETE")
+    elif issues_found and is_source_repo:
+        print(f"\n🎭 SIMULATION COMPLETE - No actual changes made in source repo")
+    else:
+        print(f"\n✅ NO SANITIZATION NEEDED")
+
 def cleanup_post_deployment():
     """
     # @codebase-summary: Post-deployment cleanup for prompt caching optimization
@@ -395,11 +522,23 @@ def main():
     - Coordinates complete deployment validation process
     - Provides console output and exit codes for automation
     - Handles validation errors with proper error reporting
-    - Supports post-deployment cleanup mode
+    - Supports post-deployment cleanup and sanitization modes
     """
-    if len(sys.argv) > 1 and sys.argv[1] == "cleanup":
-        cleanup_post_deployment()
-        return
+    if len(sys.argv) > 1:
+        if sys.argv[1] == "cleanup":
+            cleanup_post_deployment()
+            return
+        elif sys.argv[1] == "sanitize":
+            sanitize_deployment()
+            return
+        elif sys.argv[1] == "help":
+            print("Arkival Deployment Validation Tool")
+            print("\nUsage:")
+            print("  python3 validate_deployment.py           # Run full validation")
+            print("  python3 validate_deployment.py sanitize  # Fix duplicate directories/files") 
+            print("  python3 validate_deployment.py cleanup   # Post-deployment optimization")
+            print("  python3 validate_deployment.py help      # Show this help")
+            return
     
     print(f"Validation started at: {datetime.now().isoformat()}")
     
