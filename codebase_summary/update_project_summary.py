@@ -246,13 +246,37 @@ class OptimizedProjectSummaryGenerator:
         }
 
     def _detect_project_info(self) -> Dict[str, str]:
-        """Auto-detect project name and description from codebase"""
-        project_info = {"name": "Unknown Project", "description": "Project description not found"}
+        """Auto-detect comprehensive project metadata from codebase"""
+        project_info = {
+            "name": "Unknown Project", 
+            "description": "Project description not found",
+            "git_url": None,
+            "homepage": None,
+            "version": None,
+            "license": None,
+            "author": None,
+            "keywords": [],
+            "main_language": None,
+            "framework": None
+        }
         
         # Use the scan_root which is already correctly set for subdirectory mode
         search_dir = self.project_root  # This is already scan_root from path resolution
         
-        # Priority 1: README.md (human-readable project name, exclude Arkival's own README files)
+        # Collect metadata from all available sources
+        self._extract_git_metadata(search_dir, project_info)
+        self._extract_package_json_metadata(search_dir, project_info)
+        self._extract_pyproject_toml_metadata(search_dir, project_info)
+        self._extract_readme_metadata(search_dir, project_info)
+        self._extract_cargo_toml_metadata(search_dir, project_info)
+        self._extract_composer_json_metadata(search_dir, project_info)
+        self._detect_framework_and_language(search_dir, project_info)
+        
+        # Clean up and return
+        return {k: v for k, v in project_info.items() if v is not None and v != []}
+
+    def _extract_readme_metadata(self, search_dir: Path, project_info: dict):
+        """Extract project name and description from README files"""
         readme_files = ["README.md", "readme.md", "ReadMe.md"]
         for readme_name in readme_files:
             readme_path = search_dir / readme_name
@@ -262,7 +286,7 @@ class OptimizedProjectSummaryGenerator:
                         content = f.read()
                         lines = [line.strip() for line in content.split('\n') if line.strip()]
                         if lines:
-                            # Use first header as project name
+                            # Use first header as project name (priority over other sources)
                             first_line = lines[0]
                             if first_line.startswith('#'):
                                 project_name = first_line.lstrip('#').strip()
@@ -271,55 +295,259 @@ class OptimizedProjectSummaryGenerator:
                             
                             # Skip if this looks like Arkival's own README
                             if project_name.lower() not in ['arkival', 'arkival-v4']:
-                                project_info["name"] = project_name
+                                if not project_info.get("name") or project_info["name"] == "Unknown Project":
+                                    project_info["name"] = project_name
                                 
                                 # Use first substantial paragraph as description
-                                for line in lines[1:]:
-                                    if (len(line) > 20 and not line.startswith('#') and 
-                                        not line.startswith('[') and not line.startswith('!')):
-                                        # Clean up markdown
-                                        clean_desc = re.sub(r'\*\*([^*]+)\*\*', r'\1', line)
-                                        clean_desc = re.sub(r'\*([^*]+)\*', r'\1', clean_desc)
-                                        project_info["description"] = clean_desc.strip()
-                                        break
-                                return project_info
+                                if not project_info.get("description") or project_info["description"] == "Project description not found":
+                                    for line in lines[1:]:
+                                        if (len(line) > 20 and not line.startswith('#') and 
+                                            not line.startswith('[') and not line.startswith('!')):
+                                            # Clean up markdown
+                                            clean_desc = re.sub(r'\*\*([^*]+)\*\*', r'\1', line)
+                                            clean_desc = re.sub(r'\*([^*]+)\*', r'\1', clean_desc)
+                                            project_info["description"] = clean_desc.strip()
+                                            break
                 except:
                     pass
-        
-        # Priority 2: package.json (fallback for technical projects)
+
+    def _extract_git_metadata(self, search_dir: Path, project_info: dict):
+        """Extract Git repository information"""
+        try:
+            # Check .git/config for remote URL
+            git_config = search_dir / ".git" / "config"
+            if git_config.exists():
+                with open(git_config, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                    # Look for remote origin URL
+                    url_match = re.search(r'url\s*=\s*(.+)', content)
+                    if url_match:
+                        url = url_match.group(1).strip()
+                        # Clean up SSH URLs to HTTPS
+                        if url.startswith('git@github.com:'):
+                            url = url.replace('git@github.com:', 'https://github.com/')
+                        if url.endswith('.git'):
+                            url = url[:-4]
+                        project_info["git_url"] = url
+        except:
+            pass
+
+    def _extract_package_json_metadata(self, search_dir: Path, project_info: dict):
+        """Extract metadata from package.json"""
         package_json = search_dir / "package.json"
         if package_json.exists():
             try:
                 with open(package_json, 'r', encoding='utf-8') as f:
                     data = json.load(f)
-                    if "name" in data:
-                        project_info["name"] = data["name"]
-                    if "description" in data:
-                        project_info["description"] = data["description"]
-                    return project_info
+                    
+                    # Only use package.json name if no better name found
+                    if not project_info.get("name") or project_info["name"] == "Unknown Project":
+                        if "name" in data:
+                            project_info["name"] = data["name"]
+                    
+                    # Only use package.json description if no better description found
+                    if not project_info.get("description") or project_info["description"] == "Project description not found":
+                        if "description" in data:
+                            project_info["description"] = data["description"]
+                    
+                    # Extract additional metadata
+                    if "version" in data:
+                        project_info["version"] = data["version"]
+                    if "homepage" in data:
+                        project_info["homepage"] = data["homepage"]
+                    if "license" in data:
+                        project_info["license"] = data["license"]
+                    if "author" in data:
+                        project_info["author"] = data["author"]
+                    if "keywords" in data and isinstance(data["keywords"], list):
+                        project_info["keywords"] = data["keywords"]
+                    
+                    # Extract git URL from repository field
+                    if "repository" in data and not project_info.get("git_url"):
+                        repo = data["repository"]
+                        if isinstance(repo, dict) and "url" in repo:
+                            url = repo["url"]
+                        elif isinstance(repo, str):
+                            url = repo
+                        else:
+                            url = None
+                        
+                        if url:
+                            # Clean up git URLs
+                            if url.startswith('git+'):
+                                url = url[4:]
+                            if url.endswith('.git'):
+                                url = url[:-4]
+                            project_info["git_url"] = url
             except:
                 pass
-        
-        # Priority 3: pyproject.toml (fallback for Python projects)
+
+    def _extract_pyproject_toml_metadata(self, search_dir: Path, project_info: dict):
+        """Extract metadata from pyproject.toml"""
         pyproject_toml = search_dir / "pyproject.toml"
         if pyproject_toml.exists():
             try:
                 with open(pyproject_toml, 'r', encoding='utf-8') as f:
                     content = f.read()
+                    
+                    # Only use if no better name found
+                    if not project_info.get("name") or project_info["name"] == "Unknown Project":
+                        name_match = re.search(r'name\s*=\s*["\']([^"\']+)["\']', content)
+                        if name_match:
+                            project_info["name"] = name_match.group(1)
+                    
+                    # Only use if no better description found
+                    if not project_info.get("description") or project_info["description"] == "Project description not found":
+                        desc_match = re.search(r'description\s*=\s*["\']([^"\']+)["\']', content)
+                        if desc_match:
+                            project_info["description"] = desc_match.group(1)
+                    
+                    # Extract additional metadata
+                    version_match = re.search(r'version\s*=\s*["\']([^"\']+)["\']', content)
+                    if version_match:
+                        project_info["version"] = version_match.group(1)
+                    
+                    license_match = re.search(r'license\s*=\s*["\']([^"\']+)["\']', content)
+                    if license_match:
+                        project_info["license"] = license_match.group(1)
+                    
+                    # Extract repository URL
+                    repo_match = re.search(r'repository\s*=\s*["\']([^"\']+)["\']', content)
+                    if repo_match and not project_info.get("git_url"):
+                        project_info["git_url"] = repo_match.group(1)
+            except:
+                pass
+
+    def _extract_cargo_toml_metadata(self, search_dir: Path, project_info: dict):
+        """Extract metadata from Cargo.toml for Rust projects"""
+        cargo_toml = search_dir / "Cargo.toml"
+        if cargo_toml.exists():
+            try:
+                with open(cargo_toml, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                    
+                    if not project_info.get("main_language"):
+                        project_info["main_language"] = "Rust"
+                    
+                    # Extract metadata
                     name_match = re.search(r'name\s*=\s*["\']([^"\']+)["\']', content)
-                    if name_match:
+                    if name_match and (not project_info.get("name") or project_info["name"] == "Unknown Project"):
                         project_info["name"] = name_match.group(1)
+                    
                     desc_match = re.search(r'description\s*=\s*["\']([^"\']+)["\']', content)
-                    if desc_match:
+                    if desc_match and (not project_info.get("description") or project_info["description"] == "Project description not found"):
                         project_info["description"] = desc_match.group(1)
-                    return project_info
+                    
+                    version_match = re.search(r'version\s*=\s*["\']([^"\']+)["\']', content)
+                    if version_match:
+                        project_info["version"] = version_match.group(1)
+                        
+                    repo_match = re.search(r'repository\s*=\s*["\']([^"\']+)["\']', content)
+                    if repo_match and not project_info.get("git_url"):
+                        project_info["git_url"] = repo_match.group(1)
+            except:
+                pass
+
+    def _extract_composer_json_metadata(self, search_dir: Path, project_info: dict):
+        """Extract metadata from composer.json for PHP projects"""
+        composer_json = search_dir / "composer.json"
+        if composer_json.exists():
+            try:
+                with open(composer_json, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    
+                    if not project_info.get("main_language"):
+                        project_info["main_language"] = "PHP"
+                    
+                    # Extract metadata similar to package.json
+                    if not project_info.get("name") or project_info["name"] == "Unknown Project":
+                        if "name" in data:
+                            project_info["name"] = data["name"]
+                    
+                    if not project_info.get("description") or project_info["description"] == "Project description not found":
+                        if "description" in data:
+                            project_info["description"] = data["description"]
+                    
+                    if "version" in data:
+                        project_info["version"] = data["version"]
+                    if "license" in data:
+                        project_info["license"] = data["license"]
+                    if "keywords" in data and isinstance(data["keywords"], list):
+                        project_info["keywords"] = data["keywords"]
+            except:
+                pass
+
+    def _detect_framework_and_language(self, search_dir: Path, project_info: dict):
+        """Detect framework and primary language from project structure"""
+        # Framework detection based on files and dependencies
+        frameworks = []
+        
+        # Check for common framework indicators
+        if (search_dir / "package.json").exists():
+            try:
+                with open(search_dir / "package.json", 'r') as f:
+                    data = json.load(f)
+                    deps = {**data.get("dependencies", {}), **data.get("devDependencies", {})}
+                    
+                    if "react" in deps:
+                        frameworks.append("React")
+                    if "vue" in deps:
+                        frameworks.append("Vue.js")
+                    if "angular" in deps or "@angular/core" in deps:
+                        frameworks.append("Angular")
+                    if "next" in deps:
+                        frameworks.append("Next.js")
+                    if "express" in deps:
+                        frameworks.append("Express.js")
+                    if "svelte" in deps:
+                        frameworks.append("Svelte")
             except:
                 pass
         
-        # Final fallback
-        project_info["name"] = search_dir.name
-        project_info["description"] = f"Code analysis for {search_dir.name} project"
-        return project_info
+        # Check for specific framework files
+        if (search_dir / "django_project").exists() or any((search_dir).glob("**/settings.py")):
+            frameworks.append("Django")
+        if (search_dir / "app.py").exists() or (search_dir / "wsgi.py").exists():
+            frameworks.append("Flask")
+        if (search_dir / "manage.py").exists():
+            frameworks.append("Django")
+        if (search_dir / "Gemfile").exists():
+            frameworks.append("Ruby on Rails")
+            if not project_info.get("main_language"):
+                project_info["main_language"] = "Ruby"
+        
+        # Language detection based on file extensions
+        if not project_info.get("main_language"):
+            file_counts = defaultdict(int)
+            try:
+                for root, dirs, files in os.walk(search_dir):
+                    # Skip common ignore directories
+                    dirs[:] = [d for d in dirs if d not in {'.git', 'node_modules', '__pycache__', '.cache'}]
+                    for file in files:
+                        ext = Path(file).suffix.lower()
+                        if ext in {'.py', '.js', '.ts', '.tsx', '.jsx', '.rs', '.go', '.java', '.php', '.rb', '.cpp', '.c', '.cs'}:
+                            file_counts[ext] += 1
+                
+                if file_counts:
+                    primary_ext = max(file_counts, key=file_counts.get)
+                    lang_map = {
+                        '.py': 'Python', '.js': 'JavaScript', '.ts': 'TypeScript', 
+                        '.tsx': 'TypeScript', '.jsx': 'JavaScript', '.rs': 'Rust',
+                        '.go': 'Go', '.java': 'Java', '.php': 'PHP', '.rb': 'Ruby',
+                        '.cpp': 'C++', '.c': 'C', '.cs': 'C#'
+                    }
+                    project_info["main_language"] = lang_map.get(primary_ext)
+            except:
+                pass
+        
+        if frameworks:
+            project_info["framework"] = frameworks[0] if len(frameworks) == 1 else frameworks
+        
+        # Final fallback for name and description
+        if not project_info.get("name") or project_info["name"] == "Unknown Project":
+            project_info["name"] = search_dir.name
+        if not project_info.get("description") or project_info["description"] == "Project description not found":
+            project_info["description"] = f"Code analysis for {project_info['name']} project"
 
     def _analyze_code_file(self, file_path: str) -> Dict[str, Any]:
         """Streamlined code analysis for a single file"""
@@ -571,6 +799,16 @@ class OptimizedProjectSummaryGenerator:
             "version": version,
             "updated_at": datetime.datetime.now().isoformat() + "Z",
             "description": project_info["description"],
+            "project_metadata": {
+                "git_url": project_info.get("git_url"),
+                "homepage": project_info.get("homepage"), 
+                "project_version": project_info.get("version"),
+                "license": project_info.get("license"),
+                "author": project_info.get("author"),
+                "keywords": project_info.get("keywords", []),
+                "main_language": project_info.get("main_language"),
+                "framework": project_info.get("framework")
+            },
             "main_dependencies": {"runtime": [], "development": [], "system": []},
             "project_structure": structure,
             "code_analysis": code_analysis,
