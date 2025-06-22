@@ -28,10 +28,10 @@ def find_arkival_paths():
     current_dir = Path.cwd()
     project_root = None
     
-    # Search upward for arkival.config.json
+    # Search upward for arkival_config.json
     search_path = current_dir
     for _ in range(5):  # Max 5 levels up
-        if (search_path / "arkival.config.json").exists():
+        if (search_path / "arkival_config.json").exists():
             project_root = search_path
             break
         if search_path.parent == search_path:  # Reached filesystem root
@@ -60,21 +60,21 @@ def find_arkival_paths():
     # Dev mode: scripts are in codebase_summary/, data files in root
     # Subdirectory mode: everything under Arkival/
     
-    if current_dir.name.lower() in ['arkival', 'arkival-v4'] or (project_root / "arkival.config.json").exists():
+    if current_dir.name.lower() in ['arkival', 'arkival-v4'] or (project_root / "arkival_config.json").exists():
         # Subdirectory deployment mode - ensure we scan the parent project
         if current_dir.name.lower() in ['arkival', 'arkival-v4']:
             # We're inside an Arkival directory, parent is the project to scan
             parent_project_root = current_dir.parent
             arkival_dir = current_dir
         else:
-            # arkival.config.json exists, project_root is correct
+            # arkival_config.json exists, project_root is correct
             parent_project_root = project_root
             arkival_dir = project_root
             
         return {
             'project_root': parent_project_root,  # Parent project directory (Comic Creator)
             'scan_root': parent_project_root,     # Directory to scan (parent project)
-            'config_file': parent_project_root / "arkival.config.json",
+            'config_file': parent_project_root / "arkival_config.json",
             'arkival_dir': arkival_dir,
             'data_dir': arkival_dir,
             'scripts_dir': arkival_dir / "codebase_summary",
@@ -93,7 +93,7 @@ def find_arkival_paths():
         return {
             'project_root': project_root,
             'scan_root': project_root,     # Directory to scan (same as project root in dev mode)
-            'config_file': project_root / "arkival.config.json",
+            'config_file': project_root / "arkival_config.json",
             'arkival_dir': project_root,
             'data_dir': project_root,
             'scripts_dir': project_root / "codebase_summary",

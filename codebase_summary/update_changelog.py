@@ -36,10 +36,10 @@ def find_arkival_paths():
     else:
         is_in_scripts_dir = False
         
-        # Search upward for arkival.config.json
+        # Search upward for arkival_config.json
         search_path = current_dir
         for _ in range(5):  # Max 5 levels up
-            if (search_path / "arkival.config.json").exists():
+            if (search_path / "arkival_config.json").exists():
                 project_root = search_path
                 break
             if search_path.parent == search_path:  # Reached filesystem root
