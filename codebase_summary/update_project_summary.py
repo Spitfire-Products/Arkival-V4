@@ -1828,19 +1828,19 @@ Thank you for contributing to making AI agent workflows more efficient!
             
             # Generate architecture diagram
             architecture_diagram = self._generate_architecture_diagram(summary)
-            architecture_path = self.project_root / "ARCHITECTURE_DIAGRAM.md"
+            architecture_path = self.paths['arkival_dir'] / "ARCHITECTURE_DIAGRAM.md"
             with open(architecture_path, 'w', encoding='utf-8') as f:
                 f.write(architecture_diagram)
             
             # Generate markdown summary
             markdown_summary = self._generate_markdown_summary(summary)
-            markdown_path = self.project_root / "CODEBASE_SUMMARY.md"
+            markdown_path = self.paths['arkival_dir'] / "CODEBASE_SUMMARY.md"
             with open(markdown_path, 'w', encoding='utf-8') as f:
                 f.write(markdown_summary)
             
             # Generate contributing guidelines
             contributing_md = self._generate_contributing_md(summary)
-            contributing_path = self.project_root / "CONTRIBUTING.md"
+            contributing_path = self.paths['arkival_dir'] / "CONTRIBUTING.md"
             with open(contributing_path, 'w', encoding='utf-8') as f:
                 f.write(contributing_md)
             
