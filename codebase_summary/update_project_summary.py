@@ -1421,41 +1421,88 @@ Thank you for contributing to making AI agent workflows more efficient!
             '.next', '.nuxt', 'coverage', 'test-results', '.pytest_cache', '.claude',
             '.cursor', '.aider', '.codeium', '.copilot'  # AI coding tools
         }
+        
+        # CRITICAL: In subdirectory mode, ignore the Arkival directory itself
+        deployment_mode = self._detect_deployment_mode()
+        if deployment_mode == "subdirectory":
+            default_ignores.add('Arkival-V4')
+            default_ignores.add('Arkival')
+            default_ignores.add('arkival-v4')
+            default_ignores.add('arkival')
+            print(f"🔍 DEBUG: Subdirectory mode - added Arkival directory ignores")
         ignore_patterns.update(default_ignores)
+        print(f"🔍 DEBUG: Loaded {len(default_ignores)} default ignore patterns")
         
         # Load custom patterns from .scanignore
         ignore_file = self.paths.get('scan_ignore')
+        print(f"🔍 DEBUG: Looking for .scanignore at: {ignore_file}")
+        
         if ignore_file and ignore_file.exists():
             try:
+                print(f"🔍 DEBUG: Loading .scanignore from: {ignore_file}")
                 with open(ignore_file, 'r', encoding='utf-8') as f:
+                    custom_patterns = []
                     for line in f:
                         line = line.strip()
                         if line and not line.startswith('#'):
                             ignore_patterns.add(line.rstrip('/'))
-                print(f"✅ Loaded {len(ignore_patterns) - len(default_ignores)} custom ignore patterns")
+                            custom_patterns.append(line.rstrip('/'))
+                print(f"✅ Loaded {len(custom_patterns)} custom ignore patterns: {custom_patterns}")
             except Exception as e:
                 print(f"⚠️ Warning: Could not load .scanignore: {e}")
+        else:
+            print(f"🔍 DEBUG: No .scanignore file found at {ignore_file}")
         
+        print(f"🔍 DEBUG: Total ignore patterns: {len(ignore_patterns)}")
         return ignore_patterns
     
     def _should_ignore_path(self, path: Path) -> bool:
         """Check if a path should be ignored based on patterns"""
-        path_str = str(path.relative_to(self.project_root))
-        
-        # Check each part of the path
-        for part in path.parts:
-            if part in self.ignore_patterns:
-                return True
-        
-        # Check full path against glob patterns
-        for pattern in self.ignore_patterns:
-            if '*' in pattern or '?' in pattern:
-                if fnmatch.fnmatch(path_str, pattern):
+        try:
+            # Handle path relative to project_root with error checking
+            if not path.is_relative_to(self.project_root):
+                print(f"🔍 DEBUG: Path {path} not relative to project_root {self.project_root}")
+                return False
+                
+            path_str = str(path.relative_to(self.project_root))
+            
+            # Debug: Print first few path checks
+            if hasattr(self, '_debug_count'):
+                self._debug_count += 1
+            else:
+                self._debug_count = 1
+                
+            if self._debug_count <= 5:
+                print(f"🔍 DEBUG: Checking path: {path_str} against {len(self.ignore_patterns)} patterns")
+                if self._debug_count == 1:
+                    print(f"🔍 DEBUG: Ignore patterns: {sorted(list(self.ignore_patterns))[:10]}...")
+            
+            # Check each part of the path
+            for part in path.parts:
+                if part in self.ignore_patterns:
+                    if self._debug_count <= 5:
+                        print(f"🔍 DEBUG: IGNORED {path_str} - part '{part}' matches pattern")
                     return True
-            elif pattern in path_str:
-                return True
-        
-        return False
+            
+            # Check full path against glob patterns
+            for pattern in self.ignore_patterns:
+                if '*' in pattern or '?' in pattern:
+                    if fnmatch.fnmatch(path_str, pattern):
+                        if self._debug_count <= 5:
+                            print(f"🔍 DEBUG: IGNORED {path_str} - matches glob pattern '{pattern}'")
+                        return True
+                elif pattern in path_str:
+                    if self._debug_count <= 5:
+                        print(f"🔍 DEBUG: IGNORED {path_str} - contains pattern '{pattern}'")
+                    return True
+            
+            if self._debug_count <= 5:
+                print(f"🔍 DEBUG: SCANNING {path_str} - no patterns matched")
+            return False
+            
+        except Exception as e:
+            print(f"🔍 DEBUG: Path ignore error for {path}: {e}")
+            return False
 
     def _get_last_agent_task(self) -> str:
         """Get the last agent task from session state"""
