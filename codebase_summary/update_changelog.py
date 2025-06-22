@@ -743,8 +743,8 @@ def generate_markdown_changelog():
     """
     try:
         changelog = load_changelog()
-        project_root = get_project_root()
-        changelog_md_path = project_root / "CHANGELOG.md"
+        paths = find_arkival_paths()
+        changelog_md_path = paths['arkival_dir'] / "CHANGELOG.md"
         
         # Generate markdown content
         content = []
