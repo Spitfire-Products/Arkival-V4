@@ -252,37 +252,7 @@ class OptimizedProjectSummaryGenerator:
         # Use the scan_root which is already correctly set for subdirectory mode
         search_dir = self.project_root  # This is already scan_root from path resolution
         
-        # Priority 1: package.json
-        package_json = search_dir / "package.json"
-        if package_json.exists():
-            try:
-                with open(package_json, 'r', encoding='utf-8') as f:
-                    data = json.load(f)
-                    if "name" in data:
-                        project_info["name"] = data["name"]
-                    if "description" in data:
-                        project_info["description"] = data["description"]
-                    return project_info
-            except:
-                pass
-        
-        # Priority 2: pyproject.toml
-        pyproject_toml = search_dir / "pyproject.toml"
-        if pyproject_toml.exists():
-            try:
-                with open(pyproject_toml, 'r', encoding='utf-8') as f:
-                    content = f.read()
-                    name_match = re.search(r'name\s*=\s*["\']([^"\']+)["\']', content)
-                    if name_match:
-                        project_info["name"] = name_match.group(1)
-                    desc_match = re.search(r'description\s*=\s*["\']([^"\']+)["\']', content)
-                    if desc_match:
-                        project_info["description"] = desc_match.group(1)
-                    return project_info
-            except:
-                pass
-        
-        # Priority 3: README.md (exclude Arkival's own README files)
+        # Priority 1: README.md (human-readable project name, exclude Arkival's own README files)
         readme_files = ["README.md", "readme.md", "ReadMe.md"]
         for readme_name in readme_files:
             readme_path = search_dir / readme_name
@@ -316,7 +286,37 @@ class OptimizedProjectSummaryGenerator:
                 except:
                     pass
         
-        # Fallback
+        # Priority 2: package.json (fallback for technical projects)
+        package_json = search_dir / "package.json"
+        if package_json.exists():
+            try:
+                with open(package_json, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    if "name" in data:
+                        project_info["name"] = data["name"]
+                    if "description" in data:
+                        project_info["description"] = data["description"]
+                    return project_info
+            except:
+                pass
+        
+        # Priority 3: pyproject.toml (fallback for Python projects)
+        pyproject_toml = search_dir / "pyproject.toml"
+        if pyproject_toml.exists():
+            try:
+                with open(pyproject_toml, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                    name_match = re.search(r'name\s*=\s*["\']([^"\']+)["\']', content)
+                    if name_match:
+                        project_info["name"] = name_match.group(1)
+                    desc_match = re.search(r'description\s*=\s*["\']([^"\']+)["\']', content)
+                    if desc_match:
+                        project_info["description"] = desc_match.group(1)
+                    return project_info
+            except:
+                pass
+        
+        # Final fallback
         project_info["name"] = search_dir.name
         project_info["description"] = f"Code analysis for {search_dir.name} project"
         return project_info
