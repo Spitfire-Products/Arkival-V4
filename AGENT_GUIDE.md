@@ -14,9 +14,11 @@ python3 codebase_summary/update_project_summary.py
 
 ### 2. Read Critical Context
 - **`codebase_summary.json`** - Current project analysis with `_critical_context` section
-- **`codebase_summary/session_state.json`** - Previous agent tasks and handoff context
+- **`codebase_summary/session_state.json`** - Previous agent tasks and handoff context  
 - **`ARCHITECTURE_DIAGRAM.md`** - Visual project overview with decision trees
 - **`modules/claude-code/CLAUDE.md`** - Claude integration guide (if using Claude module)
+
+**📁 Path Resolution**: In subdirectory mode, all files are prefixed with `Arkival-V4/` (e.g., `Arkival-V4/codebase_summary.json`)
 
 ### 3. Agent Workflow Commands
 ```bash
@@ -34,6 +36,8 @@ Agent handoff uses a **THREE-PART SYSTEM** that works together:
 1. **session_state.json** - Current session tracking and technical state
 2. **agent_handoff.json** - Structured handoff instructions and context  
 3. **changelog_summary.json** - Historical record with detailed session summary
+
+**📁 Subdirectory Mode**: Files are located at `Arkival-V4/codebase_summary/session_state.json`, `Arkival-V4/export_package/agent_handoff.json`, `Arkival-V4/changelog_summary.json`
 
 ### Primary Handoff Method: Agent Workflow Orchestrator
 ```bash
@@ -83,6 +87,20 @@ Ready for next agent with complete handoff documentation." \
 - Generated documentation reflects **Arkival itself**
 
 **Smart Path Resolution**: All scripts use `find_arkival_paths()` to automatically determine correct file locations based on deployment context.
+
+### 🧭 Workflow Flag System
+
+**Simple deployment detection**: `arkival_config.json` in root = subdirectory mode
+
+**Workflow Process**:
+1. **Setup** → detects subdirectory → places `arkival_config.json` in root
+2. **All scripts** → check for workflow flag → use appropriate paths automatically
+3. **Agents** → run standard commands → system handles deployment mode internally
+
+**What this means for agents**:
+- Use standard commands like `python3 codebase_summary/agent_workflow_orchestrator.py incoming`
+- The workflow flag automatically triggers correct path resolution
+- No manual detection or path adjustment required
 
 ## 📊 Key Capabilities
 
@@ -226,9 +244,10 @@ System handoff complete with full documentation."
 - This ensures consistency across the entire handoff system
 
 ### 4. **CRITICAL**: Only ONE changelog_summary.json file should exist
-- **PRIMARY**: `/home/runner/workspace/changelog_summary.json` (root level)
+- **Development Mode**: `changelog_summary.json` (project root)
+- **Subdirectory Mode**: `Arkival-V4/changelog_summary.json` (Arkival directory)
 - **REMOVE**: Any `codebase_summary/changelog_summary.json` (legacy artifact)
-- If you find duplicates, delete the nested one and keep the root file
+- If you find duplicates, delete the nested one and keep the deployment-appropriate location
 
 ### 5. Update Todo List for Next Agent
 Use TodoWrite to set clear priorities for the next session with specific actionable tasks.
@@ -247,6 +266,8 @@ Use TodoWrite to set clear priorities for the next session with specific actiona
 ### Agent Handoff
 - `codebase_summary/session_state.json` - Current session tracking
 - `export_package/agent_handoff.json` - Transition documentation
+
+**📁 Path Resolution**: In subdirectory deployments, prefix all paths with deployment directory (e.g., `Arkival-V4/codebase_summary.json`)
 
 ## 🎯 Agent Task-Specific Workflows
 
@@ -305,6 +326,11 @@ Use TodoWrite to set clear priorities for the next session with specific actiona
    - **session_state.json** - Current session context and technical state
    - **agent_handoff.json** - Structured instructions from previous agent
    - **changelog_summary.json** - Recent session summaries and historical context
+   
+   **📁 File Locations by Mode**:
+   - **Development**: Files at project root and `codebase_summary/`, `export_package/` directories
+   - **Subdirectory**: Files at `Arkival-V4/` prefix (e.g., `Arkival-V4/codebase_summary/session_state.json`)
+   
 3. **Understand deployment mode**: Check `_critical_context.deployment_mode` in codebase_summary.json
 4. **Check priority items**: Review `next_agent_context.priority_items` in session_state.json
 5. **Verify system state**: Ensure application is running and all systems operational per handoff docs
@@ -338,6 +364,8 @@ Use TodoWrite to set clear priorities for the next session with specific actiona
    - `session_state.json` - Current session and technical state
    - `agent_handoff.json` - Structured next agent instructions  
    - `changelog_summary.json` - Historical record with version correlation
+   
+   **📁 Deployment-Aware**: Paths automatically resolve to correct locations (`Arkival-V4/` prefix in subdirectory mode)
 
 2. **Set priorities**: Use TodoWrite to establish clear priorities for next agent session
 3. **Commit changes**: Follow structured commit message format with session summary
@@ -353,10 +381,10 @@ Use TodoWrite to set clear priorities for the next session with specific actiona
 - **Force regeneration**: Use `--force` flag if cache issues suspected
 
 ### Agent Handoff Issues
-- **Verify session_state.json**: Check file exists and is readable in `codebase_summary/` directory
-- **Check file permissions**: Ensure write access to `codebase_summary/` and `export_package/` directories
+- **Verify session_state.json**: Check file exists and is readable in `codebase_summary/` directory (add `Arkival-V4/` prefix in subdirectory mode)
+- **Check file permissions**: Ensure write access to deployment directories (`codebase_summary/`, `export_package/` with mode-appropriate prefix)
 - **Previous agent completion**: Verify previous agent properly completed handoff workflow
-- **Path resolution**: Confirm `find_arkival_paths()` is returning expected file locations
+- **Path resolution**: Confirm `find_arkival_paths()` is returning expected file locations for deployment mode
 
 ### Path Resolution Problems
 - **Config file location**: Check `arkival_config.json` exists in expected location (parent dir for subdirectory mode)

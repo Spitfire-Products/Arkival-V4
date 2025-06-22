@@ -14,85 +14,47 @@ import argparse
 
 def find_arkival_paths():
     """
-    # @codebase-summary: Universal path resolution for Arkival subdirectory deployment
-    - Detects deployment mode and returns all required file paths for agent workflow orchestration
-    - Used by agent handoff system to locate session state and configuration files
-    
-    Universal path resolution for Arkival subdirectory deployment
-    Returns: Dict with all required paths
+    # @codebase-summary: Simple workflow flag-based path resolution
+    - Uses arkival_config.json in root as definitive subdirectory deployment flag
+    - Simplified detection logic based on workflow flag presence
+    - Returns all required file paths for agent workflow orchestration
     """
     current_dir = Path.cwd()
-    project_root = None
     
-    # Check if we're running from within the codebase_summary directory
-    if current_dir.name == "codebase_summary" and current_dir.parent.name != "Arkival":
-        # Running from source repo's codebase_summary directory
-        project_root = current_dir.parent
-        is_in_scripts_dir = True
-    else:
-        is_in_scripts_dir = False
-        
-        # Search upward for arkival_config.json
-        search_path = current_dir
-        for _ in range(5):  # Max 5 levels up
-            if (search_path / "arkival_config.json").exists():
-                project_root = search_path
-                break
-            if search_path.parent == search_path:  # Reached filesystem root
-                break
-            search_path = search_path.parent
-        
-        # Try alternative detection methods
-        if not project_root:
-            # Look for Arkival directory as indicator
-            search_path = current_dir
-            for _ in range(5):
-                if (search_path / "Arkival").exists():
-                    project_root = search_path
-                    break
-                search_path = search_path.parent
-        
-        # Fallback - assume current directory
-        if not project_root:
-            project_root = current_dir
+    # Simple workflow flag detection: arkival_config.json in current directory = subdirectory mode
+    subdirectory_mode = (current_dir / "arkival_config.json").exists()
     
-    # Determine deployment mode
-    # Three scenarios:
-    # 1. Running from source repo (dev mode)
-    # 2. Running from subdirectory deployment (Arkival/)
-    # 3. Running from within codebase_summary directory in source repo
-    
-    if current_dir.name.lower() in ['arkival', 'arkival-v4'] or (
-        not is_in_scripts_dir and (project_root / "arkival_config.json").exists()
-    ):
-        # Subdirectory deployment mode
-        arkival_dir = project_root / "Arkival"
+    if subdirectory_mode:
+        # Subdirectory deployment mode - use Arkival-V4 directory structure
+        arkival_dir = current_dir / "Arkival-V4"
         return {
-            'project_root': project_root,
-            'config_file': project_root / "arkival_config.json",
+            'project_root': current_dir,  # Parent project root
+            'config_file': current_dir / "arkival_config.json",
             'arkival_dir': arkival_dir,
-            'data_dir': arkival_dir,  # Same as arkival_dir, no separate data folder
+            'data_dir': arkival_dir,
             'scripts_dir': arkival_dir / "codebase_summary", 
             'export_dir': arkival_dir / "export_package",
             'checkpoints_dir': arkival_dir / "checkpoints",
             
-            # Data files in arkival root, matching dev mode structure
+            # Data files in Arkival-V4 directory
             'codebase_summary': arkival_dir / "codebase_summary.json",
             'changelog_summary': arkival_dir / "changelog_summary.json",
             'session_state': arkival_dir / "codebase_summary" / "session_state.json",
             'missing_breadcrumbs': arkival_dir / "codebase_summary" / "missing_breadcrumbs.json"
         }
     else:
-        # Development mode - use root directory structure
-        # Special handling when running from codebase_summary directory
-        if is_in_scripts_dir:
+        # Development mode - running from Arkival project directory
+        # Handle case where we might be running from codebase_summary subdirectory
+        if current_dir.name == "codebase_summary":
+            project_root = current_dir.parent
             scripts_dir = current_dir
         else:
+            project_root = current_dir
             scripts_dir = project_root / "codebase_summary"
             
         return {
             'project_root': project_root,
-            'config_file': project_root / "arkival_config.json",
+            'config_file': project_root / "arkival_config.json",  # May not exist in dev mode
             'arkival_dir': project_root,
             'data_dir': project_root,
             'scripts_dir': scripts_dir, 
@@ -837,42 +799,61 @@ class AgentWorkflowOrchestrator:
 
     def _detect_deployment_mode(self) -> Dict[str, Any]:
         """
-        # @codebase-summary: Deployment mode detection and explanation system
-        - Detects current deployment mode (standalone vs subdirectory)
-        - Explains path resolution and file location behaviors
-        - Provides deployment-specific guidance for agents
-        - Used by: agent onboarding, path resolution, deployment understanding
+        # @codebase-summary: Deployment mode detection using arkival_config.json workflow flag
+        - Simple detection: arkival_config.json in root = subdirectory mode
+        - Provides deployment-specific guidance for agents based on this flag
+        - Used by: agent onboarding, workflow orchestration, deployment understanding
         """
         deployment_info = {
-            "mode": "unknown",
+            "mode": "development",
             "explanation": "",
-            "file_locations": {},
+            "workflow_flag": "arkival_config.json",
             "config_location": "",
             "analysis_scope": ""
         }
 
         try:
-            # Use existing path resolution logic
-            paths = self.paths
-            current_dir = Path.cwd()
+            # Simple workflow flag detection
+            config_in_root = (Path.cwd() / "arkival_config.json").exists()
 
-            if current_dir.name.lower() in ['arkival', 'arkival-v4'] or (paths['project_root'] / "arkival_config.json").exists():
+            if config_in_root:
                 deployment_info["mode"] = "subdirectory"
-                deployment_info["explanation"] = "Arkival is deployed as a subdirectory in an existing project. Generated documentation reflects the host project."
-                deployment_info["config_location"] = "Parent directory (arkival_config.json)"
+                deployment_info["explanation"] = "Subdirectory deployment mode detected (arkival_config.json in root). Generated documentation reflects the host project."
+                deployment_info["config_location"] = "Root directory (workflow flag present)"
                 deployment_info["analysis_scope"] = "Host project structure and metadata"
             else:
-                deployment_info["mode"] = "standalone"
-                deployment_info["explanation"] = "Arkival is running as the main project. Generated documentation reflects Arkival itself."
-                deployment_info["config_location"] = "Project root"
+                deployment_info["mode"] = "development"
+                deployment_info["explanation"] = "Development mode - Arkival as main project. Generated documentation reflects Arkival itself."
+                deployment_info["config_location"] = "Development mode (no workflow flag)"
                 deployment_info["analysis_scope"] = "Arkival system structure"
 
             deployment_info["file_locations"] = {
                 "codebase_summary": str(paths['codebase_summary']),
                 "session_state": str(paths['session_state']),
                 "changelog": str(paths['changelog_summary']),
+                "agent_handoff": str(paths['export_dir'] / "agent_handoff.json"),
                 "scripts_dir": str(paths['scripts_dir'])
             }
+            
+            # Add deployment-specific path examples
+            if deployment_info["mode"] == "subdirectory":
+                deployment_info["path_examples"] = {
+                    "files_prefixed_with": "Arkival-V4/",
+                    "example_paths": [
+                        "Arkival-V4/codebase_summary.json",
+                        "Arkival-V4/codebase_summary/session_state.json", 
+                        "Arkival-V4/export_package/agent_handoff.json"
+                    ]
+                }
+            else:
+                deployment_info["path_examples"] = {
+                    "files_at_root": True,
+                    "example_paths": [
+                        "codebase_summary.json",
+                        "codebase_summary/session_state.json",
+                        "export_package/agent_handoff.json"
+                    ]
+                }
 
         except Exception as e:
             deployment_info["error"] = f"Failed to detect deployment mode: {e}"
@@ -1106,9 +1087,11 @@ class AgentWorkflowOrchestrator:
             ]
 
             examples["troubleshooting"] = [
-                "Check file permissions in codebase_summary/ directory",
+                "Check file permissions in deployment-appropriate directories",
                 "Verify current working directory matches deployment mode",
-                "Review find_arkival_paths() output in logs for path issues"
+                "Review find_arkival_paths() output in logs for path issues",
+                "In subdirectory mode: check Arkival-V4/codebase_summary/ permissions",
+                "In development mode: check codebase_summary/ permissions"
             ]
 
         except Exception as e:
@@ -1249,7 +1232,8 @@ class AgentWorkflowOrchestrator:
 
             commands["troubleshooting_commands"] = {
                 "Force regenerate all": "python3 codebase_summary/update_project_summary.py --force",
-                "Check file permissions": "ls -la codebase_summary/",
+                "Check deployment mode": "ls arkival_config.json (exists = subdirectory mode)",
+                "Check file permissions": "ls -la [Arkival-V4/]codebase_summary/ (prefix if subdirectory)",
                 "Verify paths": "Check find_arkival_paths() output in logs"
             }
 
