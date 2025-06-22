@@ -61,12 +61,20 @@ def find_arkival_paths():
     # Subdirectory mode: everything under Arkival/
     
     if current_dir.name.lower() in ['arkival', 'arkival-v4'] or (project_root / "arkival.config.json").exists():
-        # Subdirectory deployment mode - use SAME structure as development mode
-        arkival_dir = current_dir if current_dir.name.lower() in ['arkival', 'arkival-v4'] else project_root
+        # Subdirectory deployment mode - ensure we scan the parent project
+        if current_dir.name.lower() in ['arkival', 'arkival-v4']:
+            # We're inside an Arkival directory, parent is the project to scan
+            parent_project_root = current_dir.parent
+            arkival_dir = current_dir
+        else:
+            # arkival.config.json exists, project_root is correct
+            parent_project_root = project_root
+            arkival_dir = project_root
+            
         return {
-            'project_root': project_root,  # Parent project directory (Comic Creator)
-            'scan_root': project_root,     # Directory to scan (parent project)
-            'config_file': project_root / "arkival.config.json",
+            'project_root': parent_project_root,  # Parent project directory (Comic Creator)
+            'scan_root': parent_project_root,     # Directory to scan (parent project)
+            'config_file': parent_project_root / "arkival.config.json",
             'arkival_dir': arkival_dir,
             'data_dir': arkival_dir,
             'scripts_dir': arkival_dir / "codebase_summary",
@@ -78,7 +86,7 @@ def find_arkival_paths():
             'changelog_summary': arkival_dir / "changelog_summary.json",
             'session_state': arkival_dir / "codebase_summary" / "session_state.json",
             'missing_breadcrumbs': arkival_dir / "codebase_summary" / "missing_breadcrumbs.json",
-            'scan_ignore': project_root / ".scanignore"
+            'scan_ignore': parent_project_root / ".scanignore"
         }
     else:
         # Development mode - use root directory structure
@@ -263,11 +271,11 @@ class OptimizedProjectSummaryGenerator:
         # Use the scan_root which is already correctly set for subdirectory mode
         search_dir = self.project_root  # This is already scan_root from path resolution
         
-        # Collect metadata from all available sources
+        # Collect metadata from all available sources (README first for name priority)
         self._extract_git_metadata(search_dir, project_info)
+        self._extract_readme_metadata(search_dir, project_info)  # PRIORITY 1: Human-readable names
         self._extract_package_json_metadata(search_dir, project_info)
         self._extract_pyproject_toml_metadata(search_dir, project_info)
-        self._extract_readme_metadata(search_dir, project_info)
         self._extract_cargo_toml_metadata(search_dir, project_info)
         self._extract_composer_json_metadata(search_dir, project_info)
         self._detect_framework_and_language(search_dir, project_info)
