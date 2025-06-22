@@ -370,12 +370,16 @@ class WorkflowSystemSetup:
     def _create_arkival_config(self):
         """Create arkival_config.json trigger file in project root"""
         try:
+            # Detect the actual Arkival directory name
+            current_dir = Path.cwd()
+            arkival_dir_name = current_dir.name if current_dir.name.lower() in ['arkival', 'arkival-v4'] else 'Arkival-V4'
+            
             # Simple trigger file for subdirectory mode detection
             config = {
                 "arkival_integration": True,
                 "version": "4.0",
                 "deployment_mode": "subdirectory",
-                "arkival_directory": "arkival",
+                "arkival_directory": arkival_dir_name,
                 "created_at": datetime.now().isoformat(),
                 "note": "This file enables Arkival subdirectory mode detection"
             }
