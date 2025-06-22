@@ -1,5 +1,22 @@
 # Export Package - Checkpoint Log
 
+## Automated Checkpoint: 2025-06-22 00:10:34
+
+### Project State
+- **Version**: 1.2.0 (matches changelog entry)
+- **Features**: Recent development progress with enhancement changes
+- **Status**: Active development - automated checkpoint
+- **Type**: Automated checkpoint
+
+### Recent Changes
+- Fixed deployment validation path resolution for subdirectory mode and updated workflow configuration with actual project details. Resolved validation failures when Arkival deployed as 'Arkival-V4' subdirectory and replaced placeholder values with real project information.
+
+### Notes
+This automated checkpoint was created following significant enhancement changes to track development progress.
+
+---
+
+
 ## Automated Checkpoint: 2025-06-21 23:26:20
 
 ### Project State
