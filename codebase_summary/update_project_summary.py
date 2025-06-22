@@ -249,18 +249,8 @@ class OptimizedProjectSummaryGenerator:
         """Auto-detect project name and description from codebase"""
         project_info = {"name": "Unknown Project", "description": "Project description not found"}
         
-        # Determine if we're in subdirectory deployment mode
-        current_dir = Path.cwd()
-        search_dir = self.project_root
-        
-        # Check if we're in Arkival subdirectory deployment mode
-        if (current_dir.name.lower() in ['arkival', 'arkival-v4'] or 
-            (self.project_root / "arkival.config.json").exists() or
-            'arkival_dir' in self.paths and self.paths['arkival_dir'] != self.paths['project_root']):
-            # We're in subdirectory mode - look at parent project for metadata
-            search_dir = self.project_root
-            if current_dir.name.lower() in ['arkival', 'arkival-v4']:
-                search_dir = current_dir.parent
+        # Use the scan_root which is already correctly set for subdirectory mode
+        search_dir = self.project_root  # This is already scan_root from path resolution
         
         # Priority 1: package.json
         package_json = search_dir / "package.json"
