@@ -1,12 +1,12 @@
 # Arkival - Dynamic Architecture Analysis
 
 *Auto-generated from codebase structure analysis*
-*Version: 1.1.8 | Generated: 2025-06-22T03:50:14Z*
+*Version: 1.1.9 | Generated: 2025-06-22T08:22:55Z*
 
 ## ⚠️ Version Systems - IMPORTANT
 | System | Current | Purpose | Updates |
 |--------|---------|---------|---------|
-| **Codebase Analysis** | v1.1.8 | Documentation scan version | Every `update_project_summary.py` run |
+| **Codebase Analysis** | v1.1.9 | Documentation scan version | Every `update_project_summary.py` run |
 | **Changelog/Project** | vNone | Feature release version | Major milestones only |
 
 **These are INDEPENDENT systems - version mismatch is NORMAL and EXPECTED**
@@ -18,7 +18,7 @@
 | **Architecture** | Python Application |
 | **State Management** | In-memory/Custom |
 | **Current State** | operational |
-| **Deployment Mode** | standalone |
+| **Deployment Mode** | development |
 
 ## 🗺️ Where Should I Start?
 ```mermaid
@@ -113,7 +113,7 @@ sequenceDiagram
     Setup->>State: Creates workflow_config.json
     User->>Orchestrator: incoming agent workflow
     Orchestrator->>State: Loads session_state.json
-    Orchestrator->>Summary: Triggers update_project_summary.py
+    Orchestrator->>Summary: Triggers codebase_summary/update_project_summary.py
     Summary->>State: Updates codebase_summary.json
     Note over State: All state in JSON files
 ```

@@ -77,7 +77,7 @@ Content here...
 
 #### Current Generator Registry
 - `setup_workflow_system.py` → `workflow_config.json`, `changelog_summary.json`
-- `update_project_summary.py` → `codebase_summary.json`, `missing_breadcrumbs.json`, `CODEBASE_SUMMARY.md`, `ARCHITECTURE_DIAGRAM.md`, `CONTRIBUTING.md`
+- `codebase_summary/update_project_summary.py` → `codebase_summary.json`, `missing_breadcrumbs.json`, `CODEBASE_SUMMARY.md`, `ARCHITECTURE_DIAGRAM.md`, `CONTRIBUTING.md`
 - `update_changelog.py` → `changelog_summary.json`, `CHANGELOG.md`
 - `agent_workflow_orchestrator.py` → `session_state.json`, `agent_handoff.json`
 

@@ -670,23 +670,62 @@ class OptimizedProjectSummaryGenerator:
         structure["file_types"] = dict(structure["file_types"])
         return structure
 
-    def _generate_optimized_summary(self, version: str) -> Dict[str, Any]:
-        """Generate optimized project summary"""
-        project_info = self._detect_project_info()
-        structure = self._scan_project_structure()
+    def _single_pass_scan(self) -> Dict[str, Any]:
+        """
+        # @codebase-summary: Consolidated single-pass file system traversal
+        - Replaces 5 separate os.walk() operations with one efficient scan
+        - Collects project structure, code analysis, entry points, and file data simultaneously
+        - Dramatically improves performance by eliminating redundant directory traversals
+        """
+        # Initialize all data structures for consolidated collection
+        scan_data = {
+            'project_structure': {
+                "total_files": 0,
+                "directories": [],
+                "file_types": defaultdict(int),
+                "key_files": [],
+                "technology_indicators": {
+                    "frontend": [],
+                    "backend": [],
+                    "ai_integration": [],
+                    "database": [],
+                    "deployment": [],
+                    "documentation": []
+                }
+            },
+            'code_analysis': {
+                'file_analysis': [],
+                'total_functions': 0,
+                'documented_functions': 0,
+                'missing_breadcrumbs': [],
+                'language_breakdown': defaultdict(lambda: {"files": 0, "functions": 0})
+            },
+            'entry_points': {},
+            'all_files': []
+        }
         
-        # Analyze code files - comprehensive language support
+        # Code file extensions
         code_extensions = {
             '.py', '.js', '.jsx', '.ts', '.tsx', '.java', '.go', '.rs', '.c', '.cpp', '.cc', '.cxx',
             '.php', '.rb', '.swift', '.kt', '.dart', '.sql', '.css', '.scss', '.sass', '.vue', 
             '.lua', '.scala', '.clj', '.cljs', '.r', '.m', '.mm', '.cs', '.sh', '.bash', '.zsh', '.ps1'
         }
-        file_analysis = []
-        total_functions = 0
-        documented_functions = 0
-        missing_breadcrumbs = []
-        language_breakdown = defaultdict(lambda: {"files": 0, "functions": 0})
         
+        # Key file patterns
+        key_patterns = ["LICENSE", "README*", ".gitignore", "package.json", "pyproject.toml", "Cargo.toml"]
+        
+        # Entry point patterns
+        entry_patterns = {
+            'main': ['main.py', 'app.py', 'index.js', 'server.js', 'main.go', 'main.rs'],
+            'setup': ['setup.py', 'install.py', 'setup.sh', 'install.sh'],
+            'test': ['test.py', 'run_tests.py', 'test.sh', 'pytest.ini'],
+            'build': ['build.py', 'build.sh', 'Makefile', 'package.json'],
+            'docs': ['docs.py', 'mkdocs.yml', 'sphinx-build']
+        }
+        
+        print("🔍 SINGLE-PASS OPTIMIZATION: Scanning entire project in one traversal...")
+        
+        # SINGLE os.walk() operation to replace all 5 separate scans
         for root, dirs, files in os.walk(self.project_root):
             root_path = Path(root)
             
@@ -697,27 +736,99 @@ class OptimizedProjectSummaryGenerator:
             # Remove ignored directories from dirs list to prevent os.walk from entering them
             dirs[:] = [d for d in dirs if not self._should_ignore_path(root_path / d)]
                 
+            # Project structure data collection
+            rel_root = str(Path(root).relative_to(self.project_root))
+            if rel_root != '.':
+                scan_data['project_structure']["directories"].append(rel_root)
+
             for file in files:
-                if Path(file).suffix in code_extensions:
-                    file_path = Path(root) / file
-                    analysis = self._analyze_code_file(str(file_path))
+                file_path = Path(root) / file
+                
+                # Skip ignored files
+                if self._should_ignore_path(file_path):
+                    continue
                     
+                scan_data['project_structure']["total_files"] += 1
+                ext = Path(file).suffix
+                scan_data['project_structure']["file_types"][ext] += 1
+                
+                rel_path = str(file_path.relative_to(self.project_root))
+                scan_data['all_files'].append(rel_path)
+                
+                # Key files detection
+                if any(pattern.replace('*', '') in file for pattern in key_patterns):
+                    scan_data['project_structure']["key_files"].append(rel_path)
+                
+                # Technology indicators categorization
+                if ext in ['.py', '.java', '.go', '.rs']:
+                    scan_data['project_structure']["technology_indicators"]["backend"].append(rel_path)
+                elif ext in ['.js', '.jsx', '.ts', '.tsx', '.vue']:
+                    scan_data['project_structure']["technology_indicators"]["frontend"].append(rel_path)
+                elif any(ai_term in file.lower() for ai_term in ['ai', 'gpt', 'claude', 'gemini', 'llm', 'openai', 'anthropic', 'model']):
+                    scan_data['project_structure']["technology_indicators"]["ai_integration"].append(rel_path)
+                elif ext in ['.sql', '.db']:
+                    scan_data['project_structure']["technology_indicators"]["database"].append(rel_path)
+                elif file.lower() in ['dockerfile', '.replit', 'docker-compose.yml']:
+                    scan_data['project_structure']["technology_indicators"]["deployment"].append(rel_path)
+                elif ext in ['.md', '.txt'] or 'doc' in file.lower():
+                    scan_data['project_structure']["technology_indicators"]["documentation"].append(rel_path)
+                
+                # Entry points detection
+                for entry_type, patterns in entry_patterns.items():
+                    for pattern in patterns:
+                        if file.endswith(pattern) or pattern in file:
+                            if entry_type not in scan_data['entry_points']:
+                                scan_data['entry_points'][entry_type] = rel_path
+                            break
+                
+                # Code analysis for programming files
+                if ext in code_extensions:
+                    analysis = self._analyze_code_file(str(file_path))
                     if analysis["function_count"] > 0:
-                        file_analysis.append(analysis)
-                        total_functions += analysis["function_count"]
-                        documented_functions += analysis["documented_count"]
+                        scan_data['code_analysis']['file_analysis'].append(analysis)
+                        scan_data['code_analysis']['total_functions'] += analysis["function_count"]
+                        scan_data['code_analysis']['documented_functions'] += analysis["documented_count"]
                         
-                        # Track missing breadcrumbs
+                        # Language breakdown
+                        lang_key = ext
+                        scan_data['code_analysis']['language_breakdown'][lang_key]["files"] += 1
+                        scan_data['code_analysis']['language_breakdown'][lang_key]["functions"] += analysis["function_count"]
+                        
+                        # Missing breadcrumbs collection
                         if analysis["missing_breadcrumbs"]:
-                            missing_breadcrumbs.append({
+                            scan_data['code_analysis']['missing_breadcrumbs'].append({
                                 "file": analysis["file"],
                                 "missing": analysis["missing_breadcrumbs"]
                             })
-                        
-                        # Language breakdown
-                        lang = analysis["language"]
-                        language_breakdown[lang]["files"] += 1
-                        language_breakdown[lang]["functions"] += analysis["function_count"]
+        
+        # Add update_summary entry point if this script exists
+        if (self.paths['scripts_dir'] / "update_project_summary.py").exists():
+            rel_path = str(self.paths['scripts_dir'] / "update_project_summary.py").replace(str(self.project_root) + '/', '')
+            scan_data['entry_points']['update_summary'] = f"python3 {rel_path}"
+        
+        # Limit arrays for optimization
+        for category in scan_data['project_structure']["technology_indicators"]:
+            scan_data['project_structure']["technology_indicators"][category] = scan_data['project_structure']["technology_indicators"][category][:20]
+        
+        # Convert defaultdicts to regular dicts
+        scan_data['project_structure']["file_types"] = dict(scan_data['project_structure']["file_types"])
+        scan_data['code_analysis']['language_breakdown'] = dict(scan_data['code_analysis']['language_breakdown'])
+        
+        print(f"✅ OPTIMIZATION COMPLETE: Single scan processed {scan_data['project_structure']['total_files']} files")
+        return scan_data
+
+    def _generate_optimized_summary(self, version: str):
+        """Generate optimized project summary using single-pass scanning"""
+        project_info = self._detect_project_info()
+        
+        # Use single-pass scan to replace all separate scanning operations
+        scan_data = self._single_pass_scan()
+        structure = scan_data['project_structure']
+        file_analysis = scan_data['code_analysis']['file_analysis']
+        total_functions = scan_data['code_analysis']['total_functions']
+        documented_functions = scan_data['code_analysis']['documented_functions']
+        missing_breadcrumbs = scan_data['code_analysis']['missing_breadcrumbs']
+        language_breakdown = scan_data['code_analysis']['language_breakdown']
 
         # Calculate documentation gaps (top 10)
         doc_gaps = []
@@ -734,7 +845,7 @@ class OptimizedProjectSummaryGenerator:
         code_analysis = {
             "total_functions": total_functions,
             "documented_functions": documented_functions,
-            "language_breakdown": dict(language_breakdown),
+            "language_breakdown": language_breakdown,
             "documentation_gaps": doc_gaps,
             "total_files_analyzed": len(file_analysis),
             "total_lines_of_code": sum(f["lines_of_code"] for f in file_analysis),
@@ -762,12 +873,12 @@ class OptimizedProjectSummaryGenerator:
         last_agent_task = self._get_last_agent_task()
         deployment_mode = self._detect_deployment_mode()
         
-        return {
+        summary = {
             "_generator": f"Generated by {self._get_generator_path()} - Core project documentation and analysis system",
             "_critical_context": {
                 "what_this_is": project_info["description"],
                 "primary_purpose": project_info["description"],
-                "entry_points": self._detect_entry_points(structure),
+                "entry_points": scan_data['entry_points'],
                 "deployment_mode": deployment_mode,
                 "key_file_paths": {
                     "session_state": self._get_doc_file_path("session_state.json"),
@@ -853,6 +964,8 @@ class OptimizedProjectSummaryGenerator:
                 "Add comprehensive testing suite"
             ]
         }
+        
+        return (summary, scan_data)
 
     def _summarize_missing_by_dir(self, missing_breadcrumbs: List[Dict]) -> Dict[str, int]:
         """Summarize missing breadcrumbs by directory"""
@@ -1732,44 +1845,8 @@ Thank you for contributing to making AI agent workflows more efficient!
         
         return hotspots
 
-    def _detect_entry_points(self, structure: Dict) -> Dict[str, str]:
-        """Detect common entry points in the project"""
-        entry_points = {}
-        
-        # Look for common entry point patterns
-        common_patterns = [
-            ('main', ['main.py', 'app.py', 'index.js', 'server.js', 'main.go', 'main.rs']),
-            ('setup', ['setup.py', 'install.py', 'setup.sh', 'install.sh']),
-            ('test', ['test.py', 'run_tests.py', 'test.sh', 'pytest.ini']),
-            ('build', ['build.py', 'build.sh', 'Makefile', 'package.json']),
-            ('docs', ['docs.py', 'mkdocs.yml', 'sphinx-build'])
-        ]
-        
-        all_files = []
-        for root, dirs, files in os.walk(self.project_root):
-            root_path = Path(root)
-            if self._should_ignore_path(root_path):
-                continue
-            dirs[:] = [d for d in dirs if not self._should_ignore_path(root_path / d)]
-            for file in files:
-                rel_path = str(Path(root) / file).replace(str(self.project_root) + '/', '')
-                all_files.append(rel_path)
-        
-        for entry_type, patterns in common_patterns:
-            for pattern in patterns:
-                for file in all_files:
-                    if file.endswith(pattern) or pattern in file:
-                        entry_points[entry_type] = file
-                        break
-                if entry_type in entry_points:
-                    break
-        
-        # Add update_summary if this script exists
-        if (self.paths['scripts_dir'] / "update_project_summary.py").exists():
-            rel_path = str(self.paths['scripts_dir'] / "update_project_summary.py").replace(str(self.project_root) + '/', '')
-            entry_points['update_summary'] = f"python3 {rel_path}"
-        
-        return entry_points
+    # REMOVED: _detect_entry_points - now handled in single-pass scan
+    # Entry points are detected during the consolidated file traversal
 
     def _build_navigation_map(self, structure: Dict, file_analysis: List[Dict]) -> Dict[str, Any]:
         """Build navigation map based on actual project structure"""
@@ -1951,39 +2028,15 @@ Thank you for contributing to making AI agent workflows more efficient!
             # Archive previous version before generating new one
             self._archive_previous_version(current_version)
             
-            summary = self._generate_optimized_summary(new_version)
+            summary, scan_data = self._generate_optimized_summary(new_version)
             
             # Write main summary
             self.summary_path.parent.mkdir(parents=True, exist_ok=True)
             with open(self.summary_path, 'w', encoding='utf-8') as f:
                 json.dump(summary, f, indent=2)
             
-            # Write missing breadcrumbs separately (for detailed analysis)
-            code_extensions = {
-                '.py', '.js', '.jsx', '.ts', '.tsx', '.java', '.go', '.rs', '.c', '.cpp', '.cc', '.cxx',
-                '.php', '.rb', '.swift', '.kt', '.dart', '.sql', '.css', '.scss', '.sass', '.vue', 
-                '.lua', '.scala', '.clj', '.cljs', '.r', '.m', '.mm', '.cs', '.sh', '.bash', '.zsh', '.ps1'
-            }
-            missing_breadcrumbs = []
-            for root, dirs, files in os.walk(self.project_root):
-                root_path = Path(root)
-                
-                # Skip ignored directories
-                if self._should_ignore_path(root_path):
-                    continue
-                    
-                # Remove ignored directories from dirs list to prevent os.walk from entering them
-                dirs[:] = [d for d in dirs if not self._should_ignore_path(root_path / d)]
-                    
-                for file in files:
-                    if Path(file).suffix in code_extensions:
-                        file_path = Path(root) / file
-                        analysis = self._analyze_code_file(str(file_path))
-                        if analysis["missing_breadcrumbs"]:
-                            missing_breadcrumbs.append({
-                                "file": analysis["file"],
-                                "missing": analysis["missing_breadcrumbs"]
-                            })
+            # Missing breadcrumbs already collected in single-pass scan - use that data
+            missing_breadcrumbs = scan_data['code_analysis']['missing_breadcrumbs']
             
             self._write_missing_breadcrumbs(
                 missing_breadcrumbs,
@@ -2019,7 +2072,9 @@ Thank you for contributing to making AI agent workflows more efficient!
             print(f"AI Providers: {len(summary['ai_integration']['providers'])}")
             
         except Exception as e:
+            import traceback
             print(f"❌ Error generating summary: {e}")
+            traceback.print_exc()
             return False
         
         return True

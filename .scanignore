@@ -82,6 +82,14 @@ docs/build/
 site/
 _site/
 
+# ====== PYTHON DEPENDENCY EXCLUSIONS ======
+# Python dependencies and virtual environments (performance optimization)
+.pythonlibs/
+site-packages/
+*.pyi
+.local/
+.config/
+
 # ====== CUSTOM PROJECT EXCLUSIONS ======
 # Add your project-specific exclusions below:
 
