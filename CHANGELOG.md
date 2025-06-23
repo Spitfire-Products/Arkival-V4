@@ -34,7 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Transformed Arkival from technical tool into accessible AI development accelerator with clear setup paths and universal compatibility.
 
-## [1.4.0] - 2025-06-21
+## [1.4.0] - 2025-06-23
 
 ### Enhanced
 - Major documentation and system optimization: Comprehensive README rewrite, documentation reorganization, and deployment clarity improvements. Moved ENGINEERING_BEST_PRACTICES.md to root, cleaned up .gitignore, positioned system as vendor-agnostic with Claude/Replit as optional modules. Enhanced setup instructions to reflect Development Mode as primary usage pattern.
@@ -72,8 +72,6 @@ Transformed Arkival from technical tool into accessible AI development accelerat
 ## [1.1.44] - 2025-06-19
 
 ## [1.1.43] - 2025-06-19
-
-## [1.1.0] - 2025-06-18
 
 ---
 

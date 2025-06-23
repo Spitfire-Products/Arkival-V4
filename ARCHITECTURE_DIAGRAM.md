@@ -1,12 +1,12 @@
 # Arkival - Dynamic Architecture Analysis
 
 *Auto-generated from codebase structure analysis*
-*Version: 1.1.9 | Generated: 2025-06-22T08:22:55Z*
+*Version: 1.1.11 | Generated: 2025-06-23T08:36:20Z*
 
 ## ⚠️ Version Systems - IMPORTANT
 | System | Current | Purpose | Updates |
 |--------|---------|---------|---------|
-| **Codebase Analysis** | v1.1.9 | Documentation scan version | Every `update_project_summary.py` run |
+| **Codebase Analysis** | v1.1.11 | Documentation scan version | Every `update_project_summary.py` run |
 | **Changelog/Project** | vNone | Feature release version | Major milestones only |
 
 **These are INDEPENDENT systems - version mismatch is NORMAL and EXPECTED**
@@ -68,7 +68,7 @@ graph TB
         T1[Backend Files: 8]
         T2[Frontend Files: 2]
         T3[AI Integration: 5]
-        T4[Total Functions: 64]
+        T4[Total Functions: 65]
     end
 
     subgraph "🤖 Agent Context"
