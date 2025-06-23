@@ -813,8 +813,11 @@ class AgentWorkflowOrchestrator:
         }
 
         try:
-            # Simple workflow flag detection
-            config_in_root = (Path.cwd() / "arkival_config.json").exists()
+            # Use the same path resolution logic as find_arkival_paths()
+            # to properly detect subdirectory deployment mode
+            paths = find_arkival_paths()
+            config_file = paths['config_file']
+            config_in_root = config_file.exists()
 
             if config_in_root:
                 deployment_info["mode"] = "subdirectory"
