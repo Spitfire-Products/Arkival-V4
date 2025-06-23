@@ -63,8 +63,6 @@ audio/
 *.mdb
 data/dumps/
 *.csv
-*.json
-*.xml
 
 # ====== COMPILED & GENERATED CODE ======
 # Auto-generated and compiled files

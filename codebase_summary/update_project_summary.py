@@ -117,15 +117,27 @@ class OptimizedProjectSummaryGenerator:
             ],
             'javascript': [
                 r'(?:export\s+)?(?:async\s+)?function\s+([A-Za-z_]\w*)',
-                r'(?:export\s+)?const\s+([A-Za-z_]\w*)\s*=.*?(?:=>|\()',
-                r'const\s+(use[A-Z]\w*)\s*=',
-                r'class\s+([A-Z]\w*)'
+                r'(?:export\s+)?const\s+([A-Za-z_]\w*)\s*=\s*(?:async\s+)?\([^)]*\)\s*=>',
+                r'(?:export\s+)?const\s+([A-Za-z_]\w*)\s*=\s*(?:async\s+)?function',
+                r'(?:export\s+)?let\s+([A-Za-z_]\w*)\s*=\s*(?:async\s+)?\([^)]*\)\s*=>',
+                r'(?:export\s+)?var\s+([A-Za-z_]\w*)\s*=\s*(?:async\s+)?function',
+                r'const\s+(use[A-Z]\w*)\s*=\s*\([^)]*\)\s*=>',
+                r'class\s+([A-Z]\w*)',
+                r'\.([a-zA-Z_]\w*)\s*=\s*(?:async\s+)?\([^)]*\)\s*=>',
+                r'router\.(get|post|put|patch|delete|all)\s*\(',
+                r'app\.(get|post|put|patch|delete|all)\s*\('
             ],
             'typescript': [
                 r'(?:export\s+)?(?:async\s+)?function\s+([A-Za-z_]\w*)',
-                r'(?:export\s+)?const\s+([A-Za-z_]\w*)\s*=.*?(?:=>|\()',
-                r'const\s+(use[A-Z]\w*)\s*=',
-                r'class\s+([A-Z]\w*)'
+                r'(?:export\s+)?const\s+([A-Za-z_]\w*)\s*=\s*(?:async\s+)?\([^)]*\)\s*=>',
+                r'(?:export\s+)?const\s+([A-Za-z_]\w*)\s*=\s*(?:async\s+)?function',
+                r'(?:export\s+)?let\s+([A-Za-z_]\w*)\s*=\s*(?:async\s+)?\([^)]*\)\s*=>',
+                r'(?:export\s+)?var\s+([A-Za-z_]\w*)\s*=\s*(?:async\s+)?function',
+                r'const\s+(use[A-Z]\w*)\s*=\s*\([^)]*\)\s*=>',
+                r'class\s+([A-Z]\w*)',
+                r'\.([a-zA-Z_]\w*)\s*=\s*(?:async\s+)?\([^)]*\)\s*=>',
+                r'router\.(get|post|put|patch|delete|all)\s*\(',
+                r'app\.(get|post|put|patch|delete|all)\s*\('
             ],
             'rust': [
                 r'fn\s+([a-z_][a-z0-9_]*)\s*[\(<]',
@@ -265,6 +277,8 @@ class OptimizedProjectSummaryGenerator:
         self._extract_pyproject_toml_metadata(search_dir, project_info)
         self._extract_cargo_toml_metadata(search_dir, project_info)
         self._extract_composer_json_metadata(search_dir, project_info)
+        self._extract_gemfile_metadata(search_dir, project_info)
+        self._extract_go_mod_metadata(search_dir, project_info)
         self._detect_framework_and_language(search_dir, project_info)
         
         # Clean up and return
@@ -374,6 +388,12 @@ class OptimizedProjectSummaryGenerator:
                             if url.endswith('.git'):
                                 url = url[:-4]
                             project_info["git_url"] = url
+                    
+                    # Extract dependencies for later use
+                    if "dependencies" in data:
+                        project_info["dependencies"] = data.get("dependencies", {})
+                    if "devDependencies" in data:
+                        project_info["devDependencies"] = data.get("devDependencies", {})
             except:
                 pass
 
@@ -410,6 +430,38 @@ class OptimizedProjectSummaryGenerator:
                     repo_match = re.search(r'repository\s*=\s*["\']([^"\']+)["\']', content)
                     if repo_match and not project_info.get("git_url"):
                         project_info["git_url"] = repo_match.group(1)
+                    
+                    # Extract Python dependencies - pyproject.toml can have dependencies in multiple formats
+                    dependencies = []
+                    dev_dependencies = []
+                    
+                    # Standard dependencies section
+                    deps_match = re.search(r'dependencies\s*=\s*\[(.*?)\]', content, re.DOTALL)
+                    if deps_match:
+                        deps_content = deps_match.group(1)
+                        # Extract dependency names (everything before version specifiers like >=, ==, etc.)
+                        dep_patterns = re.findall(r'["\']([a-zA-Z0-9_-]+)(?:[><=~!].*?)?["\']', deps_content)
+                        dependencies.extend(dep_patterns)
+                    
+                    # Development dependencies in [tool.poetry.group.dev.dependencies] or [project.optional-dependencies]
+                    dev_deps_patterns = [
+                        r'\[tool\.poetry\.group\.dev\.dependencies\](.*?)(?=\[|\Z)',
+                        r'\[project\.optional-dependencies\].*?dev\s*=\s*\[(.*?)\]',
+                        r'dev-dependencies\s*=\s*\[(.*?)\]'
+                    ]
+                    
+                    for pattern in dev_deps_patterns:
+                        dev_match = re.search(pattern, content, re.DOTALL)
+                        if dev_match:
+                            dev_content = dev_match.group(1)
+                            dev_patterns = re.findall(r'["\']([a-zA-Z0-9_-]+)(?:[><=~!].*?)?["\']', dev_content)
+                            dev_dependencies.extend(dev_patterns)
+                    
+                    # Store extracted dependencies
+                    if dependencies:
+                        project_info["python_dependencies"] = dependencies
+                    if dev_dependencies:
+                        project_info["python_dev_dependencies"] = dev_dependencies
             except:
                 pass
 
@@ -440,6 +492,31 @@ class OptimizedProjectSummaryGenerator:
                     repo_match = re.search(r'repository\s*=\s*["\']([^"\']+)["\']', content)
                     if repo_match and not project_info.get("git_url"):
                         project_info["git_url"] = repo_match.group(1)
+                    
+                    # Extract Rust dependencies from [dependencies] and [dev-dependencies] sections
+                    dependencies = []
+                    dev_dependencies = []
+                    
+                    # Regular dependencies
+                    deps_match = re.search(r'\[dependencies\](.*?)(?=\[|\Z)', content, re.DOTALL)
+                    if deps_match:
+                        deps_content = deps_match.group(1)
+                        # Extract dependency names (before = sign)
+                        dep_names = re.findall(r'^([a-zA-Z0-9_-]+)\s*=', deps_content, re.MULTILINE)
+                        dependencies.extend(dep_names)
+                    
+                    # Development dependencies
+                    dev_deps_match = re.search(r'\[dev-dependencies\](.*?)(?=\[|\Z)', content, re.DOTALL)
+                    if dev_deps_match:
+                        dev_deps_content = dev_deps_match.group(1)
+                        dev_dep_names = re.findall(r'^([a-zA-Z0-9_-]+)\s*=', dev_deps_content, re.MULTILINE)
+                        dev_dependencies.extend(dev_dep_names)
+                    
+                    # Store extracted dependencies
+                    if dependencies:
+                        project_info["rust_dependencies"] = dependencies
+                    if dev_dependencies:
+                        project_info["rust_dev_dependencies"] = dev_dependencies
             except:
                 pass
 
@@ -469,8 +546,146 @@ class OptimizedProjectSummaryGenerator:
                         project_info["license"] = data["license"]
                     if "keywords" in data and isinstance(data["keywords"], list):
                         project_info["keywords"] = data["keywords"]
+                    
+                    # Extract PHP dependencies
+                    if "require" in data:
+                        project_info["php_dependencies"] = list(data.get("require", {}).keys())
+                    if "require-dev" in data:
+                        project_info["php_dev_dependencies"] = list(data.get("require-dev", {}).keys())
             except:
                 pass
+
+    def _extract_gemfile_metadata(self, search_dir: Path, project_info: dict):
+        """Extract metadata from Gemfile for Ruby projects"""
+        gemfile = search_dir / "Gemfile"
+        if gemfile.exists():
+            try:
+                with open(gemfile, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                    
+                    if not project_info.get("main_language"):
+                        project_info["main_language"] = "Ruby"
+                    
+                    # Extract Ruby gems
+                    dependencies = []
+                    dev_dependencies = []
+                    
+                    # Regular gems
+                    gem_matches = re.findall(r"gem\s+['\"]([^'\"]+)['\"]", content)
+                    dependencies.extend(gem_matches)
+                    
+                    # Development/test gems
+                    dev_blocks = re.findall(r"group\s+[:'](?:development|test)['\s,]*.*?do(.*?)end", content, re.DOTALL)
+                    for block in dev_blocks:
+                        dev_gems = re.findall(r"gem\s+['\"]([^'\"]+)['\"]", block)
+                        dev_dependencies.extend(dev_gems)
+                        # Remove from regular dependencies to avoid duplicates
+                        for gem in dev_gems:
+                            if gem in dependencies:
+                                dependencies.remove(gem)
+                    
+                    # Store extracted dependencies
+                    if dependencies:
+                        project_info["ruby_dependencies"] = dependencies
+                    if dev_dependencies:
+                        project_info["ruby_dev_dependencies"] = dev_dependencies
+                        
+            except:
+                pass
+
+    def _extract_go_mod_metadata(self, search_dir: Path, project_info: dict):
+        """Extract metadata from go.mod for Go projects"""
+        go_mod = search_dir / "go.mod"
+        if go_mod.exists():
+            try:
+                with open(go_mod, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                    
+                    if not project_info.get("main_language"):
+                        project_info["main_language"] = "Go"
+                    
+                    # Extract module name
+                    module_match = re.search(r'module\s+([^\s]+)', content)
+                    if module_match and (not project_info.get("name") or project_info["name"] == "Unknown Project"):
+                        module_name = module_match.group(1).split('/')[-1]  # Get last part of module path
+                        project_info["name"] = module_name
+                    
+                    # Extract Go dependencies
+                    dependencies = []
+                    
+                    # Direct dependencies in require block
+                    require_match = re.search(r'require\s*\((.*?)\)', content, re.DOTALL)
+                    if require_match:
+                        require_content = require_match.group(1)
+                        dep_matches = re.findall(r'([^\s]+)\s+v[^\s]+', require_content)
+                        dependencies.extend(dep_matches)
+                    
+                    # Single line requires
+                    single_requires = re.findall(r'require\s+([^\s]+)\s+v[^\s]+', content)
+                    dependencies.extend(single_requires)
+                    
+                    # Store extracted dependencies
+                    if dependencies:
+                        project_info["go_dependencies"] = dependencies
+                        
+            except:
+                pass
+
+    def _aggregate_runtime_dependencies(self, project_info: dict) -> List[str]:
+        """Aggregate runtime dependencies from all package managers"""
+        all_deps = []
+        
+        # JavaScript/Node.js (package.json)
+        if project_info.get("dependencies"):
+            all_deps.extend(list(project_info["dependencies"].keys()))
+        
+        # Python (pyproject.toml)
+        if project_info.get("python_dependencies"):
+            all_deps.extend(project_info["python_dependencies"])
+        
+        # Rust (Cargo.toml)
+        if project_info.get("rust_dependencies"):
+            all_deps.extend(project_info["rust_dependencies"])
+        
+        # PHP (composer.json)
+        if project_info.get("php_dependencies"):
+            all_deps.extend(project_info["php_dependencies"])
+        
+        # Ruby (Gemfile)
+        if project_info.get("ruby_dependencies"):
+            all_deps.extend(project_info["ruby_dependencies"])
+        
+        # Go (go.mod)
+        if project_info.get("go_dependencies"):
+            all_deps.extend(project_info["go_dependencies"])
+        
+        return list(set(all_deps))  # Remove duplicates
+
+    def _aggregate_dev_dependencies(self, project_info: dict) -> List[str]:
+        """Aggregate development dependencies from all package managers"""
+        all_dev_deps = []
+        
+        # JavaScript/Node.js (package.json)
+        if project_info.get("devDependencies"):
+            all_dev_deps.extend(list(project_info["devDependencies"].keys()))
+        
+        # Python (pyproject.toml)
+        if project_info.get("python_dev_dependencies"):
+            all_dev_deps.extend(project_info["python_dev_dependencies"])
+        
+        # Rust (Cargo.toml)
+        if project_info.get("rust_dev_dependencies"):
+            all_dev_deps.extend(project_info["rust_dev_dependencies"])
+        
+        # PHP (composer.json)
+        if project_info.get("php_dev_dependencies"):
+            all_dev_deps.extend(project_info["php_dev_dependencies"])
+        
+        # Ruby (Gemfile)
+        if project_info.get("ruby_dev_dependencies"):
+            all_dev_deps.extend(project_info["ruby_dev_dependencies"])
+        
+        return list(set(all_dev_deps))  # Remove duplicates
 
     def _detect_framework_and_language(self, search_dir: Path, project_info: dict):
         """Detect framework and primary language from project structure"""
@@ -513,25 +728,38 @@ class OptimizedProjectSummaryGenerator:
         
         # Language detection based on file extensions
         if not project_info.get("main_language"):
+            # First, count all files by extension to determine primary language
             file_counts = defaultdict(int)
             try:
                 for root, dirs, files in os.walk(search_dir):
-                    # Skip common ignore directories
-                    dirs[:] = [d for d in dirs if d not in {'.git', 'node_modules', '__pycache__', '.cache'}]
+                    # Skip ignored directories
+                    if self._should_ignore_path(Path(root)):
+                        continue
+                    dirs[:] = [d for d in dirs if not self._should_ignore_path(Path(root) / d)]
+                    
                     for file in files:
-                        ext = Path(file).suffix.lower()
-                        if ext in {'.py', '.js', '.ts', '.tsx', '.jsx', '.rs', '.go', '.java', '.php', '.rb', '.cpp', '.c', '.cs'}:
-                            file_counts[ext] += 1
+                        if not self._should_ignore_path(Path(root) / file):
+                            ext = Path(file).suffix.lower()
+                            if ext in ['.py', '.js', '.ts', '.java', '.rb', '.go', '.rs', '.php', '.cs', '.cpp', '.c']:
+                                file_counts[ext] += 1
                 
+                # Determine main language by file count
                 if file_counts:
-                    primary_ext = max(file_counts, key=file_counts.get)
-                    lang_map = {
-                        '.py': 'Python', '.js': 'JavaScript', '.ts': 'TypeScript', 
-                        '.tsx': 'TypeScript', '.jsx': 'JavaScript', '.rs': 'Rust',
-                        '.go': 'Go', '.java': 'Java', '.php': 'PHP', '.rb': 'Ruby',
-                        '.cpp': 'C++', '.c': 'C', '.cs': 'C#'
+                    main_ext = max(file_counts, key=file_counts.get)
+                    language_map = {
+                        '.py': 'Python',
+                        '.js': 'JavaScript', 
+                        '.ts': 'TypeScript',
+                        '.java': 'Java',
+                        '.rb': 'Ruby',
+                        '.go': 'Go',
+                        '.rs': 'Rust',
+                        '.php': 'PHP',
+                        '.cs': 'C#',
+                        '.cpp': 'C++',
+                        '.c': 'C'
                     }
-                    project_info["main_language"] = lang_map.get(primary_ext)
+                    project_info["main_language"] = language_map.get(main_ext, 'Unknown')
             except:
                 pass
         
@@ -598,6 +826,34 @@ class OptimizedProjectSummaryGenerator:
             "missing_breadcrumbs": missing_breadcrumbs,
             "lines_of_code": len(lines)
         }
+
+    def _analyze_route_file(self, file_path: str) -> List[Dict[str, Any]]:
+        """Analyze Express.js route files for endpoints"""
+        routes = []
+        try:
+            with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                content = f.read()
+                
+            # Common Express.js route patterns
+            route_patterns = [
+                r'router\.(get|post|put|patch|delete|all)\s*\(\s*[\'"`]([^\'"`]+)[\'"`]',
+                r'app\.(get|post|put|patch|delete|all)\s*\(\s*[\'"`]([^\'"`]+)[\'"`]',
+                r'\.(get|post|put|patch|delete|all)\s*\(\s*[\'"`]([^\'"`]+)[\'"`]'
+            ]
+            
+            for pattern in route_patterns:
+                matches = re.findall(pattern, content, re.IGNORECASE)
+                for method, path in matches:
+                    routes.append({
+                        'method': method.upper(),
+                        'path': path,
+                        'file': str(Path(file_path).relative_to(self.project_root))
+                    })
+                    
+        except Exception as e:
+            print(f"⚠️ Error analyzing route file {file_path}: {e}")
+            
+        return routes
 
     def _scan_project_structure(self) -> Dict[str, Any]:
         """Optimized project structure analysis"""
@@ -781,6 +1037,23 @@ class OptimizedProjectSummaryGenerator:
                                 scan_data['entry_points'][entry_type] = rel_path
                             break
                 
+                # Route file detection - check file name, path, or if in routes directory
+                is_route_file = (
+                    ('route' in file.lower() or 
+                     'route' in rel_path.lower() or
+                     '/routes/' in rel_path or
+                     rel_path.startswith('routes/')) 
+                    and ext in ['.js', '.ts']
+                )
+                if is_route_file:
+                    print(f"🔍 DEBUG: Found route file: {rel_path}")
+                    route_analysis = self._analyze_route_file(str(file_path))
+                    if route_analysis:
+                        print(f"✅ DEBUG: Found {len(route_analysis)} routes in {rel_path}")
+                        if 'routes' not in scan_data:
+                            scan_data['routes'] = []
+                        scan_data['routes'].extend(route_analysis)
+                
                 # Code analysis for programming files
                 if ext in code_extensions:
                     analysis = self._analyze_code_file(str(file_path))
@@ -922,7 +1195,11 @@ class OptimizedProjectSummaryGenerator:
                 "main_language": project_info.get("main_language"),
                 "framework": project_info.get("framework")
             },
-            "main_dependencies": {"runtime": [], "development": [], "system": []},
+            "main_dependencies": {
+                "runtime": self._aggregate_runtime_dependencies(project_info),
+                "development": self._aggregate_dev_dependencies(project_info),
+                "system": []
+            },
             "project_structure": structure,
             "code_analysis": code_analysis,
             "core_modules": [],
@@ -1512,8 +1789,17 @@ This analysis was generated by an automated project summary tool that:
                         if self._debug_count <= 5:
                             print(f"🔍 DEBUG: IGNORED {path_str} - matches glob pattern '{pattern}'")
                         return True
+                # For non-glob patterns, check if it's a complete directory/file name match
+                elif '/' not in pattern:
+                    # Check if pattern matches any complete part of the path
+                    path_parts = path_str.split('/')
+                    if pattern in path_parts:
+                        if self._debug_count <= 5 or 'routes' in path_str:
+                            print(f"🔍 DEBUG: IGNORED {path_str} - part '{pattern}' matches complete directory/file name")
+                        return True
+                # For patterns with slashes, check if they match the path
                 elif pattern in path_str:
-                    if self._debug_count <= 5:
+                    if self._debug_count <= 5 or 'routes' in path_str:
                         print(f"🔍 DEBUG: IGNORED {path_str} - contains pattern '{pattern}'")
                     return True
             
