@@ -186,5 +186,5 @@ packrat/
 Arkival/.git/
 Arkival/__pycache__/
 Arkival/.cache/
-# Added by post-deployment cleanup
+# Language detection test files - exclude from scanning to prevent artificial function inflation
 codebase_summary/language_scan_tests/

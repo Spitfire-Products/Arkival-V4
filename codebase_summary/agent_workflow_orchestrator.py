@@ -14,58 +14,81 @@ import argparse
 
 def find_arkival_paths():
     """
-    # @codebase-summary: Simple workflow flag-based path resolution
-    - Uses arkival_config.json in root as definitive subdirectory deployment flag
-    - Simplified detection logic based on workflow flag presence
-    - Returns all required file paths for agent workflow orchestration
+    # @codebase-summary: Universal path resolution for Arkival subdirectory deployment
+    - Detects deployment mode (standalone vs subdirectory) and returns all required file paths
+    - Handles both development mode and production subdirectory deployment scenarios
+    
+    Universal path resolution for Arkival subdirectory deployment
+    Returns: Dict with all required paths
     """
     current_dir = Path.cwd()
     
-    # Simple workflow flag detection: arkival_config.json in current directory = subdirectory mode
-    subdirectory_mode = (current_dir / "arkival_config.json").exists()
+    # Debug output for deployment troubleshooting
+    print(f"🔍 DEBUG: Script running from: {current_dir}")
+    
+    # The setup script places arkival_config.json in the parent directory when in subdirectory mode
+    # Search upward for this workflow flag to determine deployment mode
+    project_root = None
+    search_path = current_dir
+    
+    for _ in range(5):  # Search up to 5 levels up
+        workflow_flag = search_path / "arkival_config.json"
+        if workflow_flag.exists():
+            project_root = search_path
+            subdirectory_mode = True
+            print(f"🔍 DEBUG: Found workflow flag at: {workflow_flag}")
+            print(f"🔍 DEBUG: Subdirectory mode - project root: {project_root}")
+            break
+        if search_path.parent == search_path:  # Reached filesystem root
+            break
+        search_path = search_path.parent
+    
+    if project_root is None:
+        # No workflow flag found - development mode
+        project_root = current_dir
+        subdirectory_mode = False
+        print(f"🔍 DEBUG: No workflow flag found - development mode at: {project_root}")
     
     if subdirectory_mode:
-        # Subdirectory deployment mode - use Arkival-V4 directory structure
-        arkival_dir = current_dir / "Arkival-V4"
+        # Subdirectory deployment mode - place ALL generated files in Arkival-V4 directory
+        arkival_dir = project_root / "Arkival-V4"
+        print(f"🔍 DEBUG: All files will be written to: {arkival_dir}")
+        
         return {
-            'project_root': current_dir,  # Parent project root
-            'config_file': current_dir / "arkival_config.json",
+            'project_root': project_root,         # Parent project directory (for scanning)
+            'scan_root': project_root,            # Directory to scan (parent project)
+            'config_file': project_root / "arkival_config.json",
             'arkival_dir': arkival_dir,
             'data_dir': arkival_dir,
-            'scripts_dir': arkival_dir / "codebase_summary", 
+            'scripts_dir': arkival_dir / "codebase_summary",
             'export_dir': arkival_dir / "export_package",
             'checkpoints_dir': arkival_dir / "checkpoints",
             
-            # Data files in Arkival-V4 directory
+            # ALL data files in Arkival-V4 directory - NEVER in project root
             'codebase_summary': arkival_dir / "codebase_summary.json",
             'changelog_summary': arkival_dir / "changelog_summary.json",
             'session_state': arkival_dir / "codebase_summary" / "session_state.json",
-            'missing_breadcrumbs': arkival_dir / "codebase_summary" / "missing_breadcrumbs.json"
+            'missing_breadcrumbs': arkival_dir / "codebase_summary" / "missing_breadcrumbs.json",
+            'scan_ignore': project_root / ".scanignore"
         }
     else:
-        # Development mode - running from Arkival project directory
-        # Handle case where we might be running from codebase_summary subdirectory
-        if current_dir.name == "codebase_summary":
-            project_root = current_dir.parent
-            scripts_dir = current_dir
-        else:
-            project_root = current_dir
-            scripts_dir = project_root / "codebase_summary"
-            
+        # Development mode - use root directory structure
         return {
             'project_root': project_root,
-            'config_file': project_root / "arkival_config.json",  # May not exist in dev mode
+            'scan_root': project_root,     # Directory to scan (same as project root in dev mode)
+            'config_file': project_root / "arkival_config.json",
             'arkival_dir': project_root,
             'data_dir': project_root,
-            'scripts_dir': scripts_dir, 
+            'scripts_dir': project_root / "codebase_summary",
             'export_dir': project_root / "export_package",
             'checkpoints_dir': project_root / "checkpoints",
             
             # Data files in root/standard locations
             'codebase_summary': project_root / "codebase_summary.json",
             'changelog_summary': project_root / "changelog_summary.json",
-            'session_state': scripts_dir / "session_state.json",
-            'missing_breadcrumbs': scripts_dir / "missing_breadcrumbs.json"
+            'session_state': project_root / "codebase_summary" / "session_state.json",
+            'missing_breadcrumbs': project_root / "codebase_summary" / "missing_breadcrumbs.json",
+            'scan_ignore': project_root / ".scanignore"
         }
 
 class AgentWorkflowOrchestrator:
